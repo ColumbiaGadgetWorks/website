@@ -1,6 +1,7 @@
 DirectoryPath: public
 CheckExternal: false
 IgnoreAltMissing: false
+IgnoreAltEmpty: true
 IgnoreDirectoryMissingTrailingSlash: true
 IgnoreURLs:
   - "^/api/"
