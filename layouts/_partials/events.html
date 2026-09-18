@@ -1,0 +1,24 @@
+{{- /* Renders upcoming dated events from data/events.yaml. Param: limit */ -}}
+{{- $limit := .limit | default 100 -}}
+{{- $today := now.Format "2006-01-02" -}}
+{{- $up := slice -}}
+{{- range hugo.Data.events.upcoming -}}{{ if ge .date $today }}{{ $up = $up | append . }}{{ end }}{{- end -}}
+{{- $up = sort $up "date" -}}
+{{- $up = first $limit $up -}}
+{{- if $up }}
+<ul class="event-list">
+{{ range $up }}
+  {{- $d := time.AsTime .date -}}
+  <li class="event">
+    <div class="event-date"><span class="ev-mon">{{ $d.Format "Jan" }}</span><span class="ev-day">{{ $d.Format "2" }}</span></div>
+    <div class="event-body">
+      <strong>{{ .title }}</strong>
+      <div class="event-meta">{{ $d.Format "Monday, January 2, 2006" }}{{ with .time }} · {{ . }}{{ end }}{{ with .where }} · {{ . }}{{ end }}</div>
+      {{ with .description }}<p>{{ . | markdownify }}</p>{{ end }}
+    </div>
+  </li>
+{{ end }}
+</ul>
+{{- else }}
+<p class="muted">No dated events on the calendar right now. Open Hack Night still happens every Thursday.</p>
+{{- end }}

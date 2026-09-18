@@ -1,0 +1,12 @@
+{{ define "main" }}
+<article class="wrap page">
+  <header class="page-head">
+    <h1>{{ .Title }}</h1>
+    {{ with .Params.subtitle }}<p class="lead">{{ . }}</p>{{ end }}
+  </header>
+  {{ with .Params.image }}<figure class="page-hero">{{ partial "img.html" (dict "src" . "alt" ($.Params.imageAlt | default "") "sizes" "(min-width: 900px) 860px, 100vw" "loading" "eager") }}</figure>{{ end }}
+  <div class="prose">
+    {{ .Content }}
+  </div>
+</article>
+{{ end }}

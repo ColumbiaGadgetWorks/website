@@ -1,0 +1,23 @@
+{{ define "main" }}
+<section class="wrap page">
+  <header class="page-head">
+    <h1>{{ .Title }}</h1>
+    {{ with .Params.subtitle }}<p class="lead">{{ . }}</p>{{ end }}
+  </header>
+  <div class="prose">{{ .Content }}</div>
+  {{ $pag := .Paginate .Pages }}
+  <ul class="news-grid">
+    {{ range $pag.Pages }}
+    <li class="news-card">
+      <a href="{{ .RelPermalink }}" class="news-thumb">{{ with .Params.image }}{{ partial "img.html" (dict "src" . "alt" "" "sizes" "(min-width: 700px) 400px, 100vw" "width" 800) }}{{ else }}<span class="thumb-blank"><img src="/img/cgw-gear.png" alt="" width="64" height="64"></span>{{ end }}</a>
+      <div class="news-body">
+        <time datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format "January 2, 2006" }}</time>
+        <h2><a href="{{ .RelPermalink }}">{{ .Title }}</a></h2>
+        <p>{{ .Summary | plainify | truncate 140 }}</p>
+      </div>
+    </li>
+    {{ end }}
+  </ul>
+  {{ template "_internal/pagination.html" . }}
+</section>
+{{ end }}

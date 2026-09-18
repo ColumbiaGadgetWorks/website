@@ -1,0 +1,26 @@
+{{ define "main" }}
+<section class="wrap page">
+  <header class="page-head">
+    <h1>{{ .Title }}</h1>
+    {{ with .Params.subtitle }}<p class="lead">{{ . }}</p>{{ end }}
+  </header>
+  <div class="prose">{{ .Content }}</div>
+  <ul class="tool-cards">
+    {{ range sort .Pages "Weight" }}
+    <li class="tool-card" id="{{ .File.ContentBaseName }}">
+      <a class="tool-card-img" href="{{ .RelPermalink }}">{{ with .Params.image }}{{ partial "img.html" (dict "src" . "alt" ($.Params.imageAlt | default "") "sizes" "(min-width: 700px) 360px, 100vw" "width" 800) }}{{ else }}<span class="tool-ph"><img src="/img/cgw-gear.png" alt="" width="64" height="64"></span>{{ end }}</a>
+      <div class="tool-card-body">
+        <h2><a href="{{ .RelPermalink }}">{{ .Title }}</a></h2>
+        <p class="muted">{{ .Params.subtitle }}</p>
+        <p>{{ .Summary | plainify | truncate 200 }}</p>
+        <p class="badges">
+          {{ if .Params.training }}<span class="badge badge-warn">Training required</span>{{ else }}<span class="badge badge-ok">Open to members</span>{{ end }}
+          {{ if .Params.openHackNight }}<span class="badge">Try it on a Thursday</span>{{ end }}
+        </p>
+        <a href="{{ .RelPermalink }}">Details →</a>
+      </div>
+    </li>
+    {{ end }}
+  </ul>
+</section>
+{{ end }}

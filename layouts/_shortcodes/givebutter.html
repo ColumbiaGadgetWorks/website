@@ -1,0 +1,13 @@
+{{- $p := site.Params -}}
+{{- $which := .Get "campaign" | default "donate" -}}
+{{- $url := cond (eq $which "membership") $p.givebutterMembership $p.givebutterDonate -}}
+{{- $label := .Get "label" | default (cond (eq $which "membership") "Set up membership dues" "Donate now") -}}
+{{- if and $p.givebutterWidgetId (eq $which "donate") }}
+<div class="gb-embed">
+  <givebutter-widget id="{{ $p.givebutterWidgetId }}"></givebutter-widget>
+  <script async src="https://widgets.givebutter.com/latest.umd.cjs?dropin=true"></script>
+  <noscript><a class="btn btn-primary btn-lg" href="{{ $url }}" rel="noopener">{{ $label }}</a></noscript>
+</div>
+{{- else }}
+<p class="cta-row"><a class="btn btn-primary btn-lg" href="{{ $url }}" rel="noopener">{{ $label }}</a> <span class="muted small">Secure checkout via Givebutter. Card, bank, Apple Pay, Google Pay, Venmo, and PayPal accepted.</span></p>
+{{- end }}

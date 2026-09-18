@@ -1,0 +1,40 @@
+{{- $p := site.Params -}}
+<footer class="site-footer">
+  <div class="wrap footer-grid">
+    <div class="footer-col">
+      <div class="footer-brand"><img src="/img/cgw-gear.png" width="32" height="32" alt=""> <strong>Columbia Gadget Works</strong></div>
+      <p>{{ $p.tagline }}. A volunteer-run 501(c)(3) nonprofit since {{ $p.founded }}. Donations are tax-deductible. EIN {{ $p.ein }}.</p>
+      <p class="hack-night"><strong>Free Open Hack Night</strong><br>{{ $p.openHackNight }}<br>No membership or experience required.</p>
+    </div>
+    <div class="footer-col">
+      <h2 class="footer-h">Find us</h2>
+      <address>
+        <a href="https://www.google.com/maps/search/?api=1&query={{ $p.mapsQuery | urlquery }}" rel="noopener">{{ $p.addressStreet }}<br>{{ $p.addressCity }}, {{ $p.addressState }} {{ $p.addressZip }}</a><br>
+        <a href="mailto:{{ $p.email }}">{{ $p.email }}</a><br>
+        <a href="tel:{{ $p.phoneHref }}">{{ $p.phone }}</a>
+      </address>
+      <p><a href="/contact/">Contact form →</a></p>
+    </div>
+    <div class="footer-col">
+      <h2 class="footer-h">Around the web</h2>
+      <ul class="plain">
+        <li><a href="{{ $p.discord }}" rel="noopener">Discord community</a></li>
+        <li><a href="{{ $p.wiki }}" rel="noopener">Member wiki</a></li>
+        <li><a href="{{ $p.facebook }}" rel="noopener">Facebook</a></li>
+        <li><a href="{{ $p.bluesky }}" rel="noopener">Bluesky</a></li>
+        <li><a href="{{ $p.github }}" rel="noopener">GitHub</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h2 class="footer-h">More</h2>
+      <ul class="plain">
+        {{ range site.Menus.footer }}<li><a href="{{ .URL }}">{{ .Name }}</a></li>{{ end }}
+        <li><a href="/news/index.xml">News feed (RSS)</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="wrap footer-bottom">
+    <span>© {{ now.Year }} Columbia Gadget Works. Site content is CC BY-SA 4.0 unless noted.</span>
+    <span>Built with <a href="https://gohugo.io" rel="noopener">Hugo</a> · <a href="{{ $p.github }}/website" rel="noopener">Edit this site on GitHub</a></span>
+  </div>
+</footer>

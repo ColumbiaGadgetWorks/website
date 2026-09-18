@@ -1,0 +1,39 @@
+{{- $p := site.Params -}}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": ["NGO", "LocalBusiness"],
+  "name": "Columbia Gadget Works",
+  "alternateName": "CGW",
+  "url": {{ site.BaseURL | jsonify }},
+  "logo": {{ "/img/cgw-gear.png" | absURL | jsonify }},
+  "image": {{ "/img/og-default.jpg" | absURL | jsonify }},
+  "description": {{ $p.description | jsonify }},
+  "foundingDate": {{ $p.founded | jsonify }},
+  "nonprofitStatus": "Nonprofit501c3",
+  "taxID": {{ $p.ein | jsonify }},
+  "email": {{ $p.email | jsonify }},
+  "telephone": {{ $p.phoneHref | jsonify }},
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": {{ $p.addressStreet | jsonify }},
+    "addressLocality": {{ $p.addressCity | jsonify }},
+    "addressRegion": {{ $p.addressState | jsonify }},
+    "postalCode": {{ $p.addressZip | jsonify }},
+    "addressCountry": "US"
+  },
+  "openingHoursSpecification": [{
+    "@type": "OpeningHoursSpecification",
+    "dayOfWeek": "Thursday",
+    "opens": "18:00",
+    "closes": "20:00",
+    "description": "Free Open Hack Night, open to the public"
+  }],
+  "sameAs": [
+    {{ $p.facebook | jsonify }},
+    {{ $p.bluesky | jsonify }},
+    {{ $p.github | jsonify }},
+    {{ $p.wiki | jsonify }}
+  ]
+}
+</script>

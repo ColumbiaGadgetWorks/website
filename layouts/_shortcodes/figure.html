@@ -1,0 +1,4 @@
+<figure{{ with .Get "class" }} class="{{ . }}"{{ end }}>
+{{ partial "img.html" (dict "src" (.Get "src") "alt" (.Get "alt") "sizes" (.Get "sizes") "width" (.Get "width")) }}
+{{ with .Get "caption" }}<figcaption>{{ . | markdownify }}</figcaption>{{ end }}
+</figure>

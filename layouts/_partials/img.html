@@ -1,0 +1,21 @@
+{{- $src := .src -}}
+{{- $img := resources.Get (printf "img/%s" $src) -}}
+{{- if not $img -}}{{ errorf "img partial: assets/img/%s not found" $src }}{{- end -}}
+{{- $alt := .alt | default "" -}}
+{{- $sizes := .sizes | default "(min-width: 900px) 800px, 100vw" -}}
+{{- $maxw := .width | default 1600 -}}
+{{- $widths := slice 480 800 1200 1600 -}}
+{{- $cands := slice -}}
+{{- range $widths -}}
+  {{- if le . (math.Max $img.Width $maxw) -}}
+    {{- if le . $img.Width -}}
+      {{- $r := $img.Resize (printf "%dx webp q78" .) -}}
+      {{- $cands = $cands | append (printf "%s %dw" $r.RelPermalink .) -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- $fallback := $img.Resize (printf "%dx q80" (int (math.Min $img.Width 1200))) -}}
+<img src="{{ $fallback.RelPermalink }}"
+     {{ with $cands }}srcset="{{ delimit . ", " }}" sizes="{{ $sizes }}"{{ end }}
+     width="{{ $fallback.Width }}" height="{{ $fallback.Height }}"
+     alt="{{ $alt }}" loading="{{ .loading | default "lazy" }}" decoding="async"{{ with .class }} class="{{ . }}"{{ end }}>

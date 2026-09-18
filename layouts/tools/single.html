@@ -1,0 +1,24 @@
+{{ define "main" }}
+<article class="wrap page">
+  <header class="page-head">
+    <p class="eyebrow"><a href="/tools/">Tools</a></p>
+    <h1>{{ .Title }}</h1>
+    {{ with .Params.subtitle }}<p class="lead">{{ . }}</p>{{ end }}
+    <p class="badges">
+      {{ if .Params.training }}<span class="badge badge-warn">Training required before solo use</span>{{ else }}<span class="badge badge-ok">Open to members after orientation</span>{{ end }}
+      {{ if .Params.openHackNight }}<span class="badge">Demos on Open Hack Night</span>{{ end }}
+    </p>
+  </header>
+  <div class="tool-layout">
+    <div class="prose">{{ .Content }}</div>
+    <aside class="tool-aside">
+      {{ with .Params.image }}<figure>{{ partial "img.html" (dict "src" . "alt" ($.Params.imageAlt | default "") "sizes" "(min-width: 900px) 360px, 100vw" "width" 800 "loading" "eager") }}</figure>{{ end }}
+      <dl class="specs">
+        {{ range .Params.specs }}<div><dt>{{ .label }}</dt><dd>{{ .value }}</dd></div>{{ end }}
+      </dl>
+      {{ with .Params.wiki }}<p><a class="btn btn-outline" href="{{ . }}" rel="noopener">Operating guide on the wiki</a></p>{{ end }}
+      <p class="muted small">Want to use this? <a href="/visit/">Come by on a Thursday</a> and ask for a demo.</p>
+    </aside>
+  </div>
+</article>
+{{ end }}

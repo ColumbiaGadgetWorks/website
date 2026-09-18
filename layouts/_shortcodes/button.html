@@ -1,0 +1,1 @@
+<a class="btn {{ .Get "class" | default "btn-primary" }}" href="{{ .Get "href" }}"{{ if hasPrefix (.Get "href") "http" }} rel="noopener"{{ end }}>{{ .Inner | default (.Get "text") }}</a>

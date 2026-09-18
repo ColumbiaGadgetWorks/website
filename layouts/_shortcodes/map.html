@@ -1,0 +1,6 @@
+{{- $q := site.Params.mapsQuery -}}
+<div class="map-wrap">
+  <iframe title="Map to Columbia Gadget Works" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen
+    src="https://www.google.com/maps?q={{ $q | urlquery }}&z=16&output=embed"></iframe>
+  <p class="small"><a href="https://www.google.com/maps/search/?api=1&query={{ $q | urlquery }}" rel="noopener">Open in Google Maps</a> · <a href="https://www.openstreetmap.org/search?query={{ $q | urlquery }}" rel="noopener">OpenStreetMap</a></p>
+</div>

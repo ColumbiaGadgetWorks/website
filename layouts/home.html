@@ -1,0 +1,81 @@
+{{ define "main" }}
+{{- $p := site.Params -}}
+<section class="hero">
+  <div class="hero-media">{{ partial "img.html" (dict "src" "open-hack-night.jpg" "alt" "Members and visitors gathered in the shop on an Open Hack Night" "sizes" "100vw" "loading" "eager") }}</div>
+  <div class="wrap hero-inner">
+    <p class="eyebrow">Columbia, Missouri · 501(c)(3) nonprofit makerspace</p>
+    <h1>A community workshop where anyone can learn, build, and fix things.</h1>
+    <p class="lead">Columbia Gadget Works gives people of all skill levels access to tools, workspace, and know-how: a laser cutter, CNC router, 3D printers, a metal shop, an electronics bench, and members who will show you how to use them.</p>
+    <div class="hero-cta">
+      <a class="btn btn-primary btn-lg" href="/visit/">Plan your visit</a>
+      <a class="btn btn-light btn-lg" href="/donate/">Donate</a>
+    </div>
+    <p class="hack-chip"><strong>Free Open Hack Night</strong> · {{ $p.openHackNight }} · No membership or experience required</p>
+  </div>
+</section>
+
+<section class="wrap section">
+  <div class="three-up">
+    <div class="card">
+      <h2>Visit on a Thursday</h2>
+      <p>Open Hack Night is free and open to everyone. Take a tour, meet members, use the basic tools, and bring a broken thing to fix. Walk in the door on Grand Avenue between 6 and 8 pm.</p>
+      <a href="/visit/">What to expect →</a>
+    </div>
+    <div class="card">
+      <h2>Take a class</h2>
+      <p>Members teach free and low-cost classes on soldering, metal casting, machining, and more. Most are announced a couple of weeks ahead on Discord and here.</p>
+      <a href="/classes/">Classes and workshops →</a>
+    </div>
+    <div class="card">
+      <h2>Become a member</h2>
+      <p>Members get 24/7 access to the shop, a project locker, discounts on classes, and a vote in how the space is run. Dues pay the rent and keep Thursday nights free.</p>
+      <a href="/membership/">Membership details →</a>
+    </div>
+  </div>
+</section>
+
+<section class="band band-dark">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>The shop</h2>
+      <p>Equipment most people could never fit in a garage, shared like a library.</p>
+    </div>
+    {{ $tools := where site.RegularPages "Section" "tools" }}
+    <ul class="tool-grid">
+      {{ range sort $tools "Weight" }}
+      <li><a href="{{ .RelPermalink }}">
+        {{ with .Params.image }}{{ partial "img.html" (dict "src" . "alt" "" "sizes" "(min-width: 700px) 320px, 100vw" "width" 800) }}{{ else }}<span class="tool-ph"><img src="/img/cgw-gear.png" alt="" width="64" height="64"></span>{{ end }}
+        <span class="tool-name">{{ .Title }}</span>
+        <span class="tool-sub">{{ .Params.subtitle }}</span>
+      </a></li>
+      {{ end }}
+    </ul>
+    <p class="center"><a class="btn btn-light" href="/tools/">See all tools and training requirements</a></p>
+  </div>
+</section>
+
+<section class="wrap section two-col">
+  <div>
+    <h2>Coming up</h2>
+    {{ partial "events.html" (dict "limit" 4) }}
+    <p><a href="/events/">Full calendar →</a></p>
+  </div>
+  <div>
+    <h2>News from the shop</h2>
+    <ul class="post-list compact">
+      {{ range first 4 (where site.RegularPages "Section" "news") }}
+      <li><time datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format "Jan 2, 2006" }}</time> <a href="{{ .RelPermalink }}">{{ .Title }}</a></li>
+      {{ end }}
+    </ul>
+    <p><a href="/news/">All news →</a></p>
+  </div>
+</section>
+
+<section class="band band-rust">
+  <div class="wrap support">
+    <h2>Keep the lights on and the doors open</h2>
+    <p>Columbia Gadget Works is run entirely by volunteers. Every dollar goes to rent, equipment, and free public programs. We are a registered 501(c)(3) public charity (EIN {{ $p.ein }}) and your gift is tax-deductible.</p>
+    <a class="btn btn-light btn-lg" href="/donate/">Make a donation</a>
+  </div>
+</section>
+{{ end }}

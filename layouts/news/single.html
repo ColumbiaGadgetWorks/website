@@ -1,0 +1,15 @@
+{{ define "main" }}
+<article class="wrap page narrow">
+  <header class="page-head">
+    <p class="eyebrow"><a href="/news/">News</a> · <time datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format "January 2, 2006" }}</time></p>
+    <h1>{{ .Title }}</h1>
+  </header>
+  {{ with .Params.image }}<figure class="page-hero">{{ partial "img.html" (dict "src" . "alt" ($.Params.imageAlt | default "") "sizes" "(min-width: 900px) 760px, 100vw" "loading" "eager") }}</figure>{{ end }}
+  <div class="prose">{{ .Content }}</div>
+  <footer class="post-footer">
+    <p>Questions about this? <a href="/contact/">Get in touch</a>, or come by on a Thursday.</p>
+    {{ with .NextInSection }}<p>Newer: <a href="{{ .RelPermalink }}">{{ .Title }}</a></p>{{ end }}
+    {{ with .PrevInSection }}<p>Older: <a href="{{ .RelPermalink }}">{{ .Title }}</a></p>{{ end }}
+  </footer>
+</article>
+{{ end }}

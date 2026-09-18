@@ -1,0 +1,13 @@
+# Old WordPress URLs → new site. Cloudflare Pages reads this file.
+/2026/01/27/hello-world/                       /news/new-website/                        301
+/2026/01/27/metalworking-class/                /news/metalworking-class/                 301
+/2026/02/20/metal-casting-class-feb-26th/      /news/metal-casting-class-feb-26th/       301
+/2026/02/27/metal-casting-class-recap/         /news/metal-casting-class-recap/          301
+/2026/03/20/soldering-class-and-art-in-the-park/ /news/soldering-class-and-art-in-the-park/ 301
+/2026/04/08/kopn-tour-april-23/                /news/kopn-tour-april-23/                 301
+/how-to-get-involved/                          /visit/                                   301
+/donation-membership/                          /donate/                                  301
+/about-cgw/                                    /about/                                   301
+/feed/                                         /news/index.xml                           301
+/wp-login.php                                  /                                         301
+/wp-admin/*                                    /                                         301

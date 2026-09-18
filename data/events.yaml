@@ -1,0 +1,57 @@
+# Events shown on /events/ and the homepage.
+# recurring: always listed. upcoming: dated items, hidden automatically once the date passes.
+# Dates are YYYY-MM-DD. Keep this file current; it is the calendar of record for the site.
+recurring:
+  - title: Open Hack Night
+    when: Every Thursday, 6–8 pm
+    description: Free and open to the public. Tours, demos, help with your project, and the basic tools. No sign-up needed. Skipped only on major holidays.
+  - title: City of Columbia grant classes
+    when: First Thursday of the month, Nov 2026 – Oct 2027
+    description: A year of free public classes funded by a City of Columbia grant. Topics announced a month ahead.
+  - title: Board meeting
+    when: Last Thursday of the quarter, 8 pm (after Open Hack Night)
+    description: Open to members. Agenda and minutes are posted on the member wiki.
+  - title: Annual member meeting
+    when: Last Saturday in April
+    description: Members elect officers and vote on any bylaw changes.
+
+upcoming:
+  - date: 2026-10-29
+    title: Quarterly board meeting
+    time: 8 pm
+    where: The shop
+    description: Held after Open Hack Night. Members welcome.
+  - date: 2026-11-05
+    title: "Grant class: topic to be announced"
+    time: 6 pm
+    where: The shop
+    description: First of the monthly City of Columbia grant classes. Free; details to come.
+  - date: 2026-12-03
+    title: "Grant class: topic to be announced"
+    time: 6 pm
+    where: The shop
+  - date: 2027-01-07
+    title: "Grant class: topic to be announced"
+    time: 6 pm
+    where: The shop
+  - date: 2027-01-28
+    title: Quarterly board meeting
+    time: 8 pm
+    where: The shop
+  - date: 2027-02-04
+    title: "Grant class: topic to be announced"
+    time: 6 pm
+    where: The shop
+  - date: 2027-03-04
+    title: "Grant class: topic to be announced"
+    time: 6 pm
+    where: The shop
+  - date: 2027-04-01
+    title: "Grant class: topic to be announced"
+    time: 6 pm
+    where: The shop
+  - date: 2027-04-24
+    title: Annual member meeting
+    time: TBD
+    where: The shop
+    description: Officer elections and bylaw votes. Members in good standing may vote.

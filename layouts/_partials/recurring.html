@@ -1,0 +1,9 @@
+<ul class="recurring">
+{{ range hugo.Data.events.recurring }}
+  <li>
+    <strong>{{ .title }}</strong>
+    <span class="when">{{ .when }}</span>
+    {{ with .description }}<p>{{ . | markdownify }}</p>{{ end }}
+  </li>
+{{ end }}
+</ul>

@@ -1,0 +1,21 @@
+{{- $p := site.Params -}}
+<form class="contact-form" method="post" action="{{ $p.contactEndpoint }}" id="contact-form">
+  <div class="field"><label for="cf-name">Your name</label><input id="cf-name" name="name" required autocomplete="name"></div>
+  <div class="field"><label for="cf-email">Email</label><input id="cf-email" name="email" type="email" required autocomplete="email"></div>
+  <div class="field"><label for="cf-topic">What is this about?</label>
+    <select id="cf-topic" name="topic">
+      <option>Visiting or membership</option>
+      <option>Classes and teaching</option>
+      <option>Donating equipment or money</option>
+      <option>Press, partnerships, or a group tour</option>
+      <option>Something else</option>
+    </select></div>
+  <div class="field"><label for="cf-msg">Message</label><textarea id="cf-msg" name="message" rows="6" required></textarea></div>
+  <div class="hp" aria-hidden="true"><label>Leave this empty<input name="website" tabindex="-1" autocomplete="off"></label></div>
+  {{ with $p.turnstileSiteKey }}<div class="cf-turnstile" data-sitekey="{{ . }}"></div><script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>{{ end }}
+  <input type="hidden" name="redirect" value="/contact/?sent=1">
+  <button class="btn btn-primary" type="submit">Send message</button>
+  <p class="small muted">Or email <a href="mailto:{{ $p.email }}">{{ $p.email }}</a> directly.</p>
+</form>
+<div class="callout ok" id="contact-thanks" hidden>Thanks! Your message went to the volunteers who watch our inbox. We usually answer within a few days.</div>
+<script>if(new URLSearchParams(location.search).get('sent')){document.getElementById('contact-form').hidden=true;document.getElementById('contact-thanks').hidden=false;}</script>

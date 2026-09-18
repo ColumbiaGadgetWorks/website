@@ -1,0 +1,20 @@
+name: Build check
+on:
+  pull_request:
+  push:
+    branches: [main]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: peaceiris/actions-hugo@v3
+        with:
+          hugo-version: '0.165.0'
+          extended: true
+      - run: hugo --minify --gc --panicOnWarning
+      - name: Check internal links
+        uses: wjdp/htmltest-action@master
+        with:
+          path: public
+          config: .htmltest.yml

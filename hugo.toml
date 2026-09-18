@@ -1,0 +1,100 @@
+baseURL = "https://columbiagadgetworks.org/"
+locale = "en-US"
+title = "Columbia Gadget Works"
+timeZone = "America/Chicago"
+enableRobotsTXT = true
+disableKinds = ["taxonomy", "term"]
+
+[pagination]
+  pagerSize = 12
+
+[sitemap]
+  changefreq = "weekly"
+  priority = 0.5
+
+[markup.goldmark.renderer]
+  unsafe = true            # allow raw HTML in markdown (buttons, callouts)
+[markup.tableOfContents]
+  startLevel = 2
+  endLevel = 2
+
+[outputs]
+  home = ["HTML", "RSS"]
+  section = ["HTML", "RSS"]
+
+[params]
+  description = "Columbia Gadget Works is a volunteer-run, 501(c)(3) community makerspace in Columbia, Missouri. Tools, workspace, classes, and a free Open Hack Night every Thursday."
+  tagline = "Columbia's community makerspace"
+  brandColor = "#BF4D28"
+  email = "mail@columbiagadgetworks.org"
+  phone = "573-326-9868"
+  phoneHref = "+15733269868"
+  addressStreet = "1404 Grand Ave"
+  addressCity = "Columbia"
+  addressState = "MO"
+  addressZip = "65203"
+  ein = "27-3926809"
+  founded = "2017"
+  openHackNight = "Every Thursday, 6–8 pm"
+  # Payment / community links
+  givebutterMembership = "https://givebutter.com/kxk2FA"
+  givebutterDonate = "https://givebutter.com/v7RxV6"
+  givebutterWidgetId = ""          # set once a widget is created in Givebutter → Widgets; leaves the on-page embed off until then
+  discord = "https://discord.gg/F7kM7ardMs"
+  wiki = "https://wiki.comogadget.casa/"
+  facebook = "https://www.facebook.com/columbiagadgetworks/"
+  bluesky = "https://bsky.app/profile/comogadgetworks.bsky.social"
+  github = "https://github.com/ColumbiaGadgetWorks"
+  mapsQuery = "Columbia Gadget Works, 1404 Grand Ave, Columbia, MO 65203"
+  calendarEmbedUrl = ""            # optional: public Google Calendar embed URL; shown on /events/ when set
+  contactEndpoint = "/api/contact" # Cloudflare Pages Function (functions/api/contact.js)
+  turnstileSiteKey = ""            # optional: Cloudflare Turnstile site key for the contact form
+
+[menus]
+  [[menus.main]]
+    name = "Visit"
+    pageRef = "/visit"
+    weight = 10
+  [[menus.main]]
+    name = "Tools"
+    pageRef = "/tools"
+    weight = 20
+  [[menus.main]]
+    name = "Classes"
+    pageRef = "/classes"
+    weight = 30
+  [[menus.main]]
+    name = "Events"
+    pageRef = "/events"
+    weight = 40
+  [[menus.main]]
+    name = "News"
+    pageRef = "/news"
+    weight = 50
+  [[menus.main]]
+    name = "About"
+    pageRef = "/about"
+    weight = 60
+  [[menus.main]]
+    name = "Donate"
+    pageRef = "/donate"
+    weight = 70
+    [menus.main.params]
+      button = true
+
+  [[menus.footer]]
+    name = "Membership"
+    pageRef = "/membership"
+    weight = 10
+  [[menus.footer]]
+    name = "Contact"
+    pageRef = "/contact"
+    weight = 20
+  [[menus.footer]]
+    name = "Privacy"
+    pageRef = "/privacy"
+    weight = 30
+  [[menus.footer]]
+    name = "Code of Conduct"
+    pageRef = "/code-of-conduct"
+    weight = 40

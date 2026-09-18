@@ -1,0 +1,26 @@
+{{- $title := cond .IsHome site.Title (printf "%s · %s" .Title site.Title) -}}
+{{- $desc := .Description | default (cond .IsHome site.Params.description (.Summary | plainify | truncate 160)) -}}
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ $title }}</title>
+<meta name="description" content="{{ $desc }}">
+<link rel="canonical" href="{{ .Permalink }}">
+<meta name="theme-color" content="{{ site.Params.brandColor }}">
+<link rel="icon" href="/favicon-32.png" sizes="32x32">
+<link rel="icon" href="/icon-192.png" sizes="192x192">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+{{- $og := "/img/og-default.jpg" -}}
+{{- with .Params.image -}}{{ with resources.Get (printf "img/%s" .) }}{{ $og = (.Fill "1200x630 q80").RelPermalink }}{{ end }}{{- end }}
+<meta property="og:type" content="{{ if .IsPage }}article{{ else }}website{{ end }}">
+<meta property="og:site_name" content="{{ site.Title }}">
+<meta property="og:title" content="{{ $title }}">
+<meta property="og:description" content="{{ $desc }}">
+<meta property="og:url" content="{{ .Permalink }}">
+<meta property="og:image" content="{{ $og | absURL }}">
+<meta name="twitter:card" content="summary_large_image">
+{{ range .AlternativeOutputFormats -}}
+<link rel="{{ .Rel }}" type="{{ .MediaType.Type }}" href="{{ .Permalink }}" title="{{ site.Title }}">
+{{ end -}}
+{{- $css := resources.Get "css/site.css" | resources.ExecuteAsTemplate "css/site.css" . | minify | fingerprint -}}
+<link rel="stylesheet" href="{{ $css.RelPermalink }}" integrity="{{ $css.Data.Integrity }}">
+{{ partial "jsonld.html" . }}
