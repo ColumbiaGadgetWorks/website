@@ -8,18 +8,18 @@ imageAlt: An instructor demonstrating the vertical milling machine to members du
 training: true
 openHackNight: true
 specs:
-  - { label: Mill, value: Vertical knee mill with DRO }
-  - { label: Lathe, value: Engine lathe (12 in swing class) }
+  - { label: Mill, value: Bridgeport vertical knee mill }
+  - { label: Lathe, value: Clausing engine lathe }
   - { label: Welding, value: MIG, TIG, and stick }
   - { label: Also, value: Drill press, bandsaw, chop saw, bench grinders, belt sander, hand tools }
   - { label: Zone, value: Metalworking }
 ---
 
-The metal shop is where the heavy iron lives. A full-size vertical milling machine and an engine lathe let members make precise parts in steel, aluminum, and brass: shafts, bushings, brackets, fixtures, and repairs for machines that stopped being sold decades ago. Welders, a bandsaw, a chop saw, grinders, and a drill press round out the zone for fabrication work: frames, carts, brackets, and art.
+The metal shop is where the heavy iron lives. A Bridgeport vertical milling machine and a Clausing engine lathe let members make precise parts in steel, aluminum, and brass: shafts, bushings, brackets, fixtures, and repairs for machines that stopped being sold decades ago. Welders, a bandsaw, a chop saw, grinders, and a drill press round out the zone for fabrication work: frames, carts, brackets, and art.
 
 **What people make:** custom motorcycle and car parts, tooling for the other machines in the shop, repairs for farm and shop equipment, steel furniture, and the occasional battlebot.
 
-<!-- TODO: fill in actual mill and lathe makes/models and welder models; the wiki doesn't list them yet. -->
+<!-- TODO: welder models, and whether the mill has a DRO. -->
 
 ## Training
 
