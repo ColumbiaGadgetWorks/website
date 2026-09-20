@@ -4,24 +4,26 @@ Status as of 2026-09-20: the Hugo site is live at https://columbiagadgetworks.or
 repo's `main` branch to a Cloudflare Worker in the CGW Cloudflare account. DNS is on Cloudflare;
 the registrar is Namecheap. What remains, in order.
 
-## 1. Force HTTPS (Cloudflare, 2 minutes)
+## 1. Force HTTPS (Cloudflare, 2 minutes) — DONE 2026-09-20
 
 1. Cloudflare dashboard → **columbiagadgetworks.org** → **SSL/TLS** → **Edge Certificates**.
 2. Turn on **Always Use HTTPS**.
 3. Check: `curl -sI http://columbiagadgetworks.org/ | head -3` should show `301` with a `location: https://…` line.
 
-## 2. Redirect www to the root domain (Cloudflare, 2 minutes)
+## 2. Redirect www to the root domain (Cloudflare, 2 minutes) — DONE 2026-09-20
 
 1. Domain → **Rules** → **Overview** → **Create rule** → **Redirect Rule**.
 2. Pick the template **Redirect from WWW to Root**, deploy it.
 3. Check: `curl -sI https://www.columbiagadgetworks.org/ | head -3` should show `301` to the apex.
 
-## 3. Turn on the contact form (Discord + Cloudflare, 10 minutes)
+## 3. Turn on the contact form (Discord + Cloudflare, 10 minutes) — DONE 2026-09-20
 
 1. In Discord, create a private text channel, e.g. `#website-contact`, visible to officers and whoever answers inquiries.
 2. Server Settings → **Integrations** → **Webhooks** → **New Webhook**. Name it "Website contact form", set its channel, **Copy Webhook URL**.
 3. Cloudflare → **Workers & Pages** → **website** → **Settings** → **Variables and Secrets** → **Add**.
-   Type **Secret**, name `DISCORD_WEBHOOK_URL`, paste the URL, save. The Worker redeploys on its own.
+   Type **Secret**, name `DISCORD_WEBHOOK_URL`, paste the URL, then click **Deploy**.
+   Use the top-level *Variables and Secrets* section, not the one inside *Build*: build secrets never reach the running Worker.
+   https://columbiagadgetworks.org/api/health shows whether the live Worker sees it.
 4. Test: submit https://columbiagadgetworks.org/contact/ with a real message. You should land on a
    "Thanks" notice and see the message in the channel within seconds. If you land on "not sent",
    the secret name is wrong or the webhook was deleted.
