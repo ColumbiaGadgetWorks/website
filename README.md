@@ -27,7 +27,7 @@ hugo server          # http://localhost:1313, live reload
 hugo --minify        # production build into public/
 ```
 
-Requires Hugo **extended** ≥ 0.146 (image processing). Pin the same version in Cloudflare (`HUGO_VERSION`).
+Requires Hugo **extended** ≥ 0.146 (image processing). `npm install` fetches the pinned version into `node_modules/.bin/hugo` if you'd rather not install Hugo globally.
 
 ## Cloudflare setup (Worker with static assets)
 
@@ -35,9 +35,9 @@ The site deploys as a Cloudflare Worker: Hugo's `public/` folder is served as st
 
 1. Workers & Pages → Create application → Import a repository → pick `ColumbiaGadgetWorks/website`.
 2. Build settings (Settings → Build after creation if the wizard skipped them):
-   - Build command: `hugo --minify --gc`
+   - Build command: leave empty (or `npm run build`); `wrangler.jsonc` runs the Hugo build itself
    - Deploy command: `npx wrangler deploy`
-   - Variables: `HUGO_VERSION` = `0.165.0`
+   - Hugo comes from the `hugo-extended` npm package pinned in `package.json`, so no `HUGO_VERSION` variable is needed
 3. Secrets (Settings → Variables and Secrets, type *Secret*):
    - `DISCORD_WEBHOOK_URL` — webhook for the contact form channel (see `src/contact.js`)
    - `TURNSTILE_SECRET` (optional) — add only **after** `turnstileSiteKey` in `hugo.toml` has deployed

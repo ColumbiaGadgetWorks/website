@@ -4,9 +4,10 @@
   "scripts": {
     "build": "hugo --minify --gc",
     "dev": "hugo server",
-    "deploy": "hugo --minify --gc && wrangler deploy"
+    "deploy": "wrangler deploy"
   },
   "devDependencies": {
+    "hugo-extended": "0.165.0",
     "wrangler": "^4.85.0"
   }
 }

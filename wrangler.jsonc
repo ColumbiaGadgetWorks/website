@@ -1,7 +1,9 @@
 {
-  // Cloudflare Worker config. Build: `hugo --minify --gc`, then `npx wrangler deploy`.
+  // Cloudflare Worker config. `npm install && npx wrangler deploy` builds and deploys.
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "cgw-website",
+  "name": "website",
+  // Runs before `wrangler deploy` (locally and in Cloudflare Workers Builds). Hugo comes from the hugo-extended npm package, so the build image's Hugo version does not matter.
+  "build": { "command": "npm run build" },
   "main": "src/index.js",
   "compatibility_date": "2026-05-01",
   "assets": {
