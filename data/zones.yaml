@@ -3,7 +3,7 @@
 # `tint` is the pale background wash for the zone header.
 - id: woodworking
   name: Woodworking
-  accent: "#B4551D"
+  accent: "#AB501B"
   tint: "#FBEADF"
   summary: Saws, sanders, and the router table, plus the CNC router that cuts parts too fussy to do by hand.
 - id: machining
@@ -28,6 +28,6 @@
   summary: Sewing, vinyl, paint, and the general-purpose bench space for projects that are not made of metal.
 - id: metalworking
   name: Metalworking
-  accent: "#8A6A00"
+  accent: "#886800"
   tint: "#FBF0D5"
   summary: The kiln for casting and heat treating, plus MIG, TIG, and stick welding.
