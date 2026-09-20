@@ -1,9 +1,7 @@
 ---
 title: New Website!
-date: 2026-01-27T13:34:15-06:00
-description: Columbia Gadget Works launched a new website in January 2026.
+date: 2026-09-19T23:01:02-05:00
+description: Columbia Gadget Works launched a new website in September 2026.
 ---
 
-Please bear with us during the transition. New information and features coming soon!
-
-*Update, September 2026: the site has been rebuilt again, this time as a fast static site that any member can edit on GitHub. See the [tools](/tools/), [classes](/classes/), and [events](/events/) pages for what's new.*
+The site has been rebuilt again, this time as a fast static site that any member can edit on GitHub. Check out the [source code](https://github.com/ColumbiaGadgetWorks/website)
