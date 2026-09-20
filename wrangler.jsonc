@@ -12,5 +12,7 @@
     "html_handling": "auto-trailing-slash",
     "not_found_handling": "404-page"
   },
+  // Do not delete variables/secrets that were set in the dashboard on each deploy.
+  "keep_vars": true,
   "observability": { "enabled": true }
 }
