@@ -17,5 +17,11 @@
   <button class="btn btn-primary" type="submit">Send message</button>
   <p class="small muted">Or email <a href="mailto:{{ $p.email }}">{{ $p.email }}</a> directly.</p>
 </form>
+<div class="callout warn" id="contact-error" hidden>Sorry, your message was not sent. <span id="contact-error-why"></span> Please email <a href="mailto:{{ $p.email }}">{{ $p.email }}</a> instead.</div>
 <div class="callout ok" id="contact-thanks" hidden>Thanks! Your message went to the volunteers who watch our inbox. We usually answer within a few days.</div>
-<script>if(new URLSearchParams(location.search).get('sent')){document.getElementById('contact-form').hidden=true;document.getElementById('contact-thanks').hidden=false;}</script>
+<script>
+(function(){var q=new URLSearchParams(location.search);
+if(q.get('sent')){document.getElementById('contact-form').hidden=true;document.getElementById('contact-thanks').hidden=false;}
+var e=q.get('error');if(e){var why={captcha:'The spam check did not pass.',config:'The form is not set up on the server yet.',send:'The message could not be delivered.',1:'A required field was missing or invalid.'};
+document.getElementById('contact-error-why').textContent=why[e]||'';document.getElementById('contact-error').hidden=false;}})();
+</script>

@@ -4,6 +4,10 @@
 //   DISCORD_WEBHOOK_URL  (secret, required)  — a webhook for the #website-contact channel
 //   TURNSTILE_SECRET     (secret, optional)  — enables Cloudflare Turnstile verification when the
 //                                              site key is also set in hugo.toml (params.turnstileSiteKey)
+//
+// Rollout order matters: deploy the site key in hugo.toml FIRST, then add TURNSTILE_SECRET.
+// If the secret exists but the page has no widget, no token is sent and every submission is
+// rejected with ?error=captcha (the page now shows that error, but nothing gets delivered).
 export async function onRequestPost({ request, env }) {
   const ct = request.headers.get('content-type') || '';
   let data;
