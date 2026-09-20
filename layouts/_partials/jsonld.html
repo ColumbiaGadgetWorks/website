@@ -5,21 +5,21 @@
   "@type": ["NGO", "LocalBusiness"],
   "name": "Columbia Gadget Works",
   "alternateName": "CGW",
-  "url": {{ site.BaseURL | jsonify }},
-  "logo": {{ "/img/cgw-gear.png" | absURL | jsonify }},
-  "image": {{ "/img/og-default.jpg" | absURL | jsonify }},
-  "description": {{ $p.description | jsonify }},
-  "foundingDate": {{ $p.founded | jsonify }},
+  "url": {{ site.BaseURL }},
+  "logo": {{ "/img/cgw-gear.png" | absURL }},
+  "image": {{ "/img/og-default.jpg" | absURL }},
+  "description": {{ $p.description }},
+  "foundingDate": {{ $p.founded }},
   "nonprofitStatus": "Nonprofit501c3",
-  "taxID": {{ $p.ein | jsonify }},
-  "email": {{ $p.email | jsonify }},
-  "telephone": {{ $p.phoneHref | jsonify }},
+  "taxID": {{ $p.ein }},
+  "email": {{ $p.email }},
+  "telephone": {{ $p.phoneHref }},
   "address": {
     "@type": "PostalAddress",
-    "streetAddress": {{ $p.addressStreet | jsonify }},
-    "addressLocality": {{ $p.addressCity | jsonify }},
-    "addressRegion": {{ $p.addressState | jsonify }},
-    "postalCode": {{ $p.addressZip | jsonify }},
+    "streetAddress": {{ $p.addressStreet }},
+    "addressLocality": {{ $p.addressCity }},
+    "addressRegion": {{ $p.addressState }},
+    "postalCode": {{ $p.addressZip }},
     "addressCountry": "US"
   },
   "openingHoursSpecification": [{
@@ -30,10 +30,10 @@
     "description": "Free Open Hack Night, open to the public"
   }],
   "sameAs": [
-    {{ $p.facebook | jsonify }},
-    {{ $p.bluesky | jsonify }},
-    {{ $p.github | jsonify }},
-    {{ $p.wiki | jsonify }}
+    {{ $p.facebook }},
+    {{ $p.bluesky }},
+    {{ $p.github }},
+    {{ $p.wiki }}
   ]
 }
 </script>
