@@ -29,16 +29,22 @@ hugo --minify        # production build into public/
 
 Requires Hugo **extended** ≥ 0.146 (image processing). Pin the same version in Cloudflare (`HUGO_VERSION`).
 
-## Cloudflare Pages setup
+## Cloudflare setup (Worker with static assets)
 
-1. Pages → Create project → connect this repo.
-2. Framework preset: **Hugo**. Build command `hugo --minify --gc`. Output directory `public`.
-3. Environment variables:
-   - `HUGO_VERSION` = `0.165.0` (build)
-   - `DISCORD_WEBHOOK_URL` = webhook for the contact form channel (secret; see `functions/api/contact.js`)
-   - `TURNSTILE_SECRET` (optional) with `turnstileSiteKey` in `hugo.toml`
-4. Custom domain: add `columbiagadgetworks.org` and `www` (the zone should already be on Cloudflare DNS).
-5. `static/_redirects` maps the old WordPress URLs; `static/_headers` sets caching and security headers.
+The site deploys as a Cloudflare Worker: Hugo's `public/` folder is served as static assets and `src/index.js` handles the contact form at `/api/contact`. Config is in `wrangler.jsonc`.
+
+1. Workers & Pages → Create application → Import a repository → pick `ColumbiaGadgetWorks/website`.
+2. Build settings (Settings → Build after creation if the wizard skipped them):
+   - Build command: `hugo --minify --gc`
+   - Deploy command: `npx wrangler deploy`
+   - Variables: `HUGO_VERSION` = `0.165.0`
+3. Secrets (Settings → Variables and Secrets, type *Secret*):
+   - `DISCORD_WEBHOOK_URL` — webhook for the contact form channel (see `src/contact.js`)
+   - `TURNSTILE_SECRET` (optional) — add only **after** `turnstileSiteKey` in `hugo.toml` has deployed
+4. Custom domain: Settings → Domains & Routes → add `columbiagadgetworks.org` and `www` (the zone must be in the same account).
+5. `static/_redirects` maps the old WordPress URLs; `static/_headers` sets caching and security headers. Both are honored by Workers static assets.
+
+Manual deploy from a machine with Wrangler logged in: `npm run deploy`.
 
 ## After launch checklist
 

@@ -1,0 +1,12 @@
+{
+  "name": "cgw-website",
+  "private": true,
+  "scripts": {
+    "build": "hugo --minify --gc",
+    "dev": "hugo server",
+    "deploy": "hugo --minify --gc && wrangler deploy"
+  },
+  "devDependencies": {
+    "wrangler": "^4.85.0"
+  }
+}
