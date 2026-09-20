@@ -39,7 +39,8 @@ disableKinds = ["taxonomy", "term"]
   # Payment / community links
   givebutterMembership = "https://givebutter.com/kxk2FA"
   givebutterDonate = "https://givebutter.com/v7RxV6"
-  givebutterWidgetId = ""          # set once a widget is created in Givebutter → Widgets; leaves the on-page embed off until then
+  givebutterAccount = "T9BSo58XoxQgK1XH"   # from the Givebutter embed script (acct=...)
+  givebutterWidgetId = ""          # the id from the <givebutter-widget id="..."> tag in the same embed code; embed stays off until set
   discord = "https://discord.gg/F7kM7ardMs"
   wiki = "https://wiki.comogadget.casa/"
   facebook = "https://www.facebook.com/columbiagadgetworks/"

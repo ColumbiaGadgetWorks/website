@@ -43,7 +43,8 @@ Treat the webhook URL as a password: anyone holding it can post into that channe
    `https://columbiagadgetworks.org` (it currently says `http://`).
 2. Open the **donation** campaign (the one behind givebutter.com/v7RxV6) → **Share** → **Widgets**
    (or "Embed") → create a **form** widget → copy the widget ID (a short code, not the campaign slug).
-3. In this repo, set `givebutterWidgetId = "<that id>"` in `hugo.toml`, commit, push. The donate page
+3. The embed code has two parts: a `<script … acct=…>` loader (already in `hugo.toml` as `givebutterAccount`) and a
+   `<givebutter-widget id="…">` tag. Put that id in `hugo.toml` as `givebutterWidgetId`, commit, push. The donate page
    then embeds the form on our own domain instead of linking out. Until then it shows a button.
 
 ## 6. Retire WordPress.com (15 minutes; do after 1–5 are done and the site has been live a few days)
