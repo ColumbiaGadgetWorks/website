@@ -16,5 +16,14 @@ www               IN CNAME columbiagadgetworks.org.
 _dmarc            IN TXT   "v=DMARC1;p=none;"
 google._domainkey IN TXT   "v=DKIM1;k=rsa;p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAh9V6IVDbSSe5p8xPugt5DtKLHo3zeVm9X9bkc7svWRbiK9mdq9Rl3A9/87i42RMUBoNtoFWKNR7A8DNOmG001qPqtw7FhtvIZQtXZGVP0gsLAQJC+CE+FQKYKsi0Qaxd3N3oU4wl/Fthe1JPp3QG0Pm/5vOIX9kEjNAfPjKj6YWw6D0BktaqHt5NdHqwUlF/S1h/pGuauFs+VXUDfelMDUuLue4yBh+Ik6AIwmgCoNNvj71RaGSsCAEhBK1ivGkOR+/51d8x4231v2QtI9Nlqv2ukfEb1pK1NMKpp91JZ2Iz2/kGnC0e+1qzcmZUSU7p+TFfa8BIOCYzfYPxT7LNUwIDAQAB"
 
+;; WordPress.com outbound-mail DKIM — keep until the WordPress.com plan is cancelled
+wpcloud1._domainkey IN CNAME wpcloud1._domainkey.wpcloud.com.
+wpcloud2._domainkey IN CNAME wpcloud2._domainkey.wpcloud.com.
+
+;; Google domain verification (Workspace / Google-hosted) — keep
+vgqemn6x7kjj      IN CNAME gv-vze2kqff7cvjlo.dv.googlehosted.com.
+
+;; Not carried over: TXT _domainconnect (WordPress.com's DNS-management hook; meaningless once DNS leaves WordPress.com)
+
 ;; Google site verification (Search Console / Workspace)
 @                 IN TXT   "google-site-verification=7OnMIWqzxQb5ebmrkrx0HekvmP5aPFsY1En6TJODyAE"
