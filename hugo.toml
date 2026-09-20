@@ -39,7 +39,8 @@ disableKinds = ["taxonomy", "term"]
   # Payment / community links
   givebutterMembership = "https://givebutter.com/kxk2FA"
   givebutterDonate = "https://givebutter.com/v7RxV6"
-  givebutterWidgetId = ""          # set once a widget is created in Givebutter → Widgets; leaves the on-page embed off until then
+  givebutterAccountId = "T9BSo58XoxQgK1XH"   # from the Givebutter widget embed snippet (the acct= value)
+  givebutterWidgetId = ""          # the id in <givebutter-widget id="...">; until it is set, /donate keeps the plain button
   discord = "https://discord.gg/F7kM7ardMs"
   wiki = "https://wiki.comogadget.casa/"
   facebook = "https://www.facebook.com/columbiagadgetworks/"
@@ -48,6 +49,7 @@ disableKinds = ["taxonomy", "term"]
   mapsQuery = "Columbia Gadget Works, 1404 Grand Ave, Columbia, MO 65203"
   calendarEmbedUrl = ""            # optional: public Google Calendar embed URL; shown on /events/ when set
   contactEndpoint = "/api/contact" # Cloudflare Pages Function (functions/api/contact.js)
+  subscribeEndpoint = "/api/subscribe" # Cloudflare Pages Function (functions/api/subscribe.js)
   turnstileSiteKey = ""            # optional: Cloudflare Turnstile site key for the contact form
 
 [menus]

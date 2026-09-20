@@ -7,16 +7,16 @@ description: "Free and low-cost maker classes in Columbia, MO: soldering, metal 
 
 ## Open Hack Night is the first class
 
-Every Thursday from 6 to 8 pm the shop is open to everyone. It isn't a formal class, but it's where most learning at CGW actually happens: a member shows you how the laser works, someone walks you through your first 3D print, a machinist explains what you did wrong on the lathe. If you want to learn something specific, say so when you arrive. [Plan a visit →](/visit/)
+Every Thursday from 6 to 8 pm the shop is open to everyone. It isn't a formal class, but it's where most learning at CGW actually happens: a member shows you how the laser works, someone walks you through your first 3D print, a machinist explains what you did wrong on the lathe. If you want to learn something specific, say so when you arrive. [Plan a visit](/visit/)
 
 ## Scheduled classes
 
 Members run classes roughly monthly, usually on a Thursday at 6 pm in place of the normal open night. Recent ones:
 
-- **Metal casting:** make a plaster mold from a 3D-printed part and pour it in aluminum with the shop's casting setup. [Recap →](/news/metal-casting-class-recap/)
-- **Soldering:** hand soldering and reflow/surface-mount techniques, with kits to take home. [Announcement →](/news/soldering-class-and-art-in-the-park/)
-- **Machining:** the Bridgeport mill and the Clausing lathe, from reading the dials to taking a real cut. [Recap →](/news/metalworking-class/)
-- **Field trips:** like our tour of KOPN community radio's studios and transmitter equipment. [Details →](/news/kopn-tour-april-23/)
+- **Metal casting:** make a plaster mold from a 3D-printed part and pour it in aluminum with the shop's casting setup. [Recap](/news/metal-casting-class-recap/)
+- **Soldering:** hand soldering and reflow/surface-mount techniques, with kits to take home. [Announcement](/news/soldering-class-and-art-in-the-park/)
+- **Machining:** the Bridgeport mill and the Clausing lathe, from reading the dials to taking a real cut. [Recap](/news/metalworking-class/)
+- **Field trips:** like our tour of KOPN community radio's studios and transmitter equipment. [Details](/news/kopn-tour-april-23/)
 
 Classes on the calendar for the year ahead: laser cutting basics, CNC router basics, 3D printing basics, intro to electronics and Arduino, welding, and woodshop safety. Dates are announced about a month ahead on the [events page](/events/), the [news page](/news/), and Discord.
 
@@ -33,6 +33,8 @@ All classes are **free unless otherwise stated**. Financial assistance for this 
 ## Upcoming
 
 {{< events limit="6" >}}
+
+{{< subscribe source="classes" redirect="/classes/?subscribe=ok" >}}
 
 ## Teach a class {#teach}
 

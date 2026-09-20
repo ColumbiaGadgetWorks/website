@@ -1,0 +1,77 @@
+{{- /* Class and event announcement signup.
+       {{< subscribe >}} or {{< subscribe source="events" redirect="/events/?subscribe=ok" >}} */ -}}
+{{- $p := site.Params -}}
+{{- $source := .Get "source" | default .Page.File.ContentBaseName -}}
+{{- $redirect := .Get "redirect" | default (printf "%s?subscribe=ok" .Page.RelPermalink) -}}
+<section class="signup" id="email-signup" aria-labelledby="signup-h">
+  <h2 id="signup-h">{{ .Get "heading" | default "Hear about classes before they fill up" }}</h2>
+  <p class="signup-lead">Most of our classes are free and most of them fill up. Put your email in and we will tell you when a new one is scheduled.</p>
+
+  <form class="signup-form" method="post" action="{{ $p.subscribeEndpoint }}" id="signup-form">
+    <div class="signup-fields">
+      <div class="field">
+        <label for="su-email">Email address</label>
+        <input id="su-email" name="email" type="email" required autocomplete="email" placeholder="you@example.com">
+      </div>
+      <div class="field">
+        <label for="su-name">First name <span class="muted">(optional)</span></label>
+        <input id="su-name" name="name" autocomplete="given-name">
+      </div>
+    </div>
+
+    <div class="field consent">
+      <label for="su-consent">
+        <input id="su-consent" name="consent" type="checkbox" value="yes" required>
+        <span>Yes, email me about upcoming classes and events at Columbia Gadget Works.</span>
+      </label>
+    </div>
+
+    <div class="hp" aria-hidden="true"><label>Leave this empty<input name="website" tabindex="-1" autocomplete="off"></label></div>
+    {{ with $p.turnstileSiteKey }}<div class="cf-turnstile" data-sitekey="{{ . }}"></div><script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>{{ end }}
+    <input type="hidden" name="source" value="{{ $source }}">
+    <input type="hidden" name="redirect" value="{{ $redirect }}">
+    <button class="btn btn-primary" type="submit">Add me to the list</button>
+  </form>
+
+  <div class="signup-promise">
+    <h3>What you are signing up for</h3>
+    <ul>
+      <li><strong>Class and event announcements only.</strong> New classes, open house nights, and the occasional shop event. That is the whole list.</li>
+      <li><strong>Roughly once a month.</strong> More in a busy month, nothing at all in a quiet one. We are volunteers, not marketers.</li>
+      <li><strong>Nobody else gets your address.</strong> The list is ours, it stays private, and we will never sell, rent, or share it.</li>
+      <li><strong>No fundraising drip, no newsletter padding.</strong> If you want to donate you will have to go and do it yourself.</li>
+      <li><strong>Leave whenever.</strong> Reply to any email or <a href="/contact/">tell us</a> and you are off the list that day.</li>
+    </ul>
+    <p class="small muted">Handled under our <a href="/privacy/">privacy policy</a>. You must be 13 or older to sign up.</p>
+  </div>
+
+  <div class="callout ok signup-msg" id="signup-ok" hidden>
+    <p><strong>You are on the list.</strong> We will email you when the next class is scheduled. Nothing else.</p>
+  </div>
+  <div class="callout warn signup-msg" id="signup-err" hidden>
+    <p><strong>That did not go through.</strong> <span id="signup-err-text">Please check the address and try again.</span> You can also <a href="/contact/">send us a note</a> and we will add you by hand.</p>
+  </div>
+</section>
+<script>
+(function(){
+  var p = new URLSearchParams(location.search).get('subscribe');
+  if (!p) return;
+  var form = document.getElementById('signup-form');
+  var ok = document.getElementById('signup-ok');
+  var err = document.getElementById('signup-err');
+  var msgs = {
+    invalid: 'That address did not look right.',
+    consent: 'Please tick the confirmation box.',
+    captcha: 'The spam check did not pass. Reload the page and try once more.',
+    slow: 'That is a lot of signups from one connection. Try again in a little while.',
+    error: 'Something broke on our end.'
+  };
+  if (p === 'ok') {
+    form.hidden = true; ok.hidden = false;
+    document.getElementById('email-signup').scrollIntoView({block:'center'});
+  } else {
+    document.getElementById('signup-err-text').textContent = msgs[p] || msgs.error;
+    err.hidden = false;
+  }
+})();
+</script>

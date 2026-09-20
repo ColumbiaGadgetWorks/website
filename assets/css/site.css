@@ -12,8 +12,10 @@
   --line:#E5DED4;
   --ok:#2F7A4B;
   --warn:#9C6A00;
-  --font:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
-  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  /* Ordinary, ubiquitous faces. Nothing is downloaded, so text paints on the
+     first frame and there is no layout shift when a webfont arrives. */
+  --font:Arial,"Helvetica Neue",Helvetica,sans-serif;
+  --mono:Consolas,"DejaVu Sans Mono","Courier New",monospace;
   --wrap:1120px;
   --r:10px;
 }
@@ -23,8 +25,8 @@ body{margin:0;font-family:var(--font);font-size:17px;line-height:1.6;color:var(-
 img{max-width:100%;height:auto;display:block}
 a{color:var(--rust-dark);text-decoration-thickness:1px;text-underline-offset:2px}
 a:hover{color:var(--rust)}
-h1,h2,h3,h4{line-height:1.15;letter-spacing:-.01em;margin:0 0 .5em;font-weight:800}
-h1{font-size:clamp(2rem,4.5vw,3.2rem)}
+h1,h2,h3,h4{line-height:1.18;letter-spacing:-.005em;margin:0 0 .5em;font-weight:700}
+h1{font-size:clamp(1.9rem,4.2vw,3rem)}
 h2{font-size:clamp(1.5rem,2.6vw,2rem)}
 h3{font-size:1.2rem}
 p{margin:0 0 1em}
@@ -98,7 +100,7 @@ ul.plain li{margin:0 0 .35em}
 .band-dark .btn-light{color:var(--ink)}
 .tool-ph{display:flex;align-items:center;justify-content:center;aspect-ratio:4/3;background:linear-gradient(135deg,#3a444f,#2B333C)}
 .tool-grid .tool-ph img,.tool-card .tool-ph img{width:64px;height:64px;aspect-ratio:auto;opacity:.5}
-.tool-card .tool-ph{aspect-ratio:16/10;background:var(--rust-tint)}
+.tool-card .tool-ph{aspect-ratio:16/10;background:#F1ECE4}
 .band-rust{background:var(--rust);color:#fff}
 .band-rust a.btn-light{color:var(--rust-dark)}
 .section-head{max-width:60ch;margin-bottom:28px}
@@ -162,12 +164,9 @@ ul.plain li{margin:0 0 .35em}
 /* Shop tags. Squared, stencilled, and labelled like the machines they describe:
    pill-shaped pastel chips read as generic web UI, which is not what this place is. */
 .badges{display:flex;flex-wrap:wrap;gap:8px;margin:.5em 0;align-items:stretch}
-.badge{display:inline-flex;align-items:center;gap:.5em;font-family:var(--mono);font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;padding:.36em .65em;border-radius:2px;background:#fff;border:1px solid var(--line);color:var(--muted)}
-.badge::before{content:"";flex:none;width:7px;height:7px;background:currentColor}
-.badge-ok{border-color:#B7DCC4;color:var(--ok);background:#fff}
-/* Training required gets the hazard stripe off the machine guards. */
-.badge-warn{border-color:#D8B65E;color:#6B4A00;background:#fff;padding-left:.5em}
-.badge-warn::before{width:9px;height:1.15em;border-radius:1px;background:repeating-linear-gradient(-45deg,#E8B54A 0 3px,#2A2419 3px 6px)}
+.badge{display:inline-block;font-family:var(--mono);font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;padding:.36em .65em;border-radius:2px;background:#fff;border:1px solid var(--line);color:var(--muted)}
+.badge-ok{color:var(--ok)}
+.badge-warn{color:#6B4A00}
 .band-dark .badge,.hero .badge{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.22);color:#EDE8E1}
 
 /* Tools */
@@ -196,7 +195,7 @@ ul.plain li{margin:0 0 .35em}
 .news-grid{list-style:none;padding:0;margin:24px 0;display:grid;gap:20px;grid-template-columns:repeat(auto-fill,minmax(300px,1fr))}
 .news-card{background:#fff;border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
 .news-thumb img{aspect-ratio:16/10;object-fit:cover;width:100%}
-.thumb-blank{display:flex;align-items:center;justify-content:center;aspect-ratio:16/10;background:var(--rust-tint)}
+.thumb-blank{display:flex;align-items:center;justify-content:center;aspect-ratio:16/10;background:#F1ECE4}
 .news-body{padding:16px 18px 18px}
 .news-body time{font-size:.85rem;color:var(--muted)}
 .news-body h2{font-size:1.15rem;margin:.2em 0 .3em}
@@ -230,16 +229,15 @@ ul.plain li{margin:0 0 .35em}
 .footer-bottom{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;border-top:1px solid rgba(255,255,255,.12);margin-top:36px;padding-top:16px;font-size:.85rem;color:#A9A39B}
 /* Zones. Colors come from data/zones.yaml so the palette lives in one place. */
 {{ range hugo.Data.zones }}
-.zone-{{ .id }}{--zone-accent:{{ .accent }};--zone-tint:{{ .tint }}}
+.zone-{{ .id }}{--zone-accent:{{ .accent }}}
 {{- end }}
 .zone-nav{display:flex;flex-wrap:wrap;gap:8px;margin:28px 0 8px;padding:0;list-style:none}
-.zone-chip{display:inline-flex;align-items:center;gap:.55em;font-size:.82rem;font-weight:700;text-decoration:none;color:var(--ink);background:#fff;border:1px solid var(--line);border-radius:2px;padding:.42em .78em}
-.zone-chip::before{content:"";flex:none;width:9px;height:9px;background:var(--zone-accent)}
-.zone-chip:hover,.zone-chip:focus-visible{border-color:var(--zone-accent);color:var(--zone-accent)}
+.zone-chip{display:inline-block;font-size:.82rem;font-weight:700;text-decoration:none;color:var(--zone-accent);background:#fff;border:1px solid var(--line);border-radius:2px;padding:.42em .78em}
+.zone-chip:hover,.zone-chip:focus-visible{border-color:var(--zone-accent)}
 .zone{margin-top:44px;scroll-margin-top:84px}
-.zone-head{background:var(--zone-tint);border:1px solid var(--line);border-left:5px solid var(--zone-accent);border-radius:2px;padding:16px 20px}
-.zone-head h2{margin:0 0 .12em;font-size:1.4rem;color:var(--zone-accent)}
-.zone-head p{margin:0;max-width:74ch;color:var(--ink)}
+.zone-head{border-left:4px solid var(--zone-accent);border-bottom:1px solid var(--line);padding:2px 0 12px 16px}
+.zone-head h2{margin:0 0 .12em;font-size:1.35rem;color:var(--zone-accent)}
+.zone-head p{margin:0;max-width:74ch;color:var(--muted)}
 .zone .tool-cards{margin-top:18px}
 .zone .tool-card{border-top:3px solid var(--zone-accent)}
 .zone-more{margin:10px 0 0;font-size:.95rem}
@@ -251,6 +249,23 @@ ul.plain li{margin:0 0 .35em}
 /* Homepage tile accents */
 .tool-grid li{--zone-accent:var(--rust)}
 .tool-grid a{border-top:3px solid var(--zone-accent)}
+
+/* Email signup */
+.signup{border:1px solid var(--line);background:#fff;border-radius:var(--r);padding:24px;margin:2em 0}
+.signup h2{font-size:1.3rem;margin:0 0 .2em}
+.signup-lead{color:var(--muted);max-width:62ch}
+.signup-form{margin:0}
+.signup-fields{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:600px){.signup-fields{grid-template-columns:1fr}}
+.field.consent{margin:14px 0 16px}
+.field.consent label{display:flex;gap:.6em;align-items:flex-start;font-weight:400;font-size:.95rem;margin:0}
+.field.consent input[type=checkbox]{width:auto;flex:none;margin:.3em 0 0;accent-color:var(--rust)}
+.signup-promise{margin-top:24px;border-top:1px solid var(--line);padding-top:16px}
+.signup-promise h3{font-family:var(--mono);font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:0 0 .6em;font-weight:700}
+.signup-promise ul{padding-left:1.2em;margin:0 0 .7em}
+.signup-promise li{margin:.32em 0;font-size:.95rem}
+.signup-msg{margin-top:16px}
+.signup-msg p:last-child{margin-bottom:0}
 
 /* Video. Self-hosted, no third-party player, dimensions reserved to avoid layout shift. */
 .video-figure{margin:1.6em 0}

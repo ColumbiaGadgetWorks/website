@@ -15,8 +15,6 @@ description: Join Columbia Gadget Works. Membership includes 24/7 shop access, a
 
 ## Dues
 
-<!-- TODO: confirm tiers and amounts before launch. Standard $50 and Supporter $100 come from the 2026 management notes; the general membership vote on dues is expected in early 2027. -->
-
 | Level | Monthly | Who it's for |
 |---|---|---|
 | **Standard** | $50 | Full access for one adult. |

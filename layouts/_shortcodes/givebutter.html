@@ -2,10 +2,10 @@
 {{- $which := .Get "campaign" | default "donate" -}}
 {{- $url := cond (eq $which "membership") $p.givebutterMembership $p.givebutterDonate -}}
 {{- $label := .Get "label" | default (cond (eq $which "membership") "Set up membership dues" "Donate now") -}}
-{{- if and $p.givebutterWidgetId (eq $which "donate") }}
+{{- if and $p.givebutterWidgetId $p.givebutterAccountId (eq $which "donate") }}
 <div class="gb-embed">
   <givebutter-widget id="{{ $p.givebutterWidgetId }}"></givebutter-widget>
-  <script async src="https://widgets.givebutter.com/latest.umd.cjs?dropin=true"></script>
+  <script async src="https://widgets.givebutter.com/latest.umd.cjs?acct={{ $p.givebutterAccountId }}&amp;p=other"></script>
   <noscript><a class="btn btn-primary btn-lg" href="{{ $url }}" rel="noopener">{{ $label }}</a></noscript>
 </div>
 {{- else }}

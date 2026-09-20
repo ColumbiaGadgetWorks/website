@@ -55,6 +55,51 @@ hugo --minify        # production build into public/
 
 Requires Hugo **extended** ≥ 0.146 (image processing). Pin the same version in Cloudflare (`HUGO_VERSION`).
 
+## Class and event email list
+
+`{{</* subscribe */>}}` renders the signup form. It is on `/classes/` and `/events/`,
+and linked from the footer. Addresses are stored in Cloudflare KV, not a third-party
+mailing service, so the list stays ours.
+
+Setup, in the Pages project:
+
+1. **Workers & Pages -> KV** -> create a namespace called `cgw-subscribers`.
+2. In the Pages project -> **Settings -> Bindings** -> add a **KV namespace** binding
+   named `SUBSCRIBERS` pointing at it. Add it for Production *and* Preview.
+3. **Settings -> Variables and secrets** -> add `SUBSCRIBERS_EXPORT_TOKEN` as a
+   **secret**, set to any long random string. Generate one with
+   `openssl rand -hex 32`.
+4. Optionally add `DISCORD_SIGNUP_WEBHOOK_URL` to get a ping in Discord on each
+   signup. Without it, signups fall back to `DISCORD_WEBHOOK_URL`; without either,
+   they are stored silently.
+
+Export the list as CSV:
+
+```sh
+curl "https://columbiagadgetworks.org/api/subscribers?token=$SUBSCRIBERS_EXPORT_TOKEN" -o subscribers.csv
+```
+
+Without `SUBSCRIBERS_EXPORT_TOKEN` set, that endpoint returns 404, so the list is
+never exposed by accident. Records are keyed by lowercased email, so signing up
+twice updates one row instead of creating two.
+
+To remove someone, delete the `sub:<their email>` key in the KV namespace.
+
+## Spam protection (Turnstile)
+
+Both the contact form and the signup form use Cloudflare Turnstile when it is
+configured. **Set both halves or neither:**
+
+- `params.turnstileSiteKey` in `hugo.toml` (public, safe in git)
+- `TURNSTILE_SECRET` as a Pages secret
+
+The Functions verify only when the secret is present. If the secret is set but the
+site key has not deployed yet, the forms render no widget, send no token, and every
+submission is rejected. Deploy the site key first, then add the secret.
+
+When creating the widget, list `columbiagadgetworks.org` (subdomains are covered
+automatically) and `cgw-website-30p.pages.dev` so preview builds work too.
+
 ## Cloudflare Pages setup
 
 1. Pages → Create project → connect this repo.
