@@ -1,0 +1,8 @@
+{{- $poster := resources.Get "img/battlebots-arena.jpg" -}}
+<figure class="video-figure">
+  <video controls preload="none" playsinline muted loop width="854" height="480"{{ with $poster }} poster="{{ (.Resize "854x q72").RelPermalink }}"{{ end }}>
+    <source src="/video/battlebots-arena.mp4" type="video/mp4">
+    <p>Your browser cannot play this clip. <a href="/video/battlebots-arena.mp4">Download the video</a> instead.</p>
+  </video>
+  <figcaption>Two combat robots in the member-built Chamber of Robotic Aggression.</figcaption>
+</figure>

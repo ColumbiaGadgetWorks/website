@@ -11,3 +11,5 @@
 /feed/                                         /news/index.xml                           301
 /wp-login.php                                  /                                         301
 /wp-admin/*                                    /                                         301
+# /tools/metal-shop/ was split into machining (mill + lathe) and metalworking (welding).
+/tools/metal-shop/                             /tools/machine-shop/                      301

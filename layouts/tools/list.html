@@ -5,22 +5,55 @@
     {{ with .Params.subtitle }}<p class="lead">{{ . }}</p>{{ end }}
   </header>
   <div class="prose">{{ .Content }}</div>
-  <ul class="tool-cards">
-    {{ range sort .Pages "Weight" }}
-    <li class="tool-card" id="{{ .File.ContentBaseName }}">
-      <a class="tool-card-img" href="{{ .RelPermalink }}">{{ with .Params.image }}{{ partial "img.html" (dict "src" . "alt" ($.Params.imageAlt | default "") "sizes" "(min-width: 700px) 360px, 100vw" "width" 800) }}{{ else }}<span class="tool-ph"><img src="/img/cgw-gear.png" alt="" width="64" height="64"></span>{{ end }}</a>
-      <div class="tool-card-body">
-        <h2><a href="{{ .RelPermalink }}">{{ .Title }}</a></h2>
-        <p class="muted">{{ .Params.subtitle }}</p>
-        <p>{{ .Summary | plainify | truncate 200 }}</p>
-        <p class="badges">
-          {{ if .Params.training }}<span class="badge badge-warn">Training required</span>{{ else }}<span class="badge badge-ok">Open to members</span>{{ end }}
-          {{ if .Params.openHackNight }}<span class="badge">Try it on a Thursday</span>{{ end }}
-        </p>
-        <a href="{{ .RelPermalink }}">Details →</a>
-      </div>
-    </li>
-    {{ end }}
-  </ul>
+
+  {{- $tools := .Pages -}}
+  <nav aria-label="Shop zones">
+    <ul class="zone-nav">
+      {{- range hugo.Data.zones -}}
+        {{- if where $tools "Params.zone" .id }}
+      <li><a class="zone-chip zone-{{ .id }}" href="#zone-{{ .id }}">{{ .name }}</a></li>
+        {{- end -}}
+      {{- end }}
+    </ul>
+  </nav>
+
+  {{- range hugo.Data.zones }}
+    {{- $zid := .id }}{{ $zname := .name }}{{ $zsummary := .summary }}
+    {{- with sort (where $tools "Params.zone" $zid) "Weight" }}
+  <section class="zone zone-{{ $zid }}" id="zone-{{ $zid }}" aria-labelledby="zh-{{ $zid }}">
+    <div class="zone-head">
+      <h2 id="zh-{{ $zid }}">{{ $zname }}</h2>
+      <p>{{ $zsummary }}</p>
+    </div>
+    <ul class="tool-cards">
+      {{- range . }}
+      <li class="tool-card" id="{{ .File.ContentBaseName }}">
+        {{/* Thumbnail repeats the title link below it, so it is hidden from
+             assistive tech and the tab order rather than announced twice. */}}
+        <a class="tool-card-img" href="{{ .RelPermalink }}" tabindex="-1" aria-hidden="true">
+          {{- with .Params.image }}{{ partial "img.html" (dict "src" . "alt" "" "sizes" "(min-width: 700px) 360px, 100vw" "width" 800) }}
+          {{- else }}<span class="tool-ph"><img src="/img/cgw-gear.png" alt="" width="64" height="64"></span>{{ end -}}
+        </a>
+        <div class="tool-card-body">
+          <h3><a href="{{ .RelPermalink }}">{{ .Title }}</a></h3>
+          <p class="muted">{{ .Params.subtitle }}</p>
+          <p>{{ .Summary | plainify | truncate 200 }}</p>
+          <p class="badges">
+            {{ if .Params.training }}<span class="badge badge-warn">Training required</span>{{ else }}<span class="badge badge-ok">Open to members</span>{{ end }}
+            {{ if .Params.openHackNight }}<span class="badge">Try it on a Thursday</span>{{ end }}
+          </p>
+          <a href="{{ .RelPermalink }}">Details</a>
+        </div>
+      </li>
+      {{- end }}
+    </ul>
+  </section>
+    {{- end -}}
+  {{- end }}
+
+  <div class="prose">
+    <h2>Not sure where to start?</h2>
+    <p>Come to <a href="/visit/">Open Hack Night</a> on a Thursday and ask for a tour. You will get a walk through every zone in about ten minutes, and you can try the beginner-friendly tools the same evening. Operating guides, material settings, and maintenance logs for everything here live on the <a href="https://wiki.comogadget.casa/" rel="noopener">member wiki</a>.</p>
+  </div>
 </section>
 {{ end }}

@@ -15,6 +15,8 @@ description: "Columbia Gadget Works calendar: free Open Hack Night every Thursda
 
 {{< calendar >}}
 
+{{< subscribe source="events" redirect="/events/?subscribe=ok" heading="Get class and event announcements by email" >}}
+
 Class announcements also go out on [Discord](https://discord.gg/F7kM7ardMs), [Facebook](https://www.facebook.com/columbiagadgetworks/), and [Bluesky](https://bsky.app/profile/comogadgetworks.bsky.social), and are posted in the [news](/news/). Subscribe to the [news RSS feed](/news/index.xml) if you'd rather not check.
 
 Something missing? Members can edit `data/events.yaml` in the [website repository](https://github.com/ColumbiaGadgetWorks/website) or ask the communications lead.

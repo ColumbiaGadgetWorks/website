@@ -49,6 +49,7 @@ disableKinds = ["taxonomy", "term"]
   mapsQuery = "Columbia Gadget Works, 1404 Grand Ave, Columbia, MO 65203"
   calendarEmbedUrl = ""            # optional: public Google Calendar embed URL; shown on /events/ when set
   contactEndpoint = "/api/contact" # handled by the Worker in src/index.js
+  subscribeEndpoint = "/api/subscribe" # handled by the Worker in src/subscribe.js
   turnstileSiteKey = ""            # optional: Cloudflare Turnstile site key for the contact form
 
 [menus]

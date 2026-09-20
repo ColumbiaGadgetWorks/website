@@ -13,7 +13,7 @@
         <a href="mailto:{{ $p.email }}">{{ $p.email }}</a><br>
         <a href="tel:{{ $p.phoneHref }}">{{ $p.phone }}</a>
       </address>
-      <p><a href="/contact/">Contact form →</a></p>
+      <p><a href="/contact/">Contact form</a></p>
     </div>
     <div class="footer-col">
       <h2 class="footer-h">Around the web</h2>
@@ -29,6 +29,7 @@
       <h2 class="footer-h">More</h2>
       <ul class="plain">
         {{ range site.Menus.footer }}<li><a href="{{ .URL }}">{{ .Name }}</a></li>{{ end }}
+        <li><a href="/classes/#email-signup">Class email list</a></li>
         <li><a href="/news/index.xml">News feed (RSS)</a></li>
       </ul>
     </div>

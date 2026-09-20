@@ -1,5 +1,5 @@
 ---
-title: Metal Casting Class – Recap
+title: "Metal casting class: recap"
 date: 2026-02-27T09:44:09-06:00
 description: Recap of the free metal casting class at Columbia Gadget Works, February 2026.
 image: metal-casting-parts.jpg

@@ -29,9 +29,9 @@ In 2026 we began a deliberate transition from an informal "club" to a properly g
 
 Columbia Gadget Works is a **membership organization**. Every member in good standing has one vote. Members elect four officers each April at the annual meeting, and the officers serve as the board of directors.
 
-The shop itself is divided into **zones**: woodworking, metalworking, digital fabrication (laser, CNC, 3D printing), electronics, and casting. Each zone is run by a volunteer "zone lead" who sets it up, keeps it safe, and decides what training its tools require. Other volunteers take on functions like membership, classes, facilities, and communications.
+The shop itself is divided into six **zones**: [woodworking, machining, digital fabrication, electronics, crafting, and metalworking](/tools/). Each zone is run by a volunteer "zone lead" who sets it up, keeps it safe, and decides what training its tools require. Other volunteers take on functions like membership, classes, facilities, and communications.
 
-Decisions are written down on our member wiki. If it isn't on the wiki, it isn't policy.
+Decisions are written down on our [member wiki](https://wiki.comogadget.casa/). If it isn't on the wiki, it isn't policy.
 
 ### Board of directors
 

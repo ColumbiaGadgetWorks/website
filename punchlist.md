@@ -6,10 +6,10 @@ Quick fixes
 Small changes with outsized effect on how the site reads to a reviewer. All of these are doable in an afternoon.
 Add a heading block to the homepage
 
-Real body text above the post loop — not a theme header image, not an image caption. An H1, the mission sentence, the Thursday Open Hack line, and two buttons: Plan Your Visit and Donate. Right now a reviewer landing on the homepage sees six post thumbnails and no statement of what CGW is.
+Real body text above the post loop, not a theme header image, not an image caption. An H1, the mission sentence, the Thursday Open Hack line, and two buttons: Plan Your Visit and Donate. Right now a reviewer landing on the homepage sees six post thumbnails and no statement of what CGW is.
 Rebuild the menu from the page list
 
-Select pages from the page picker rather than pasting URLs, then assign the menu to every location the theme offers — including the front page template. The homepage and interior pages currently show two different menus, which is the exact "confusing navigation" failure Google names.
+Select pages from the page picker rather than pasting URLs, then assign the menu to every location the theme offers, including the front page template. The homepage and interior pages currently show two different menus, which is the exact "confusing navigation" failure Google names.
 
 Appearance → Menus
 Move Discord and the Wiki to the footer
@@ -41,10 +41,10 @@ Create /tools
 
 Laser cutter, CNC router, mill and lathe, 3D printers, casting setup, electronics bench, woodshop. A paragraph and a photo for each, plus a note on what requires training first. Target 600+ words.
 
-This is the highest-value page you don't have. It fixes the most content volume at once, and it's what people actually search for — "laser cutter near me" brings strangers to your door.
+This is the highest-value page you don't have. It fixes the most content volume at once, and it's what people actually search for, "laser cutter near me" brings strangers to your door.
 Create /classes
 
-Open Hack Night, plus the classes you've already run — metal casting, soldering, metalworking, milling. How to propose one, and how to hear about upcoming ones. Link out to the existing blog posts so they stop being orphaned.
+Open Hack Night, plus the classes you've already run, metal casting, soldering, metalworking, milling. How to propose one, and how to hear about upcoming ones. Link out to the existing blog posts so they stop being orphaned.
 Create /contact
 
 Address, embedded Google Map, hours, phone, and a working contact form.
@@ -56,7 +56,7 @@ Expand /visit past 80 words
 What a first-timer should expect: where to park on Grand, that they need to bring nothing, that no experience is required, who greets them, and what they'll walk in on. Lead with the Thursday visit and move Discord to the end.
 Expand /about toward 400 words
 
-Add the founding story from 2017 to now, leadership or board, a link to the Form 990, and community impact. The mission copy that's there already is good — this is about giving it company.
+Add the founding story from 2017 to now, leadership or board, a link to the Form 990, and community impact. The mission copy that's there already is good, this is about giving it company.
 Add a calendar with recurring events
 
 A real events calendar does double duty: it adds indexable content that refreshes itself, and it answers the question most first-time visitors actually have.
@@ -73,7 +73,7 @@ Technical checks
 Speed and mobile performance are scored on real measurements, so these have to be run rather than reasoned about.
 Resize and compress the source images
 
-The post thumbnails are full-resolution phone photos — pxl_20260213_005721747.jpg, pxl_20260116_014121971.jpg, pxl_20260227_010125431_1.jpg. Cap the long edge near 1600px and re-upload.
+The post thumbnails are full-resolution phone photos, pxl_20260213_005721747.jpg, pxl_20260116_014121971.jpg, pxl_20260227_010125431_1.jpg. Cap the long edge near 1600px and re-upload.
 Run PageSpeed Insights on mobile
 
 Test the homepage and /donate at minimum, on the mobile tab. Fix whatever it flags.
@@ -94,7 +94,7 @@ Empty the WordPress trash
 So no deleted page keeps squatting on the donate slug and forces WordPress to hand you donate-2.
 Standardize on mail@columbiagadgetworks.org
 
-The footer currently shows a Gmail address while the About page shows the domain address. Use the domain address everywhere — it reads as a real organization, which is what Google is assessing.
+The footer currently shows a Gmail address while the About page shows the domain address. Use the domain address everywhere, it reads as a real organization, which is what Google is assessing.
 Submit an XML sitemap to Search Console
 
 Once the new pages exist, so they're indexed before the application is reviewed.

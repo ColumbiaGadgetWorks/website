@@ -8,4 +8,4 @@ imageAlt: Jeff demonstrating the vertical milling machine to a group of members
 
 CGW has been running monthly classes. Last month, Jeff shared knowledge about using the manual milling machine in the CGW workshop, and other metalworking information.
 
-Want to learn the mill or lathe yourself? See the [metal shop](/tools/metal-shop/) page and watch the [events calendar](/events/) for the next session.
+Want to learn the mill or lathe yourself? See the [machine shop](/tools/machine-shop/) page and watch the [events calendar](/events/) for the next session.
