@@ -3,7 +3,8 @@ title: Electronics bench
 subtitle: Soldering, testing, and repair, with people who've done a lot of it.
 description: Electronics workbench at Columbia Gadget Works, Columbia MO. Soldering stations, hot air rework, oscilloscope, power supplies, multimeters, and components. Open to visitors on Thursdays.
 weight: 60
-# image: TODO — add a photo of this zone to assets/img/ and set image: filename
+image: electronics-tools.webp
+imageAlt: "A multimeter, soldering iron, holding tool and some solder around a soldering mat"
 training: false
 openHackNight: true
 specs:
