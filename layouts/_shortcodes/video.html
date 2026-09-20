@@ -1,0 +1,22 @@
+{{- /* Self-hosted video. No third-party player, no tracking, nothing loaded until
+       the visitor presses play. Usage:
+       {{< video src="/video/foo.mp4" poster="foo.jpg" caption="..." >}} */ -}}
+{{- $src := .Get "src" -}}
+{{- if not $src }}{{ errorf "video shortcode: src is required (%s)" .Position }}{{ end -}}
+{{- $w := .Get "width" | default "854" -}}
+{{- $h := .Get "height" | default "480" -}}
+{{- $posterURL := "" -}}
+{{- with .Get "poster" -}}
+  {{- $p := resources.Get (printf "img/%s" .) -}}
+  {{- if not $p }}{{ errorf "video shortcode: assets/img/%s not found (%s)" . $.Position }}{{ end -}}
+  {{- $posterURL = ($p.Resize "854x q72").RelPermalink -}}
+{{- end -}}
+<figure class="video-figure">
+  <video controls preload="none" playsinline muted loop width="{{ $w }}" height="{{ $h }}"{{ with $posterURL }} poster="{{ . }}"{{ end }}>
+    <source src="{{ $src }}" type="video/mp4">
+    <p>Your browser cannot play this clip. <a href="{{ $src }}">Download the video</a> instead.</p>
+  </video>
+  {{- with .Get "caption" }}
+  <figcaption>{{ . | markdownify }}</figcaption>
+  {{- end }}
+</figure>

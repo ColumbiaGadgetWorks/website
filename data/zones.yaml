@@ -1,0 +1,33 @@
+# Shop zones. Each tool page sets `zone:` to one of these ids.
+# `accent` is used for text and rules (kept dark enough for AA contrast on white);
+# `tint` is the pale background wash for the zone header.
+- id: woodworking
+  name: Woodworking
+  accent: "#B4551D"
+  tint: "#FBEADF"
+  summary: Saws, sanders, and the router table, plus the CNC router that cuts parts too fussy to do by hand.
+- id: machining
+  name: Machining
+  accent: "#A8271F"
+  tint: "#FBE4E2"
+  summary: A full-size Bridgeport mill and a Clausing lathe for precise metal parts, one thousandth at a time.
+- id: digital-fabrication
+  name: Digital fabrication
+  accent: "#1B5C9E"
+  tint: "#E2EDF8"
+  summary: Two 3D printers and an 80-watt laser cutter, for going from a file to a finished part.
+- id: electronics
+  name: Electronics
+  accent: "#A32167"
+  tint: "#FAE2F0"
+  summary: Soldering stations and test equipment, and the most beginner-friendly bench in the building.
+- id: crafting
+  name: Crafting
+  accent: "#2E7A4A"
+  tint: "#E3F3E9"
+  summary: Sewing, vinyl, paint, and the general-purpose bench space for projects that are not made of metal.
+- id: metalworking
+  name: Metalworking
+  accent: "#8A6A00"
+  tint: "#FBF0D5"
+  summary: The kiln for casting and heat treating, plus MIG, TIG, and stick welding.

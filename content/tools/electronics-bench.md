@@ -2,15 +2,15 @@
 title: Electronics bench
 subtitle: Soldering, testing, and repair, with people who've done a lot of it.
 description: Electronics workbench at Columbia Gadget Works, Columbia MO. Soldering stations, hot air rework, oscilloscope, power supplies, multimeters, and components. Open to visitors on Thursdays.
+zone: electronics
 weight: 60
-# image: TODO — add a photo of this zone to assets/img/ and set image: filename
+# image: TODO: add a photo of this zone to assets/img/ and set image: filename
 training: false
 openHackNight: true
 specs:
   - { label: Soldering, value: Hakko FX-888D stations, hot-air rework, reflow }
   - { label: Test gear, value: Oscilloscope, bench power supplies, multimeters, function generator }
   - { label: Also, value: PanaVise holders, magnifiers, component stock, breadboards, Arduino and Raspberry Pi }
-  - { label: Zone, value: Electronics }
 ---
 
 The electronics bench is the most beginner-friendly corner of the shop and the one visitors can use right away on a Thursday night. Temperature-controlled soldering stations, a hot-air rework tool, a scope, power supplies, and bins of common components cover everything from a first blinking LED to repairing a vintage amplifier or building a custom circuit board.
@@ -29,3 +29,5 @@ No formal training required; a member will show you the stations and where thing
 - Don't take the last of anything without noting it on the consumables list.
 - Use the fume extractor when soldering.
 - Ask before probing anything mains-powered.
+
+Component inventories and bench notes are on the [member wiki](https://wiki.comogadget.casa/).

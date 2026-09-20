@@ -5,7 +5,9 @@
     {{ with .Params.subtitle }}<p class="lead">{{ . }}</p>{{ end }}
   </header>
   {{ with .Params.image }}<figure class="page-hero">{{ partial "img.html" (dict "src" . "alt" ($.Params.imageAlt | default "") "sizes" "(min-width: 900px) 860px, 100vw" "loading" "eager") }}</figure>{{ end }}
-  <div class="prose">
+  {{/* `wide: true` in front matter drops the 72ch reading measure so pages that
+       lay themselves out in columns can use the full wrap. */}}
+  <div class="prose{{ if .Params.wide }} prose-wide{{ end }}">
     {{ .Content }}
   </div>
 </article>

@@ -1,4 +1,4 @@
-/* Columbia Gadget Works — site styles. Brand color comes from hugo.toml. */
+/* Columbia Gadget Works site styles. Brand color comes from hugo.toml. */
 :root{
   --rust:{{ site.Params.brandColor }};
   --rust-dark:#983C1E;
@@ -40,14 +40,15 @@ ul.plain{list-style:none;padding:0;margin:0}
 ul.plain li{margin:0 0 .35em}
 
 /* Buttons */
-.btn{display:inline-block;padding:.6em 1.15em;border-radius:8px;font-weight:700;text-decoration:none;border:2px solid transparent;line-height:1.2;cursor:pointer;font-family:inherit;font-size:1rem}
+.btn{display:inline-block;padding:.62em 1.2em;border-radius:3px;font-weight:700;text-decoration:none;border:2px solid transparent;line-height:1.2;cursor:pointer;font-family:inherit;font-size:1rem;transition:background .12s ease,border-color .12s ease,transform .06s ease}
+.btn:active{transform:translateY(1px)}
 .btn-primary{background:var(--rust);color:#fff;border-color:var(--rust)}
 .btn-primary:hover{background:var(--rust-dark);border-color:var(--rust-dark);color:#fff}
-.btn-light{background:#fff;color:var(--ink);border-color:#fff}
-.btn-light:hover{background:var(--paper);color:var(--rust-dark)}
+.btn-light{background:#fff;color:var(--ink);border-color:var(--ink)}
+.btn-light:hover{background:var(--ink);color:#fff}
 .btn-outline{background:transparent;color:var(--rust-dark);border-color:var(--rust)}
 .btn-outline:hover{background:var(--rust-tint)}
-.btn-lg{padding:.8em 1.4em;font-size:1.08rem}
+.btn-lg{padding:.78em 1.5em;font-size:1.06rem}
 
 /* Header */
 .site-header{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:50}
@@ -84,7 +85,7 @@ ul.plain li{margin:0 0 .35em}
 .lead{font-size:1.2rem;max-width:62ch;color:inherit}
 .hero .lead{color:#E7E3DC}
 .hero-cta{display:flex;flex-wrap:wrap;gap:12px;margin:24px 0 20px}
-.hack-chip{display:inline-block;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);padding:.5em .9em;border-radius:999px;font-size:.95rem;margin:0}
+.hack-chip{display:inline-block;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.18);border-left:3px solid var(--rust);padding:.5em .9em;border-radius:2px;font-size:.95rem;margin:0}
 
 /* Cards / grids */
 .three-up{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px}
@@ -136,6 +137,10 @@ ul.plain li{margin:0 0 .35em}
 .page-hero{margin:0 0 32px}
 .page-hero img{border-radius:var(--r);width:100%}
 .prose{max-width:72ch}
+/* Pages that lay out in columns opt out of the reading measure, so a two-column
+   block fills the 1120px wrap instead of being squeezed into 72ch. */
+.prose-wide{max-width:none}
+.prose-wide>.two-col>div>:first-child{margin-top:0}
 .prose h2{margin-top:1.6em;padding-top:.2em}
 .prose h3{margin-top:1.3em}
 .prose ul,.prose ol{padding-left:1.3em}
@@ -154,17 +159,25 @@ ul.plain li{margin:0 0 .35em}
 .callout.ok{border-left-color:var(--ok)}
 .callout.warn{border-left-color:var(--warn)}
 .callout p:last-child{margin-bottom:0}
-.badges{display:flex;flex-wrap:wrap;gap:8px;margin:.4em 0}
-.badge{font-size:.78rem;font-weight:700;padding:.25em .6em;border-radius:999px;background:#fff;border:1px solid var(--line);color:var(--muted)}
-.badge-warn{border-color:#E6C98A;color:var(--warn);background:#FFF6E0}
-.badge-ok{border-color:#B7DCC4;color:var(--ok);background:#E9F5EC}
+/* Shop tags. Squared, stencilled, and labelled like the machines they describe:
+   pill-shaped pastel chips read as generic web UI, which is not what this place is. */
+.badges{display:flex;flex-wrap:wrap;gap:8px;margin:.5em 0;align-items:stretch}
+.badge{display:inline-flex;align-items:center;gap:.5em;font-family:var(--mono);font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;padding:.36em .65em;border-radius:2px;background:#fff;border:1px solid var(--line);color:var(--muted)}
+.badge::before{content:"";flex:none;width:7px;height:7px;background:currentColor}
+.badge-ok{border-color:#B7DCC4;color:var(--ok);background:#fff}
+/* Training required gets the hazard stripe off the machine guards. */
+.badge-warn{border-color:#D8B65E;color:#6B4A00;background:#fff;padding-left:.5em}
+.badge-warn::before{width:9px;height:1.15em;border-radius:1px;background:repeating-linear-gradient(-45deg,#E8B54A 0 3px,#2A2419 3px 6px)}
+.band-dark .badge,.hero .badge{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.22);color:#EDE8E1}
 
 /* Tools */
 .tool-cards{list-style:none;padding:0;margin:24px 0 0;display:grid;gap:20px;grid-template-columns:repeat(auto-fill,minmax(320px,1fr))}
 .tool-card{background:#fff;border:1px solid var(--line);border-radius:var(--r);overflow:hidden;display:flex;flex-direction:column}
 .tool-card-img img{aspect-ratio:16/10;object-fit:cover;width:100%}
 .tool-card-body{padding:18px 20px 20px}
-.tool-card-body h2{font-size:1.25rem;margin-bottom:.1em}
+.tool-card-body h3{font-size:1.2rem;margin-bottom:.1em}
+.tool-card-body h3 a{text-decoration:none;color:var(--ink)}
+.tool-card-body h3 a:hover{color:var(--rust-dark)}
 .tool-card-body p{margin-bottom:.5em}
 .tool-layout{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:40px;align-items:start}
 @media (max-width:860px){.tool-layout{grid-template-columns:1fr}}
@@ -215,5 +228,36 @@ ul.plain li{margin:0 0 .35em}
 .site-footer address{font-style:normal;line-height:1.7}
 .hack-night{background:rgba(255,255,255,.06);border-radius:8px;padding:10px 12px;display:inline-block}
 .footer-bottom{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;border-top:1px solid rgba(255,255,255,.12);margin-top:36px;padding-top:16px;font-size:.85rem;color:#A9A39B}
-@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+/* Zones. Colors come from data/zones.yaml so the palette lives in one place. */
+{{ range hugo.Data.zones }}
+.zone-{{ .id }}{--zone-accent:{{ .accent }};--zone-tint:{{ .tint }}}
+{{- end }}
+.zone-nav{display:flex;flex-wrap:wrap;gap:8px;margin:28px 0 8px;padding:0;list-style:none}
+.zone-chip{display:inline-flex;align-items:center;gap:.55em;font-size:.82rem;font-weight:700;text-decoration:none;color:var(--ink);background:#fff;border:1px solid var(--line);border-radius:2px;padding:.42em .78em}
+.zone-chip::before{content:"";flex:none;width:9px;height:9px;background:var(--zone-accent)}
+.zone-chip:hover,.zone-chip:focus-visible{border-color:var(--zone-accent);color:var(--zone-accent)}
+.zone{margin-top:44px;scroll-margin-top:84px}
+.zone-head{background:var(--zone-tint);border:1px solid var(--line);border-left:5px solid var(--zone-accent);border-radius:2px;padding:16px 20px}
+.zone-head h2{margin:0 0 .12em;font-size:1.4rem;color:var(--zone-accent)}
+.zone-head p{margin:0;max-width:74ch;color:var(--ink)}
+.zone .tool-cards{margin-top:18px}
+.zone .tool-card{border-top:3px solid var(--zone-accent)}
+.zone-more{margin:10px 0 0;font-size:.95rem}
+.two-col.feature{align-items:center}
+.two-col.feature h2{margin-top:0}
+.eyebrow-sep{margin:0 .15em;opacity:.55}
+.zone-link{color:var(--zone-accent,var(--rust-dark))}
+.page.zone-woodworking,.page.zone-machining,.page.zone-digital-fabrication,.page.zone-electronics,.page.zone-crafting,.page.zone-metalworking{border-top:3px solid var(--zone-accent);margin-top:-1px}
+/* Homepage tile accents */
+.tool-grid li{--zone-accent:var(--rust)}
+.tool-grid a{border-top:3px solid var(--zone-accent)}
+
+/* Video. Self-hosted, no third-party player, dimensions reserved to avoid layout shift. */
+.video-figure{margin:1.6em 0}
+.video-figure video{display:block;width:100%;height:auto;aspect-ratio:16/9;background:#14181c;border-radius:var(--r)}
+.video-figure figcaption{margin-top:.55em;font-size:.9rem;color:var(--muted)}
+.prose .video-figure{margin-left:0;margin-right:0}
+
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}
+  .btn{transition:none}}
 @media print{.site-header,.site-footer,.hero-media{display:none}}

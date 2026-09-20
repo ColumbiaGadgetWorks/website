@@ -1,7 +1,8 @@
 ---
 title: 3D printers
 subtitle: Fast, reliable Bambu Lab printers with multi-color capability.
-description: 3D printing at Columbia Gadget Works, Columbia MO. Bambu Lab X1 Carbon and A1 printers with AMS for PLA, PETG, TPU, ABS, and ASA. Orientation required; free for members.
+description: 3D printing at Columbia Gadget Works, Columbia MO. Bambu Lab X1 Carbon and A1 printers with AMS for PLA, PETG, TPU, ABS, and ASA. Orientation required; open to members.
+zone: digital-fabrication
 weight: 30
 image: metal-casting-mold.jpg
 imageAlt: "A hand holding a plaster mold that was made from a 3D-printed pattern"
@@ -13,7 +14,6 @@ specs:
   - { label: Build volume, value: 256 × 256 × 256 mm each }
   - { label: Materials, value: PLA, PETG, TPU, ABS, ASA }
   - { label: Software, value: Bambu Studio on the shop PC }
-  - { label: Zone, value: Digital fabrication }
 ---
 
 3D printing is the easiest way to go from an idea to a physical object, and our two Bambu Lab printers make it nearly foolproof. Both have an AMS (automatic material system) that holds four spools, so you can print in multiple colors or switch materials without babysitting the machine. Typical prints take an hour or two; large ones run overnight.

@@ -2,8 +2,9 @@
 title: CNC router
 subtitle: Computer-controlled router for carving wood, plastic, and soft metals.
 description: Shapeoko 4 XL CNC router at Columbia Gadget Works makerspace, Columbia MO. Carve signs, parts, and furniture components in wood, plastic, and aluminum. Training required.
+zone: woodworking
 weight: 20
-# image: TODO — add a photo of this zone to assets/img/ and set image: filename
+# image: TODO: add a photo of this zone to assets/img/ and set image: filename
 training: true
 openHackNight: true
 wiki: https://wiki.comogadget.casa/index.php/CNC_Router
@@ -12,7 +13,6 @@ specs:
   - { label: Work area, value: "33 × 17.5 in, 4 in Z (approx.)" }
   - { label: Control, value: Carbide Motion }
   - { label: CAM, value: Carbide Create, FreeCAD, Fusion 360 }
-  - { label: Zone, value: Digital fabrication }
 ---
 
 The CNC router turns a drawing on a computer into a carved part. A spinning cutter moves over the workpiece under computer control, cutting profiles, pockets, holes, and 3D reliefs with a precision and repeatability that's hard to match by hand. It's the tool for anything flat-ish that needs to be exact: enclosures, brackets, signage, inlay, jigs, furniture joinery, and parts for other machines.

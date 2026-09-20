@@ -38,7 +38,7 @@ Cost should never be the reason someone doesn't join. If the standard rate is ou
 
 ## Training
 
-Some tools require training before you use them alone: the laser cutter, CNC router, milling machine, lathe, welders, and table saw. Training is free for members and is run by the zone lead on request or on a scheduled class night. Once you're signed off, it's recorded on the wiki and you're good to go.
+Some tools require training before you use them alone: the laser cutter, CNC router, Bridgeport mill, Clausing lathe, welders, and table saw. Training is discounted for members and is run by the zone lead on request or on a scheduled class night. Once you're signed off, it's recorded on the wiki and you're good to go.
 
 ## Rules, briefly
 

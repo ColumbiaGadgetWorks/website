@@ -1,7 +1,13 @@
 {{ define "main" }}
-<article class="wrap page">
+{{- $zid := .Params.zone -}}
+{{- $zone := "" -}}
+{{- with where hugo.Data.zones "id" $zid }}{{ $zone = index . 0 }}{{ end -}}
+<article class="wrap page{{ with $zid }} zone-{{ . }}{{ end }}">
   <header class="page-head">
-    <p class="eyebrow"><a href="/tools/">Tools</a></p>
+    <p class="eyebrow">
+      <a href="/tools/">Tools</a>
+      {{- with $zone }} <span class="eyebrow-sep" aria-hidden="true">/</span> <a class="zone-link" href="/tools/#zone-{{ .id }}">{{ .name }}</a>{{ end -}}
+    </p>
     <h1>{{ .Title }}</h1>
     {{ with .Params.subtitle }}<p class="lead">{{ . }}</p>{{ end }}
     <p class="badges">
@@ -14,6 +20,7 @@
     <aside class="tool-aside">
       {{ with .Params.image }}<figure>{{ partial "img.html" (dict "src" . "alt" ($.Params.imageAlt | default "") "sizes" "(min-width: 900px) 360px, 100vw" "width" 800 "loading" "eager") }}</figure>{{ end }}
       <dl class="specs">
+        {{ with $zone }}<div><dt>Zone</dt><dd><a href="/tools/#zone-{{ .id }}">{{ .name }}</a></dd></div>{{ end }}
         {{ range .Params.specs }}<div><dt>{{ .label }}</dt><dd>{{ .value }}</dd></div>{{ end }}
       </dl>
       {{ with .Params.wiki }}<p><a class="btn btn-outline" href="{{ . }}" rel="noopener">Operating guide on the wiki</a></p>{{ end }}
