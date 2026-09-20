@@ -3,7 +3,8 @@ title: Woodshop
 subtitle: Table saw, sanders, and the hand tools for everything from shelves to fine furniture.
 description: Woodworking shop at Columbia Gadget Works makerspace, Columbia MO. Table saw, miter saw, band saw, planer, sanders, router table, and hand tools. Training required for power saws.
 weight: 70
-# image: TODO — add a photo of this zone to assets/img/ and set image: filename
+image: woodshop.webp
+imageAlt: "The miter saw, drill press, and pile of scrap wood"
 training: true
 openHackNight: true
 specs:
