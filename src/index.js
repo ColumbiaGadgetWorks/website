@@ -9,6 +9,17 @@ export default {
       if (request.method !== 'POST') return new Response('POST only', { status: 405 });
       return handleContact(request, env);
     }
+    if (pathname === '/api/health') {
+      // Reports which secrets are present (names only, never values) so a misconfigured form is diagnosable.
+      return Response.json({
+        ok: true,
+        configured: {
+          DISCORD_WEBHOOK_URL: Boolean(env.DISCORD_WEBHOOK_URL),
+          TURNSTILE_SECRET: Boolean(env.TURNSTILE_SECRET),
+        },
+        envKeys: Object.keys(env).filter(k => k !== 'ASSETS').sort(),
+      });
+    }
     if (pathname.startsWith('/api/')) return new Response('Not found', { status: 404 });
     return env.ASSETS.fetch(request);
   },

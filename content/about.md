@@ -11,7 +11,7 @@ Our mission is to provide an inclusive community workshop where members can acce
 
 ## What a makerspace is
 
-A makerspace is a shared workshop. Think of it the way you think of a public library, but for tools: an 80-watt laser cutter, a CNC router, a milling machine, a metal lathe, 3D printers, and a full electronics bench are expensive, loud, and take up space that most people don't have at home. By pooling dues and donations, our members share equipment none of us could justify buying alone, and, more importantly, share what they know about using it.
+A makerspace is a shared workshop. Think of it the way you think of a public library, but for tools: an 80-watt laser cutter, a CNC router, a Bridgeport mill, a Clausing lathe, 3D printers, and a full electronics bench are expensive, loud, and take up space that most people don't have at home. By pooling dues and donations, our members share equipment none of us could justify buying alone, and, more importantly, share what they know about using it.
 
 Columbia Gadget Works is the only makerspace in mid-Missouri that hosts a **free, weekly, open-to-everyone night**. Every Thursday from 6 to 8 pm anyone can walk in, get a tour, use the basic tools, and get help with a project. No membership, no fee, no experience required.
 
