@@ -1,8 +1,8 @@
 // Contact form handler, mounted at POST /api/contact by src/index.js (Cloudflare Worker).
 // Forwards the contact form to a Discord channel via webhook. No third-party form service needed.
 // Environment variables (Workers & Pages → cgw-website → Settings → Variables and Secrets):
-//   DISCORD_WEBHOOK_URL  (secret, required)  — a webhook for the #website-contact channel
-//   TURNSTILE_SECRET     (secret, optional)  — enables Cloudflare Turnstile verification when the
+//   DISCORD_WEBHOOK_URL  (secret, required)  is a webhook for the #website-contact channel
+//   TURNSTILE_SECRET     (secret, optional)  enables Cloudflare Turnstile verification when the
 //                                              site key is also set in hugo.toml (params.turnstileSiteKey)
 //
 // Rollout order matters: deploy the site key in hugo.toml FIRST, then add TURNSTILE_SECRET.

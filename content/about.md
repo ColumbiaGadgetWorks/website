@@ -31,7 +31,7 @@ Columbia Gadget Works is a **membership organization**. Every member in good sta
 
 The shop itself is divided into **zones**: woodworking, metalworking, digital fabrication (laser, CNC, 3D printing), electronics, and casting. Each zone is run by a volunteer "zone lead" who sets it up, keeps it safe, and decides what training its tools require. Other volunteers take on functions like membership, classes, facilities, and communications.
 
-Decisions are written down on our member wiki. If it isn't on the wiki, it isn't policy.
+Decisions are written down on our [member wiki](https://wiki.comogadget.casa/). If it isn't on the wiki, it isn't policy.
 
 ### Board of directors
 

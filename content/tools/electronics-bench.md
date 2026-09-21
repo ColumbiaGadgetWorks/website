@@ -30,3 +30,5 @@ No formal training required; a member will show you the stations and where thing
 - Don't take the last of anything without noting it on the consumables list.
 - Use the fume extractor when soldering.
 - Ask before probing anything mains-powered.
+
+Component inventories and bench notes are on the [member wiki](https://wiki.comogadget.casa/).

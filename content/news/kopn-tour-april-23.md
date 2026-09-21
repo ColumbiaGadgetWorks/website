@@ -1,5 +1,5 @@
 ---
-title: KOPN Tour – April 23
+title: "KOPN tour: April 23"
 date: 2026-04-08T07:05:47-05:00
 description: Columbia Gadget Works field trip to KOPN community radio on Thursday, April 23, 2026.
 image: kopn.jpg

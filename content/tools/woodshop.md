@@ -27,4 +27,6 @@ The **table saw** requires training before solo use; it's the tool that causes t
 - Dust collection on for every machine that has a port.
 - Eye protection always; hearing protection is on the wall and you'll want it.
 - Check boards for nails and screws before they touch a blade.
+
+Setup notes, blade inventories, and finishing schedules live on the [member wiki](https://wiki.comogadget.casa/).
 - Clean the machines and floor when you're done. Sawdust is the woodshop's main product and it needs to go in the bin, not the metal shop.
