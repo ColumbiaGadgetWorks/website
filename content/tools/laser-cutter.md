@@ -3,7 +3,7 @@ title: Laser cutter
 subtitle: 80-watt CO₂ laser for cutting and engraving wood, acrylic, leather, and more.
 description: OMTech 80W CO2 laser cutter at Columbia Gadget Works, Columbia MO. Cut and engrave plywood, acrylic, leather, paper, and fabric. Training required; free for members.
 weight: 10
-image: gadget-works-sign.jpg
+image: laser-cutter.webp
 imageAlt: "A laser-cut orange \"Gadget Works\" sign on a workbench with paint cans and cut-out parts"
 training: true
 openHackNight: true
