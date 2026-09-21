@@ -31,6 +31,8 @@ Every machine in the metal shop requires training before solo use. The mill and 
 
 Our metalworking instructor runs periodic classes on the mill and lathe (see [classes](/classes/)), and a Thursday-night demo is always available.
 
+Setup notes and tooling inventories live on the [member wiki](https://wiki.comogadget.casa/).
+
 ## Safety
 
 Safety glasses always. No gloves at the mill or lathe. No loose clothing, jewelry, or long hair. Never leave a chuck key in a chuck. If you're not sure, stop and ask.

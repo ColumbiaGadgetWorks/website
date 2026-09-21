@@ -1,7 +1,7 @@
 ---
 title: Metal casting
 subtitle: Turn a 3D print into a solid metal part.
-description: Metal casting at Columbia Gadget Works, Columbia MO. Plaster investment casting from 3D-printed patterns in aluminum, zinc, and pewter. Free classes offered.
+description: Metal casting at Columbia Gadget Works, Columbia MO. Plaster investment casting from 3D-printed patterns in aluminum. Free classes offered.
 weight: 50
 image: metal-casting-parts.jpg
 imageAlt: Small cast brass pieces including a Star Trek insignia lying on a white surface
@@ -9,7 +9,7 @@ training: true
 openHackNight: false
 specs:
   - { label: Method, value: Plaster investment casting from 3D-printed patterns }
-  - { label: Metals, value: Aluminum, zinc alloys, pewter, brass (with care) }
+  - { label: Metals, value: Aluminum, brass (with care) }
   - { label: Equipment, value: Propane furnace, crucibles, burnout kiln, flasks, safety gear }
   - { label: Zone, value: Casting }
 ---

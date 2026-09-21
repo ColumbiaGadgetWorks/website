@@ -4,7 +4,7 @@ subtitle: Short, because we collect very little.
 description: Privacy policy for columbiagadgetworks.org.
 ---
 
-*Last updated: September 18, 2026*
+*Last updated: September 20, 2026*
 
 Columbia Gadget Works ("CGW", "we") operates columbiagadgetworks.org. This page explains what information the site collects and what we do with it.
 
