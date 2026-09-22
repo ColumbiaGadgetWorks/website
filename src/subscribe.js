@@ -15,6 +15,8 @@
 //   DISCORD_SIGNUP_WEBHOOK_URL (secret, optional) - posts each new signup to a
 //                Discord channel.
 
+import { verifyTurnstile } from './turnstile.js';
+
 const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 const SIGNUPS_PER_HOUR = 5;
 
@@ -35,18 +37,8 @@ export async function handleSubscribe(request, env) {
   if (honeypot) return done(request, back, 'ok', 200); // bot: pretend success
   if (!EMAIL_RE.test(email)) return done(request, back, 'invalid', 400, 'Invalid email address');
 
-  if (env.TURNSTILE_SECRET) {
-    const v = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({
-        secret: env.TURNSTILE_SECRET,
-        response: data['cf-turnstile-response'],
-        remoteip: request.headers.get('CF-Connecting-IP'),
-      }),
-    }).then(r => r.json()).catch(() => ({ success: false }));
-    if (!v.success) return done(request, back, 'captcha', 400, 'Captcha failed');
-  }
+  const ts = await verifyTurnstile(request, env, data['cf-turnstile-response'], 'subscribe');
+  if (!ts.ok) return done(request, back, 'captcha', 400, 'Captcha failed');
 
   if (!env.SUBSCRIBERS) return done(request, back, 'error', 500, 'Mailing list is not configured');
 

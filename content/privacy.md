@@ -26,7 +26,7 @@ Some pages include content from other services. When you interact with them, tho
 
 - **Givebutter** processes donations and membership dues. We receive your name, email, and gift details so we can send a receipt and acknowledge your gift. We never see your full card number. See [Givebutter's privacy policy](https://givebutter.com/privacy).
 - **Google Maps** provides the embedded map on the Visit and Contact pages. See [Google's privacy policy](https://policies.google.com/privacy).
-- **Cloudflare Turnstile**, if enabled, checks that form submissions aren't automated. It sets no tracking cookies.
+- **Cloudflare Turnstile** checks that submissions to the contact form and the email signup aren't automated. It sets no tracking cookies. See [Cloudflare's privacy policy](https://www.cloudflare.com/privacypolicy/).
 
 We don't share or sell personal information to anyone.
 

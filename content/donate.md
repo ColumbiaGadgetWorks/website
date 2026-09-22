@@ -27,6 +27,8 @@ You'll receive an emailed receipt for every online gift. For gifts of $250 or mo
 
 {{< givebutter campaign="donate" >}}
 
+Monthly gifts are especially helpful: they let us plan around predictable income. Choose **Monthly** on the form, or **Yearly** if you prefer to give once a year.
+
 ## Other ways to give
 
 - **By check:** payable to *Columbia Gadget Works*, mailed or dropped off at 1404 Grand Ave, Columbia, MO 65203.

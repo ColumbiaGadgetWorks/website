@@ -228,11 +228,6 @@ ul.plain li{margin:0 0 .35em}
 .updates-msg{margin:0;padding:10px 14px;border:1px solid var(--line);border-left:4px solid var(--ok);border-radius:3px;background:#fff}
 .updates-msg.warn{border-left-color:var(--warn)}
 
-/* Donate: one-time and monthly Givebutter buttons side by side */
-.gb-pair{display:flex;flex-wrap:wrap;gap:16px 32px;align-items:flex-start}
-.gb-option{display:flex;flex-direction:column;gap:8px}
-.gb-label{margin:0;font-family:var(--mono);font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
-
 /* Footer */
 .site-footer{background:var(--steel-deep);color:#D9D4CD;margin-top:0;padding:48px 0 24px;font-size:.95rem}
 .site-footer a{color:#fff}

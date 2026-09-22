@@ -3,26 +3,11 @@
 {{- $url := cond (eq $which "membership") $p.givebutterMembership $p.givebutterDonate -}}
 {{- $label := .Get "label" | default (cond (eq $which "membership") "Set up membership dues" "Donate now") -}}
 {{- if and $p.givebutterWidgetId $p.givebutterAccount (eq $which "donate") }}
-{{- /* One-time and monthly are separate Givebutter widgets, each styled in the
-       Givebutter dashboard. The monthly one only appears once its id is set, so
-       there is never a "monthly" button that quietly takes a one-time gift. */}}
-<div class="gb-embed gb-pair">
-  <div class="gb-option">
-    {{ with $p.givebutterMonthlyWidgetId }}<p class="gb-label">One-time gift</p>{{ end }}
-    <givebutter-widget id="{{ $p.givebutterWidgetId }}"></givebutter-widget>
-  </div>
-  {{- with $p.givebutterMonthlyWidgetId }}
-  <div class="gb-option">
-    <p class="gb-label">Monthly gift</p>
-    <givebutter-widget id="{{ . }}"></givebutter-widget>
-  </div>
-  {{- end }}
+<div class="gb-embed">
+  <givebutter-widget id="{{ $p.givebutterWidgetId }}"></givebutter-widget>
   <script async src="https://widgets.givebutter.com/latest.umd.cjs?acct={{ $p.givebutterAccount }}&p=other"></script>
   <noscript><a class="btn btn-primary btn-lg" href="{{ $url }}" rel="noopener">{{ $label }}</a></noscript>
 </div>
-{{- with $p.givebutterMonthlyWidgetId }}
-<p>Monthly gifts are especially helpful: they let us plan around predictable income.</p>
-{{- end }}
 {{- else }}
 <p class="cta-row"><a class="btn btn-primary btn-lg" href="{{ $url }}" rel="noopener">{{ $label }}</a> <span class="muted small">Secure checkout via Givebutter. Card, bank, Apple Pay, Google Pay, Venmo, and PayPal accepted.</span></p>
 {{- end }}

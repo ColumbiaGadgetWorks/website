@@ -8,6 +8,8 @@
 // Rollout order matters: deploy the site key in hugo.toml FIRST, then add TURNSTILE_SECRET.
 // If the secret exists but the page has no widget, no token is sent and every submission is
 // rejected with ?error=captcha (the page now shows that error, but nothing gets delivered).
+import { verifyTurnstile } from './turnstile.js';
+
 export async function handleContact(request, env) {
   const ct = request.headers.get('content-type') || '';
   let data;
@@ -25,16 +27,8 @@ export async function handleContact(request, env) {
   if (!name || !email || !message || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email))
     return done(request, '/contact/?error=1', 400, 'Missing or invalid fields');
 
-  if (env.TURNSTILE_SECRET) {
-    const token = data['cf-turnstile-response'];
-    const ip = request.headers.get('CF-Connecting-IP');
-    const v = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ secret: env.TURNSTILE_SECRET, response: token, remoteip: ip }),
-    }).then(r => r.json()).catch(() => ({ success: false }));
-    if (!v.success) return done(request, '/contact/?error=captcha', 400, 'Captcha failed');
-  }
+  const ts = await verifyTurnstile(request, env, data['cf-turnstile-response'], 'contact');
+  if (!ts.ok) return done(request, '/contact/?error=captcha', 400, 'Captcha failed');
 
   if (!env.DISCORD_WEBHOOK_URL) return done(request, '/contact/?error=config', 500, 'Form not configured');
 

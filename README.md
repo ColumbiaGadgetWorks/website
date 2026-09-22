@@ -76,18 +76,29 @@ record rather than creating a duplicate, and each connection is limited to five 
 Optional: set `SUBSCRIBERS_EXPORT_TOKEN` as a secret to download the list as CSV from
 `/api/subscribers?token=...`. Without it that address returns 404.
 
-## Donate buttons
+## Donate button
 
-`/donate/` shows the one-time Givebutter widget (`givebutterWidgetId`). Set
-`givebutterMonthlyWidgetId` to a second widget, whose campaign accepts recurring gifts, and a
-"Monthly gift" button appears beside it. Both buttons are styled in the Givebutter dashboard.
+`/donate/` embeds one Givebutter widget (`givebutterWidgetId`). Its form offers one-time, monthly
+and yearly gifts; that choice, and the button's look, are both set in the Givebutter dashboard.
 
 ## Spam protection (Turnstile)
 
-The contact form and the email signup both use Turnstile when configured. **Set both halves or neither:**
-`params.turnstileSiteKey` in `hugo.toml`, and `TURNSTILE_SECRET` as a Worker secret.
-If the secret is set but the site key has not deployed, the forms render no widget, send no
-token, and every submission is rejected. Deploy the site key first.
+The contact form and the email signup both use Cloudflare Turnstile. The site key is set in
+`hugo.toml` (`turnstileSiteKey`); it is public and safe in git. The secret lives only in the
+Worker as `TURNSTILE_SECRET` (Workers & Pages, website, Settings, Variables and Secrets, type
+Secret). Never commit it.
+
+`src/turnstile.js` does the server-side check for both forms. It requires `success`, and also that
+the token's `action` matches the form (`contact` or `subscribe`) and its `hostname` matches the site,
+so a token minted for one form or another domain is refused.
+
+**Rollout order matters.** With no secret set, the check is skipped. If the secret is added while
+the live pages have no widget, every submission is rejected for lacking a token. So the site key
+must be deployed first, then the secret added.
+
+For local testing with `wrangler dev`, put Cloudflare's published always-pass test secret
+(`1x0000000000000000000000000000000AA`) in `.dev.vars` (gitignored). Test tokens skip the action
+and hostname checks, since Cloudflare answers them for a dummy host; the real secret never does.
 
 ## After launch checklist
 

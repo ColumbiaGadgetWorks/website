@@ -55,6 +55,7 @@
     rendered = true;
     window.turnstile.render(box, {
       sitekey: box.dataset.sitekey,
+      action: 'subscribe',
       callback: function () { if (pending) form.submit(); }
     });
   }
