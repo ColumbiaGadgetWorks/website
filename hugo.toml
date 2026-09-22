@@ -40,7 +40,7 @@ disableKinds = ["taxonomy", "term"]
   givebutterMembership = "https://givebutter.com/kxk2FA"
   givebutterDonate = "https://givebutter.com/v7RxV6"
   givebutterAccount = "T9BSo58XoxQgK1XH"   # from the Givebutter embed script (acct=...)
-  givebutterWidgetId = "j9Mr6K"          # the id from the <givebutter-widget id="..."> tag in the same embed code; embed stays off until set
+  givebutterWidgetId = "j9Mr6K"          # the id from the <givebutter-widget id="..."> tag; its form offers one-time, monthly and yearly gifts
   discord = "https://discord.gg/F7kM7ardMs"
   wiki = "https://wiki.comogadget.casa/"
   facebook = "https://www.facebook.com/columbiagadgetworks/"
@@ -49,7 +49,8 @@ disableKinds = ["taxonomy", "term"]
   mapsQuery = "Columbia Gadget Works, 1404 Grand Ave, Columbia, MO 65203"
   calendarEmbedUrl = ""            # optional: public Google Calendar embed URL; shown on /events/ when set
   contactEndpoint = "/api/contact" # handled by the Worker in src/index.js
-  turnstileSiteKey = ""            # optional: Cloudflare Turnstile site key for the contact form
+  subscribeEndpoint = "/api/subscribe" # email updates signup, handled by the Worker in src/subscribe.js
+  turnstileSiteKey = "0x4AAAAAAE_62c1QS97IgYEj"  # Cloudflare Turnstile site key (public): protects the contact form and the email signup. Must be live BEFORE TURNSTILE_SECRET is added.
 
 [menus]
   [[menus.main]]

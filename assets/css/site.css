@@ -211,6 +211,23 @@ ul.plain li{margin:0 0 .35em}
 .map-wrap iframe{width:100%;height:360px;border:0;border-radius:var(--r);background:#eee}
 .gb-embed{margin:1.2em 0}
 
+/* Email updates band, above the footer on every page. Inline, never a popup. */
+.updates{background:#fff;border-top:1px solid var(--line);padding:32px 0}
+.updates-inner{display:grid;grid-template-columns:minmax(0,1fr) minmax(280px,440px);gap:20px 48px;align-items:start}
+@media (max-width:760px){.updates-inner{grid-template-columns:1fr}}
+.updates h2{font-size:1.25rem;margin:0 0 .3em}
+.updates-copy p{margin:0;color:var(--muted);max-width:56ch}
+.updates-form{margin:0}
+.updates-row{display:flex;gap:8px}
+.updates-row input{flex:1;min-width:0;font:inherit;padding:.55em .7em;border:1px solid #C9C2B8;border-radius:3px;background:#fff}
+.updates-row input:focus{outline:2px solid var(--rust);outline-offset:1px;border-color:var(--rust)}
+.updates-row .btn{flex:none}
+.updates-ts{margin-top:10px}
+.updates-ts:empty{display:none}
+.updates-fine{margin:.6em 0 0;font-size:.85rem;color:var(--muted)}
+.updates-msg{margin:0;padding:10px 14px;border:1px solid var(--line);border-left:4px solid var(--ok);border-radius:3px;background:#fff}
+.updates-msg.warn{border-left-color:var(--warn)}
+
 /* Footer */
 .site-footer{background:var(--steel-deep);color:#D9D4CD;margin-top:0;padding:48px 0 24px;font-size:.95rem}
 .site-footer a{color:#fff}

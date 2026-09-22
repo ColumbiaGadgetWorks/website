@@ -58,12 +58,47 @@ Drop an MP4 in `static/video/` and a poster still in `assets/img/`, then:
 Nothing loads until the visitor presses play (`preload="none"`), and the poster reserves the
 layout box. Re-mux phone footage with `ffmpeg -i in.mp4 -c copy -movflags +faststart out.mp4`.
 
+## Email updates list
+
+The "Get updates by email" box sits above the footer on every page
+(`layouts/_partials/updates-signup.html`). Submissions go to `src/subscribe.js` and are stored
+in a Cloudflare KV namespace bound as `SUBSCRIBERS`.
+
+**No setup needed.** The binding in `wrangler.jsonc` deliberately has no id: Wrangler creates the
+namespace on the first deploy and keeps it linked (automatic provisioning). This works in Workers
+Builds because its default token has KV edit permission. It does *not* have D1 permission, so do
+not switch this to a D1 database the same way.
+
+To read the list: Cloudflare dashboard, **Storage & Databases, KV**, open the namespace. Each key
+is `sub:<email address>`. Deleting a key unsubscribes that person. Signing up twice updates one
+record rather than creating a duplicate, and each connection is limited to five signups an hour.
+
+Optional: set `SUBSCRIBERS_EXPORT_TOKEN` as a secret to download the list as CSV from
+`/api/subscribers?token=...`. Without it that address returns 404.
+
+## Donate button
+
+`/donate/` embeds one Givebutter widget (`givebutterWidgetId`). Its form offers one-time, monthly
+and yearly gifts; that choice, and the button's look, are both set in the Givebutter dashboard.
+
 ## Spam protection (Turnstile)
 
-The contact form uses Turnstile when configured. **Set both halves or neither:**
-`params.turnstileSiteKey` in `hugo.toml`, and `TURNSTILE_SECRET` as a Worker secret.
-If the secret is set but the site key has not deployed, the form renders no widget, sends no
-token, and every submission is rejected. Deploy the site key first.
+The contact form and the email signup both use Cloudflare Turnstile. The site key is set in
+`hugo.toml` (`turnstileSiteKey`); it is public and safe in git. The secret lives only in the
+Worker as `TURNSTILE_SECRET` (Workers & Pages, website, Settings, Variables and Secrets, type
+Secret). Never commit it.
+
+`src/turnstile.js` does the server-side check for both forms. It requires `success`, and also that
+the token's `action` matches the form (`contact` or `subscribe`) and its `hostname` matches the site,
+so a token minted for one form or another domain is refused.
+
+**Rollout order matters.** With no secret set, the check is skipped. If the secret is added while
+the live pages have no widget, every submission is rejected for lacking a token. So the site key
+must be deployed first, then the secret added.
+
+For local testing with `wrangler dev`, put Cloudflare's published always-pass test secret
+(`1x0000000000000000000000000000000AA`) in `.dev.vars` (gitignored). Test tokens skip the action
+and hostname checks, since Cloudflare answers them for a dummy host; the real secret never does.
 
 ## After launch checklist
 
