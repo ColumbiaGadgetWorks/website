@@ -12,6 +12,11 @@
     "html_handling": "auto-trailing-slash",
     "not_found_handling": "404-page"
   },
+  // Email updates list. No id on purpose: Wrangler creates the namespace on the
+  // first deploy and keeps it linked afterwards (automatic provisioning, wrangler
+  // 4.45+). Workers Builds' default token has KV edit permission, so this needs no
+  // manual setup. Do not add a D1 database the same way: that token has no D1 access.
+  "kv_namespaces": [{ "binding": "SUBSCRIBERS" }],
   // Do not delete variables/secrets that were set in the dashboard on each deploy.
   "keep_vars": true,
   "observability": { "enabled": true }

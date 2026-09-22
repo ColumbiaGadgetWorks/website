@@ -1,0 +1,85 @@
+{{- /* Email updates signup. Sits above the footer on every page: inline, never a
+       popup. Turnstile's script is only fetched once someone focuses the form,
+       so pages that nobody signs up from pay nothing for it. */ -}}
+{{- $p := site.Params -}}
+<section class="updates" id="updates" aria-labelledby="updates-h">
+  <div class="wrap updates-inner">
+    <div class="updates-copy">
+      <h2 id="updates-h">Get updates by email</h2>
+      <p>We'll email you when new classes and events are announced, and with the occasional update about the organization. That's all we send.</p>
+    </div>
+    <div>
+      <form class="updates-form" method="post" action="{{ $p.subscribeEndpoint }}" id="updates-form">
+        <div class="updates-row">
+          <label for="up-email" class="sr">Email address</label>
+          <input id="up-email" name="email" type="email" required autocomplete="email" placeholder="you@example.com">
+          <button class="btn btn-primary" type="submit">Sign up</button>
+        </div>
+        <div class="hp" aria-hidden="true"><label>Leave this empty<input name="website" tabindex="-1" autocomplete="off"></label></div>
+        <input type="hidden" name="back" value="{{ .RelPermalink }}">
+        {{ with $p.turnstileSiteKey }}<div class="updates-ts" id="up-ts" data-sitekey="{{ . }}"></div>{{ end }}
+        <p class="updates-fine">No spam, ever. We never share your address, and you can unsubscribe any time. <a href="/privacy/">Privacy</a></p>
+      </form>
+      <p class="updates-msg ok" id="updates-ok" role="status" hidden><strong>You're on the list.</strong> We'll be in touch when there's something new.</p>
+      <p class="updates-msg warn" id="updates-err" role="alert" hidden></p>
+    </div>
+  </div>
+</section>
+<script>
+(function () {
+  var form = document.getElementById('updates-form');
+  if (!form) return;
+
+  // Result of a submission, passed back by the Worker as ?updates=...
+  var q = new URLSearchParams(location.search).get('updates');
+  if (q === 'ok') {
+    form.hidden = true;
+    document.getElementById('updates-ok').hidden = false;
+  } else if (q) {
+    var why = {
+      invalid: "That email address doesn't look right. Please check it and try again.",
+      captcha: "The spam check didn't finish. Please try once more.",
+      slow: 'Too many signups from this connection. Please try again later.'
+    };
+    var err = document.getElementById('updates-err');
+    err.textContent = why[q] || 'Something went wrong on our end. Please try again, or use the contact form.';
+    err.hidden = false;
+  }
+
+  var box = document.getElementById('up-ts');
+  if (!box) return; // Turnstile not configured yet
+
+  var rendered = false, pending = false;
+  function render() {
+    if (rendered || !window.turnstile) return;
+    rendered = true;
+    window.turnstile.render(box, {
+      sitekey: box.dataset.sitekey,
+      callback: function () { if (pending) form.submit(); }
+    });
+  }
+  function load() {
+    if (window.turnstile) return render();
+    // The contact page may already be loading Turnstile; wait for it instead of loading twice.
+    if (document.querySelector('script[src*="challenges.cloudflare.com/turnstile"]')) {
+      var t = setInterval(function () { if (window.turnstile) { clearInterval(t); render(); } }, 150);
+      return;
+    }
+    window.cgwTurnstileReady = render;
+    var s = document.createElement('script');
+    s.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=cgwTurnstileReady';
+    s.async = true;
+    document.head.appendChild(s);
+  }
+  form.addEventListener('focusin', load, { once: true });
+  form.addEventListener('submit', function (e) {
+    var token = form.querySelector('[name="cf-turnstile-response"]');
+    if (!token || !token.value) {
+      // Hold the submission until the check completes, then send it automatically.
+      e.preventDefault();
+      pending = true;
+      load();
+    }
+  });
+})();
+</script>

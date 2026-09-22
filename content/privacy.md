@@ -4,7 +4,7 @@ subtitle: Short, because we collect very little.
 description: Privacy policy for columbiagadgetworks.org.
 ---
 
-*Last updated: September 20, 2026*
+*Last updated: September 22, 2026*
 
 Columbia Gadget Works ("CGW", "we") operates columbiagadgetworks.org. This page explains what information the site collects and what we do with it.
 
@@ -15,6 +15,8 @@ Columbia Gadget Works ("CGW", "we") operates columbiagadgetworks.org. This page 
 **Hosting logs.** The site is served by Cloudflare, which processes standard request data (IP address, browser, pages requested) to deliver the site and defend against abuse. Cloudflare's handling of that data is described in its [privacy policy](https://www.cloudflare.com/privacypolicy/). We may use Cloudflare's aggregate, cookie-free analytics to see how many people visit and which pages are popular. That data does not identify individuals.
 
 **Contact form.** When you send a message through our [contact form](/contact/), we receive your name, email address, and message. It is delivered to a private channel on our volunteer Discord server so that the people who handle inquiries can respond. We use it only to reply to you, and we don't add you to any mailing list.
+
+**Email updates.** If you sign up for email updates, we store the address you give us, the date, and the page you signed up from. We use it for one purpose: emailing you about new classes and events, and the occasional update about the organization. We never sell, rent, or share it. The list is held in Cloudflare storage and is readable only by the volunteers who send the updates. To unsubscribe, reply to any update or use the [contact form](/contact/), and you'll be removed.
 
 **Email and phone.** If you email or call us, we keep the correspondence as long as needed to respond and for our records.
 
