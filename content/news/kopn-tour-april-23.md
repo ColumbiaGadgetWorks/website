@@ -14,7 +14,7 @@ If you'd like to participate, please [join our Discord server](https://discord.g
 
 ## How the visit went
 
-Members toured the radio station and its studios, and got to see the equipment that puts a community station on the air.
+Members toured the radio station and its studios, and heard about the new tower equipment KOPN is installing.
 
 Field trips like this one are a regular part of what we do. Not everything worth understanding is in our building, and Columbia has a lot of places quietly running interesting equipment. A community radio station is a good example: it is a working broadcast operation kept going by volunteers, which is a description that will sound familiar to anyone who spends Thursday evenings at the shop.
 

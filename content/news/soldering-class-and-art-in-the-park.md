@@ -10,6 +10,8 @@ Just a reminder that the CGW soldering class will be **March 26th at 6 pm**. We'
 
 Also, CGW is planning to have a booth at **Art in the Park** (June 6 and 7). If you're interested in showcasing projects for CGW or hanging out at the booth, please [get in touch](/contact/).
 
+**Update:** Art in the Park has since passed. We take a booth to community events through the year, so if you would like to help with the next one, [get in touch](/contact/) any time.
+
 ## How the class went
 
 Members were trained in both of the soldering methods the shop uses, and everyone was given a free soldering kit to practice on and take home.
