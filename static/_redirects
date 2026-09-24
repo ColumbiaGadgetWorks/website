@@ -1,5 +1,6 @@
-# Old WordPress URLs → new site. Cloudflare Pages reads this file.
-/2026/01/27/hello-world/                       /news/new-website/                        301
+# Old WordPress URLs to their pages on this site. Read by Cloudflare Workers static assets.
+/2026/01/27/hello-world/                       /news/new-website-sept-2026/              301
+/news/new-website/                             /news/new-website-sept-2026/              301
 /2026/01/27/metalworking-class/                /news/metalworking-class/                 301
 /2026/02/20/metal-casting-class-feb-26th/      /news/metal-casting-class-feb-26th/       301
 /2026/02/27/metal-casting-class-recap/         /news/metal-casting-class-recap/          301
@@ -11,3 +12,4 @@
 /feed/                                         /news/index.xml                           301
 /wp-login.php                                  /                                         301
 /wp-admin/*                                    /                                         301
+/wp-content/*                                  /                                         301
