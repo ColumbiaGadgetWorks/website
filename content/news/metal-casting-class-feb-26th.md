@@ -9,3 +9,5 @@ imageAlt: "A plaster mold made from a 3D-printed pattern"
 Join us this Thursday (**Feb 26, 2026**) for a **free metal casting class at 6 pm**. Learn how to make a plaster mold from a 3D-printed part and cast it in different types of metal with the equipment you can use for free at Columbia Gadget Works!
 
 No experience needed. Bring closed-toe shoes and long pants; we'll supply everything else.
+
+**Update:** the class has been and gone. See the [recap](/news/metal-casting-class-recap/) for how it went and what members cast.

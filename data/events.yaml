@@ -22,16 +22,16 @@ upcoming:
     where: The shop
     description: Held after Open Hack Night. Members welcome.
   - date: 2026-11-05
-    title: "Grant class: topic to be announced"
+    title: Free public class, City of Columbia series
     time: 6 pm
     where: The shop
-    description: First of the monthly City of Columbia grant classes. Free; details to come.
+    description: First of the monthly free classes funded by the City of Columbia Office of Cultural Affairs. Open to everyone; the topic is announced about a month ahead here and on Discord.
   - date: 2026-12-03
-    title: "Grant class: topic to be announced"
+    title: Free public class, City of Columbia series
     time: 6 pm
     where: The shop
   - date: 2027-01-07
-    title: "Grant class: topic to be announced"
+    title: Free public class, City of Columbia series
     time: 6 pm
     where: The shop
   - date: 2027-01-28
@@ -39,19 +39,18 @@ upcoming:
     time: 8 pm
     where: The shop
   - date: 2027-02-04
-    title: "Grant class: topic to be announced"
+    title: Free public class, City of Columbia series
     time: 6 pm
     where: The shop
   - date: 2027-03-04
-    title: "Grant class: topic to be announced"
+    title: Free public class, City of Columbia series
     time: 6 pm
     where: The shop
   - date: 2027-04-01
-    title: "Grant class: topic to be announced"
+    title: Free public class, City of Columbia series
     time: 6 pm
     where: The shop
   - date: 2027-04-24
     title: Annual member meeting
-    time: TBD
     where: The shop
     description: Officer elections and bylaw votes. Members in good standing may vote.
