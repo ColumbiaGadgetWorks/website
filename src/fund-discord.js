@@ -21,10 +21,22 @@ const ADMINISTRATOR = 1n << 3n;
 const BLURPLE = 0x5865f2;
 const GREEN = 0x2ecc71;
 
+// The app's public key as 64 hex characters, or null. Tolerates the spaces
+// and line breaks a pasted secret tends to pick up.
+export function discordPublicKey(env) {
+  const key = String(env.DISCORD_PUBLIC_KEY || '').trim();
+  return /^[0-9a-f]{64}$/i.test(key) ? key : null;
+}
+
 export async function handleDiscord(request, env, ctx) {
-  if (!env.DISCORD_PUBLIC_KEY) return new Response('Not configured', { status: 503 });
+  const publicKey = discordPublicKey(env);
+  if (!publicKey) {
+    console.error('discord: DISCORD_PUBLIC_KEY is missing or not 64 hex characters');
+    return new Response('Not configured', { status: 503 });
+  }
   const body = await request.text();
-  if (!(await verify(request, body, env.DISCORD_PUBLIC_KEY))) {
+  if (!(await verify(request, body, publicKey))) {
+    console.warn('discord: rejected a request with a bad signature');
     return new Response('Bad signature', { status: 401 });
   }
   const interaction = JSON.parse(body);
