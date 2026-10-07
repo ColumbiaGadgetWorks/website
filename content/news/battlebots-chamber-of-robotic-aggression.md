@@ -27,4 +27,4 @@ A combat robot is a good excuse to touch nearly every corner of the building, wh
 
 Start small. An antweight class bot is cheap, fits on a bench, and teaches you the same lessons a heavier one would, just without the shrapnel. Come to [Open Hack Night](/visit/) on a Thursday and say you want to build a battlebot; there are several members who will immediately have opinions about drive trains.
 
-Build notes and arena details go on the [member wiki](https://wiki.comogadget.casa/), and match nights get announced on [Discord](https://discord.gg/F7kM7ardMs) and the [events calendar](/events/).
+Build notes and arena details go on the [member wiki](https://wiki.comogadget.casa/), and match nights get announced on [Discord](https://discord.gg/F7kM7ardMs) and the [events calendar](/calendar/).

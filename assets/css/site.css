@@ -129,7 +129,6 @@ ul.plain li{margin:0 0 .35em}
 .recurring strong{display:block}
 .recurring .when{color:var(--rust-dark);font-weight:600;font-size:.95rem}
 .recurring p{margin:.4em 0 0;font-size:.95rem;color:var(--muted)}
-.cal-wrap iframe{width:100%;height:600px;border:1px solid var(--line);border-radius:var(--r);background:#fff}
 
 /* Pages */
 .page{padding:48px 20px 72px}
@@ -242,6 +241,51 @@ ul.plain li{margin:0 0 .35em}
 .updates-fine{margin:.6em 0 0;font-size:.85rem;color:var(--muted)}
 .updates-msg{margin:0;padding:10px 14px;border:1px solid var(--line);border-left:4px solid var(--ok);border-radius:3px;background:#fff}
 .updates-msg.warn{border-left-color:var(--warn)}
+
+/* Calendar. Grid on wider screens, agenda everywhere. Colour lives in text and
+   rules, never as a background wash. */
+.cal{margin:1.6em 0 2em}
+.cal-bar{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:12px;
+  border-bottom:2px solid var(--ink);padding-bottom:10px;margin-bottom:16px}
+.cal-title{margin:0;font-size:1.4rem}
+.cal-nav{display:flex;gap:8px}
+.cal-btn{font:inherit;font-size:.8rem;font-weight:700;padding:.4em .8em;border:1px solid var(--line);
+  background:#fff;color:var(--ink);border-radius:3px;cursor:pointer}
+.cal-btn:hover{border-color:var(--rust);color:var(--rust-dark)}
+.cal-btn:focus-visible{outline:2px solid var(--rust);outline-offset:1px}
+.cal-note{color:var(--muted);font-size:.95rem}
+
+.cal-grid{width:100%;border-collapse:collapse;table-layout:fixed;margin:0 0 28px}
+.cal-grid th{font-family:var(--mono);font-size:.68rem;text-transform:uppercase;letter-spacing:.09em;
+  color:var(--muted);font-weight:700;text-align:left;padding:0 0 6px 6px;border-bottom:1px solid var(--line)}
+.cal-grid th abbr{text-decoration:none;border:0}
+.cal-grid td{border:1px solid var(--line);vertical-align:top;height:94px;padding:4px 5px;background:#fff}
+.cal-grid td.cal-empty{background:transparent;border-color:transparent}
+.cal-daynum{display:block;font-family:var(--mono);font-size:.72rem;color:var(--muted);margin-bottom:3px}
+.cal-grid td.cal-today{border-color:var(--rust);box-shadow:inset 0 2px 0 var(--rust)}
+.cal-grid td.cal-today .cal-daynum{color:var(--rust-dark);font-weight:700}
+.cal-chip{display:block;font-size:.76rem;line-height:1.25;padding:2px 0 2px 6px;margin-bottom:3px;
+  border-left:2px solid var(--rust);color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+.cal-sub{font-size:1.05rem;margin:0 0 10px}
+.cal-agenda{list-style:none;padding:0;margin:0}
+.cal-item{border-top:1px solid var(--line);padding:14px 0 14px 16px;border-left:3px solid var(--rust);
+  padding-left:16px;margin-bottom:0}
+.cal-item:last-child{border-bottom:1px solid var(--line)}
+.cal-when{font-family:var(--mono);font-size:.72rem;text-transform:uppercase;letter-spacing:.07em;
+  color:var(--muted);margin:0 0 .25em;font-weight:700}
+.cal-what{font-weight:700;margin:0 0 .25em;font-size:1.02rem}
+.cal-where,.cal-desc{margin:.2em 0 0;font-size:.93rem;color:var(--muted)}
+.cal-desc{white-space:pre-line}
+.cal-none{color:var(--muted);padding:14px 0;border-top:1px solid var(--line)}
+
+/* The month grid is unreadable on a phone; the agenda says the same thing better. */
+@media (max-width:760px){
+  .cal-grid{display:none}
+  .cal-bar{border-bottom-width:1px}
+}
+
+.cal-subscribe{display:flex;flex-wrap:wrap;gap:10px;margin:1em 0}
 
 /* Footer */
 .site-footer{background:var(--steel-deep);color:#D9D4CD;margin-top:0;padding:48px 0 24px;font-size:.95rem}

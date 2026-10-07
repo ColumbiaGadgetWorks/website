@@ -15,9 +15,9 @@ Here is what usually happens:
 - **Someone greets you.** Ring the bell if the door is closed; a member will let you in and show you around. Ask for a tour; it takes about ten minutes and covers every zone in the shop.
 - **You can use the basic tools.** Hand tools, the electronics bench, the 3D printers (with a member's help), and whatever demo is running that night are available to visitors. The big machines (laser, CNC router, mill, lathe) need training first, but a member will happily show you how they work.
 - **Bring a project, or don't.** People show up with broken lamps, half-finished robots, a 3D file they want printed, or nothing at all. All of those are fine.
-- **Classes often happen on Thursdays.** Check the [events calendar](/events/) or the [news](/news/) page; class nights are announced a couple of weeks ahead.
+- **Classes often happen on Thursdays.** Check the [events calendar](/calendar/) or the [news](/news/) page; class nights are announced a couple of weeks ahead.
 
-Open Hack Night is skipped only on major holidays. If a Thursday falls on one, assume we're closed unless the [calendar](/events/) says otherwise.
+Open Hack Night is skipped only on major holidays. If a Thursday falls on one, assume we're closed unless the [calendar](/calendar/) says otherwise.
 
 ## Where we are
 

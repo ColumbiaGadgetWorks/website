@@ -47,7 +47,13 @@ disableKinds = ["taxonomy", "term"]
   bluesky = "https://bsky.app/profile/comogadgetworks.bsky.social"
   github = "https://github.com/ColumbiaGadgetWorks"
   mapsQuery = "Columbia Gadget Works, 1404 Grand Ave, Columbia, MO 65203"
-  calendarEmbedUrl = ""            # optional: public Google Calendar embed URL; shown on /events/ when set
+  calendarPublicUrl = ""           # optional: PUBLIC .ics address of the calendar, used only for the "add to your calendar" buttons.
+                                   # Leave empty if the calendar is not shared publicly. The address the Worker reads is
+                                   # the CALENDAR_ICS_URL secret, which must never be put in this file.
+                                   # Left empty on purpose: the public address of columbiagadgetworks@gmail.com is a
+                                   # DIFFERENT, abandoned calendar (its hack night ended April 2022). Set this only to the
+                                   # public address of the same calendar CALENDAR_ICS_URL points at, or the buttons will
+                                   # subscribe visitors to the wrong one.
   contactEndpoint = "/api/contact" # handled by the Worker in src/index.js
   subscribeEndpoint = "/api/subscribe" # email updates signup, handled by the Worker in src/subscribe.js
   turnstileSiteKey = "0x4AAAAAAE_62c1QS97IgYEj"  # Cloudflare Turnstile site key (public): protects the contact form and the email signup. Must be live BEFORE TURNSTILE_SECRET is added.
@@ -66,8 +72,8 @@ disableKinds = ["taxonomy", "term"]
     pageRef = "/classes"
     weight = 30
   [[menus.main]]
-    name = "Events"
-    pageRef = "/events"
+    name = "Calendar"
+    pageRef = "/calendar"
     weight = 40
   [[menus.main]]
     name = "News"
