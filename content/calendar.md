@@ -9,6 +9,8 @@ This calendar is the schedule of record for Columbia Gadget Works. It updates as
 
 {{< calendar-live >}}
 
+{{< hidden >}}
+
 ## The standing schedule
 
 Some things happen on the same rhythm all year, whether or not they appear above.
@@ -17,7 +19,11 @@ Some things happen on the same rhythm all year, whether or not they appear above
 
 **Open Hack Night is the one to start with.** Every Thursday from 6 to 8 pm the shop is open to the public. No membership, no sign-up, no experience, and nothing to bring. Someone will give you a tour, and you can use the beginner-friendly tools the same evening. [What to expect on a visit](/visit/).
 
+{{< /hidden >}}
+
 {{< calendar-subscribe >}}
+
+{{< hidden >}}
 
 ## Getting something on the calendar
 
@@ -28,3 +34,5 @@ Class announcements also go out on [Discord](https://discord.gg/yjpeBrAjuR), [Fa
 ## Holidays and changes
 
 Open Hack Night is skipped only on major holidays. If a Thursday falls on one, assume we are closed unless the calendar above says otherwise. Anything cancelled at short notice is announced on Discord first.
+
+{{< /hidden >}}

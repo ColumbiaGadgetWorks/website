@@ -4,6 +4,7 @@ import { handleContact } from './contact.js';
 import { handleSubscribe, handleExport } from './subscribe.js';
 import { handleCalendar } from './calendar.js';
 import { handleFund } from './fund.js';
+import { handleJoin, handleGivebutterWebhook, joinConfigured } from './join.js';
 
 export default {
   async fetch(request, env, ctx) {
@@ -28,6 +29,11 @@ export default {
       if (request.method !== 'GET') return new Response('GET only', { status: 405 });
       return handleExport(request, env);
     }
+    if (pathname.startsWith('/api/join/')) return handleJoin(request, env, pathname);
+    if (pathname === '/api/givebutter-webhook') {
+      if (request.method !== 'POST') return new Response('POST only', { status: 405 });
+      return handleGivebutterWebhook(request, env);
+    }
     if (pathname === '/api/health') {
       // Reports whether each known binding is present, so a misconfigured form is
       // diagnosable. Never reports values, and does not enumerate binding names.
@@ -41,6 +47,8 @@ export default {
           SUBSCRIBERS: Boolean(env.SUBSCRIBERS),
           SUBSCRIBERS_EXPORT_TOKEN: Boolean(env.SUBSCRIBERS_EXPORT_TOKEN),
           DISCORD_SIGNUP_WEBHOOK_URL: Boolean(env.DISCORD_SIGNUP_WEBHOOK_URL),
+          DOLIBARR: joinConfigured(env),
+          GIVEBUTTER_WEBHOOK_SECRET: Boolean(env.GIVEBUTTER_WEBHOOK_SECRET),
         },
       });
     }

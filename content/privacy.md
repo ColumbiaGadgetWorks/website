@@ -18,6 +18,8 @@ Columbia Gadget Works ("CGW", "we") operates columbiagadgetworks.org. This page 
 
 **Email updates.** If you sign up for email updates, we store the address you give us, the date, and the page you signed up from. We use it for one purpose: emailing you about new classes and events, and the occasional update about the organization. We never sell, rent, or share it. The list is held in Cloudflare storage and is readable only by the volunteers who send the updates. To unsubscribe, reply to any update or use the [contact form](/contact/), and you'll be removed.
 
+**Membership signup.** When you [join online](/membership/join/), we collect your name, email address, and (if you give it) your Discord username, along with whether you want to hear about events and news. You sign the liability waiver and the membership agreement by drawing your signature on screen; we keep the signed copy together with the date and the IP address it was signed from. You also upload a photo of a government-issued ID, which only the membership team can view. All of this is stored in our own membership system, not in Cloudflare and not with a marketing service, and is used only to run your membership. If you start a signup and do not finish it, it is deleted after about a month. To have your information removed, use the [contact form](/contact/).
+
 **Email and phone.** If you email or call us, we keep the correspondence as long as needed to respond and for our records.
 
 ## Third-party services embedded on this site

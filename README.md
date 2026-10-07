@@ -118,6 +118,29 @@ For local testing with `wrangler dev`, put Cloudflare's published always-pass te
 (`1x0000000000000000000000000000000AA`) in `.dev.vars` (gitignored). Test tokens skip the action
 and hostname checks, since Cloudflare answers them for a dummy host; the real secret never does.
 
+## Membership signup
+
+`/membership/join/` is a four step signup: details, paperwork (waiver, agreement, ID photo), dues,
+done. The page is `content/membership-join.md` plus `layouts/_shortcodes/join.html`; the Worker side
+is `src/join.js`. The Worker stores nothing about applicants. It checks Turnstile, then forwards to
+the onboarding module in Dolibarr
+([dolibarr-onboarding](https://github.com/ColumbiaGadgetWorks/dolibarr-onboarding)), which holds the
+record and has a sandbox for trying the whole flow without real money.
+
+Secrets to add to the Worker (Workers & Pages, website, Settings, Variables and Secrets):
+
+- `DOLIBARR_URL`: Dolibarr's address with no trailing slash. The Worker runs on Cloudflare's
+  network, so this has to be reachable from the internet: a public hostname or a Cloudflare Tunnel.
+- `DOLIBARR_API_KEY`: the "Key for the website" shown on the module's setup page in Dolibarr.
+- `GIVEBUTTER_WEBHOOK_SECRET` (optional): only needed if Givebutter should report payments through
+  this site at `/api/givebutter-webhook`. The normal setup does not use it: the "Connect Givebutter"
+  button in the Dolibarr module points Givebutter straight at Dolibarr.
+
+Until the first two are set the join page says online signup is unavailable and links to Givebutter
+directly, so this can be merged before Dolibarr is ready. `/api/health` shows `DOLIBARR` as true
+once they are present. The Turnstile widget on step 1 uses the
+action `join` with the same site key and secret as the contact form.
+
 ## After launch checklist
 
 - Google Search Console: verify the domain, submit `/sitemap.xml`.

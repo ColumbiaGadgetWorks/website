@@ -207,6 +207,23 @@ ul.plain li{margin:0 0 .35em}
 .field input,.field select,.field textarea{width:100%;font:inherit;padding:.55em .7em;border:1px solid #C9C2B8;border-radius:6px;background:#fff}
 .field input:focus,.field select:focus,.field textarea:focus{outline:2px solid var(--rust);outline-offset:1px;border-color:var(--rust)}
 .hp{position:absolute;left:-9999px}
+/* Membership signup (layouts/_shortcodes/join.html) */
+.join{max-width:680px}
+.join-steps{display:flex;flex-wrap:wrap;gap:6px 22px;list-style:none;padding:0 0 10px;margin:1.4em 0;border-bottom:1px solid var(--line);counter-reset:joinstep}
+.join-steps li{counter-increment:joinstep;font-family:var(--mono);font-size:.82rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:0;padding-bottom:6px;border-bottom:3px solid transparent}
+.join-steps li::before{content:counter(joinstep) ". "}
+.join-steps li.is-current{color:var(--rust-dark);font-weight:700;border-bottom-color:var(--rust)}
+.join-steps li.is-done{color:var(--ok)}
+.join .contact-form{max-width:none}
+.join-check{display:flex;gap:10px;align-items:flex-start;margin:0 0 12px;font-size:.97rem}
+.join-check input{margin-top:.25em;flex:none}
+.join-task{border-top:1px solid var(--line);padding:6px 0 18px}
+.join-task h3{margin:.9em 0 .6em}
+.join-done{font-family:var(--mono);font-size:.78rem;text-transform:uppercase;letter-spacing:.06em;color:var(--ok);margin-left:10px}
+.join-doc{white-space:pre-wrap;max-height:320px;overflow:auto;border:1px solid var(--line);background:#fff;padding:14px 16px;margin-bottom:14px;font-size:.95rem}
+.join-sig{display:block;width:100%;max-width:600px;height:auto;background:#fff;border:1px solid #C9C2B8;border-radius:6px;touch-action:none;cursor:crosshair;margin-bottom:8px}
+.join-sig-clear{padding:.3em .8em;font-size:.9rem}
+.join button[aria-busy="true"]{opacity:.6;cursor:progress}
 .map-wrap iframe{width:100%;height:360px;border:0;border-radius:var(--r);background:#eee}
 .gb-embed{margin:1.2em 0}
 
@@ -247,7 +264,11 @@ ul.plain li{margin:0 0 .35em}
 .cal-grid td{border:1px solid var(--line);vertical-align:top;height:94px;padding:4px 5px;background:#fff}
 .cal-grid td.cal-empty{background:transparent;border-color:transparent}
 .cal-daynum{display:block;font-family:var(--mono);font-size:.72rem;color:var(--muted);margin-bottom:3px}
-.cal-grid td.cal-today{border-color:var(--rust);box-shadow:inset 0 2px 0 var(--rust)}
+/* Outline, not a border: with border-collapse the shared edges are resolved
+   against the neighbouring cells, which left the highlight sitting a pixel
+   out of true on the top and left. An outline is drawn on the cell's own
+   box, so it sits square on all four sides. */
+.cal-grid td.cal-today{outline:2px solid var(--rust);outline-offset:-2px}
 .cal-grid td.cal-today .cal-daynum{color:var(--rust-dark);font-weight:700}
 .cal-chip{display:block;font-size:.76rem;line-height:1.25;padding:2px 0 2px 6px;margin-bottom:3px;
   border-left:2px solid var(--rust);color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -264,10 +285,18 @@ ul.plain li{margin:0 0 .35em}
 .cal-desc{white-space:pre-line}
 .cal-none{color:var(--muted);padding:14px 0;border-top:1px solid var(--line)}
 
+/* The agenda says the same thing as the grid, so it earns its place only
+   on a phone, where the grid is hidden and it is the only view. */
+.cal-sub,.cal-agenda{display:none}
+
 /* The month grid is unreadable on a phone; the agenda says the same thing better. */
 @media (max-width:760px){
   .cal-grid{display:none}
   .cal-bar{border-bottom-width:1px}
+  /* :not([hidden]) so the script can still hide the heading when the
+     feed fails, which a bare display:block would override. */
+  .cal-sub:not([hidden]){display:block}
+  .cal-agenda{display:block}
 }
 
 .cal-subscribe{display:flex;flex-wrap:wrap;gap:10px;margin:1em 0}
