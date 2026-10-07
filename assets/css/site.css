@@ -271,13 +271,16 @@ ul.plain li{margin:0 0 .35em}
 .cal-grid td.cal-today{outline:2px solid var(--rust);outline-offset:-2px}
 .cal-grid td.cal-today .cal-daynum{color:var(--rust-dark);font-weight:700}
 .cal-grid td.cal-picked{box-shadow:inset 0 -4px 0 var(--rust)}
-.cal-chip{display:block;font-size:.76rem;line-height:1.25;padding:2px 0 2px 6px;margin-bottom:3px;
+.cal-chip{display:block;font-size:.76rem;line-height:1.25;padding:1px 0 1px 6px;margin-bottom:2px;
   border-left:2px solid var(--rust);color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 /* A day with events is a button filling its cell, so the whole square is the target. */
 .cal-grid td:has(.cal-daybtn){padding:0}
-/* Flex, because a button otherwise centres its content vertically. */
-.cal-daybtn{display:flex;flex-direction:column;justify-content:flex-start;width:100%;height:100%;min-height:94px;padding:4px 5px;margin:0;border:0;
+/* Flex, because a button otherwise centres its content vertically. 93px, not
+   94: the cell's collapsed border adds one, and a row with a button must be
+   no taller than one without. */
+.cal-daybtn{display:flex;flex-direction:column;justify-content:flex-start;width:100%;height:100%;min-height:93px;padding:4px 5px;margin:0;border:0;
   background:transparent;font:inherit;text-align:left;color:inherit;cursor:pointer}
+.cal-more{display:block;font-size:.72rem;line-height:1.25;padding:1px 0 1px 8px;color:var(--muted);font-weight:700}
 .cal-daybtn:hover .cal-chip{color:var(--rust-dark)}
 .cal-daybtn:focus-visible{outline:2px solid var(--rust);outline-offset:-3px}
 
@@ -303,11 +306,14 @@ ul.plain li{margin:0 0 .35em}
   .cal-btn{flex:1;padding:.6em .4em}
   .cal-grid{margin-bottom:16px}
   .cal-grid th{text-align:center;padding:0 0 6px}
-  .cal-grid td{height:auto;padding:0;text-align:center}
+  /* A fixed height (a minimum, in a table) so an all-blank sixth week still
+     takes its space and the grid does not jump between months. */
+  .cal-grid td{height:52px;padding:0;text-align:center}
   .cal-grid td > .cal-daynum{padding:8px 0}
-  .cal-daybtn{display:block;min-height:0;padding:8px 0 6px;text-align:center}
-  .cal-daynum{margin:0;font-size:.85rem;color:var(--ink)}
+  .cal-daybtn{display:block;min-height:0;padding:8px 0 6px;text-align:center;line-height:1}
+  .cal-daynum{margin:0;font-size:.85rem;line-height:1.4;color:var(--ink)}
   .cal-daybtn .cal-daynum{font-weight:700}
+  .cal-more{display:none}
   .cal-chip{display:inline-block;width:6px;height:6px;padding:0;margin:3px 1px 0;border:0;
     border-radius:50%;background:var(--rust);font-size:0;vertical-align:top}
 }

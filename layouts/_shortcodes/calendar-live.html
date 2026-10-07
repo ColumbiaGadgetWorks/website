@@ -135,7 +135,8 @@
     var cells = [];
     for (var i = 0; i < startPad; i++) cells.push(null);
     for (var d = 1; d <= total; d++) cells.push(d);
-    while (cells.length % 7) cells.push(null);
+    // Always six weeks, so the grid keeps its height from month to month.
+    while (cells.length < 42) cells.push(null);
 
     body.innerHTML = '';
     for (var w = 0; w < cells.length / 7; w++) {
@@ -165,7 +166,10 @@
         num.className = 'cal-daynum';
         num.textContent = d2;
         box.appendChild(num);
-        list.forEach(function (e) {
+        // Three lines fit a cell. A busier day shows two and a count, so no
+        // week grows taller than the rest. Picking the day lists them all.
+        var shown = list.length > 3 ? list.slice(0, 2) : list;
+        shown.forEach(function (e) {
           var item = document.createElement('span');
           item.className = 'cal-chip';
           item.setAttribute('aria-hidden', 'true');
@@ -173,6 +177,13 @@
           item.textContent = (e.allDay ? '' : timeLabel(e.start) + ' ') + e.title;
           box.appendChild(item);
         });
+        if (shown.length < list.length) {
+          var more = document.createElement('span');
+          more.className = 'cal-more';
+          more.setAttribute('aria-hidden', 'true');
+          more.textContent = '+' + (list.length - shown.length) + ' more';
+          box.appendChild(more);
+        }
         tr.appendChild(td);
       }
       body.appendChild(tr);
