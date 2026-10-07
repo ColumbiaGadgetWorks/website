@@ -81,7 +81,8 @@
 
   body {
     margin: 0;
-    padding: clamp(1rem, 4vw, 3rem) clamp(1rem, 4vw, 2rem) 4rem;
+    /* Top padding clears the panel switch and Minimize, fixed in the corners. */
+    padding: 4rem clamp(1rem, 4vw, 2rem) 4rem;
     background-color: var(--paper);
     background-image:
       linear-gradient(var(--grid) 1px, transparent 1px),
@@ -205,6 +206,7 @@
     border-bottom: 1.5px solid var(--ink);
   }
   .give-band.at-foot { border-bottom: 0; border-top: 1.5px solid var(--ink); }
+  .give-band { justify-content: center; column-gap: clamp(1.5rem, 6vw, 4rem); }
 
   .qr-card {
     flex: 0 0 auto;
@@ -246,50 +248,42 @@
   a.qr-cap[href] { color: var(--cut); }
   a.qr-cap[href]::after { content: " \2192"; }
 
-  /* The panel switch: as tall as the QR cards, impossible to miss. */
-  .swap-btn {
-    flex: 1 1 11rem;
-    min-height: 9rem;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    justify-content: center;
-    gap: .375rem;
-    padding: 1.125rem 1.375rem;
+  /* The panel switch: one button pinned to the top left of the screen,
+     above everything else, wearing the colour of the panel it opens. */
+  .panel-switch {
+    position: fixed;
+    top: .5rem;
+    left: .5rem;
+    z-index: 10;
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    padding: .5rem .875rem;
     border: 1.5px solid var(--ink);
     background: var(--swap-bg);
     color: var(--paper-fixed);
     font-family: "IBM Plex Sans Condensed", sans-serif;
-    font-size: clamp(1.375rem, 3.4vw, 2rem);
+    font-size: 1.125rem;
     font-weight: 700;
     line-height: 1;
-    letter-spacing: .015em;
+    letter-spacing: .02em;
     text-transform: uppercase;
-    text-align: left;
     cursor: pointer;
-    box-shadow: 4px 4px 0 var(--ink);
-    transition: transform .12s ease, box-shadow .12s ease;
+    box-shadow: 3px 3px 0 var(--ink);
+    transition: transform .12s ease, box-shadow .12s ease, background-color .3s ease;
     -webkit-tap-highlight-color: transparent;
   }
-  .swap-btn:hover,
-  .swap-btn:focus-visible,
-  .swap-btn:active {
-    transform: translate(2px, 2px);
+  .panel-switch:hover,
+  .panel-switch:focus-visible,
+  .panel-switch:active {
+    transform: translate(1px, 1px);
     box-shadow: 2px 2px 0 var(--ink);
   }
-  .swap-btn:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
-  .swap-btn small {
-    font-family: "IBM Plex Mono", monospace;
-    font-size: .6875rem;
-    font-weight: 500;
-    letter-spacing: .14em;
-    opacity: .85;
-  }
+  .panel-switch:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
   .swap-arrow { display: inline-block; transition: transform .2s ease; }
-  .swap-btn:hover .swap-arrow { transform: translateX(.25rem); }
-  .swap-btn.back:hover .swap-arrow { transform: translateX(-.25rem); }
+  .to-info:hover .swap-arrow { transform: translateX(.25rem); }
+  .to-fund:hover .swap-arrow { transform: translateX(-.25rem); }
 
-  /* Each button wears the colour of the panel it opens. */
   .to-info { --swap-bg: var(--cgw-orange); }
   .to-fund { --swap-bg: var(--fund-red); }
 
@@ -667,9 +661,10 @@
     overflow: hidden;
   }
   .cal-grid td.cal-empty { background: transparent; border-color: transparent; }
+  /* Drawn inside the cell: with collapsed borders, colouring the border itself
+     shares each edge with the neighbours and the box comes out lopsided. */
   .cal-grid td.cal-today {
-    border-color: var(--cut);
-    box-shadow: inset 0 3px 0 var(--cut);
+    box-shadow: inset 0 0 0 2px var(--cut), inset 0 4px 0 var(--cut);
   }
   .cal-daynum {
     display: block;
@@ -736,6 +731,11 @@
   <span class="kiosk-min-bar" aria-hidden="true"></span> Minimize
 </a>
 
+<button type="button" class="panel-switch to-info" id="panel-switch" data-show="info">
+  <span class="panel-switch-label">View information</span>
+  <span class="swap-arrow" aria-hidden="true">&rarr;</span>
+</button>
+
 <div class="stage">
 
 <!-- ================= panel 1: the shop fund ================= -->
@@ -768,10 +768,6 @@
       <div class="qr-img"><img src="{{ index $qr "venmo" }}" alt="QR code to donate with Venmo" width="168" height="168"></div>
       <figcaption><a class="qr-cap" target="_blank" rel="noopener">Donate with Venmo</a></figcaption>
     </figure>
-    <button type="button" class="swap-btn to-info" data-show="info">
-      <span>View information <span class="swap-arrow" aria-hidden="true">&rarr;</span></span>
-      <small>Calendar &middot; Discord &middot; Membership</small>
-    </button>
   </section>
 
   <div id="sheet-body">
@@ -840,10 +836,6 @@
       <div class="qr-img"><img src="{{ index $qr "membership" }}" alt="QR code to become a member" width="168" height="168"></div>
       <figcaption><a class="qr-cap" target="_blank" rel="noopener">Become a member</a></figcaption>
     </figure>
-    <button type="button" class="swap-btn to-fund back" data-show="fund">
-      <span><span class="swap-arrow" aria-hidden="true">&larr;</span> View fundraising</span>
-      <small>Shop fund progress</small>
-    </button>
   </section>
 </main>
 
@@ -929,6 +921,7 @@ function showPanel(name) {
   document.documentElement.setAttribute("data-panel", name);
   window.scrollTo({ top: 0, behavior: "smooth" });
   current = name;
+  updateSwitch();
 
   // Drop the old panel from layout once it has slid away, so the page is
   // only as tall as the panel on screen.
@@ -937,9 +930,21 @@ function showPanel(name) {
   armIdle();
 }
 
-for (const btn of document.querySelectorAll("[data-show]")) {
-  btn.addEventListener("click", () => showPanel(btn.dataset.show));
+// One switch, relabelled for whichever panel it would open next.
+const panelSwitch = document.getElementById("panel-switch");
+const panelSwitchLabel = panelSwitch.querySelector(".panel-switch-label");
+const panelSwitchArrow = panelSwitch.querySelector(".swap-arrow");
+function updateSwitch() {
+  const next = current === "fund" ? "info" : "fund";
+  panelSwitch.dataset.show = next;
+  panelSwitch.classList.toggle("to-info", next === "info");
+  panelSwitch.classList.toggle("to-fund", next === "fund");
+  panelSwitchLabel.textContent = next === "info" ? "View information" : "View fundraising";
+  panelSwitchArrow.innerHTML = next === "info" ? "&rarr;" : "&larr;";
+  // The back arrow leads the label, the forward one follows it.
+  panelSwitch.prepend(next === "info" ? panelSwitchLabel : panelSwitchArrow);
 }
+panelSwitch.addEventListener("click", () => showPanel(panelSwitch.dataset.show));
 
 // On the kiosk, an information panel nobody is touching returns to the fund
 // sheet, so the screen is never left on a month someone browsed to.
