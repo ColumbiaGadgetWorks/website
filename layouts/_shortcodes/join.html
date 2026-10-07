@@ -10,6 +10,7 @@
   </ol>
 
   <div class="callout warn" id="join-error" role="alert" hidden></div>
+  <div class="callout ok" id="join-cancelled" role="status" hidden><p>Your signup was cancelled and everything you entered was deleted. You can start again below.</p></div>
   <p id="join-loading" class="muted">Loading&hellip;</p>
   <noscript><div class="callout warn">The signup needs JavaScript. You can also join in person on any Thursday night, or <a href="/contact/">contact us</a>.</div></noscript>
 
@@ -25,7 +26,6 @@
     <div class="field"><label for="jn-discord">Discord username <span class="muted">(optional)</span></label><input id="jn-discord" name="discord" autocomplete="off" maxlength="100"></div>
     <label class="join-check"><input type="checkbox" name="visited" required> I have visited Columbia Gadget Works in person at least once</label>
     <label class="join-check"><input type="checkbox" name="notify_events" checked> I want to be notified regarding events at the CGW makerspace</label>
-    <label class="join-check"><input type="checkbox" name="notify_news"> I want to be notified about news and updates from the CGW makerspace</label>
     <div class="hp" aria-hidden="true"><label>Leave this empty<input name="website" tabindex="-1" autocomplete="off"></label></div>
     {{ with $p.turnstileSiteKey }}<div class="cf-turnstile" data-sitekey="{{ . }}" data-action="join"></div><script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>{{ end }}
     <button class="btn btn-primary" type="submit">Next</button>
@@ -87,6 +87,8 @@
     <p class="muted" id="join-waiting" hidden>Waiting for Givebutter to confirm your payment. This page updates on its own, usually within a minute. You will also get an email, so it is safe to close this page.</p>
   </div>
 
+  <p class="small muted join-restart" id="join-restart" hidden>Made a mistake, or want to start again? <button type="button" class="join-link" id="join-restart-btn">Cancel this signup and start over</button></p>
+
   <div class="callout ok join-panel" id="join-4" hidden>
     <p><strong>Welcome to Columbia Gadget Works<span id="join-name"></span>.</strong> Your paperwork and dues are both in. Someone from the membership team will be in touch about your badge and a safety orientation. Until then, come by any Thursday at Open Hack Night.</p>
   </div>
@@ -105,7 +107,9 @@
     size: 'That photo is too large or empty. Please try another.',
     type: 'That file is not a photo we can read. Please use a JPEG or PNG.',
     signature: 'Please draw your signature in the box.',
-    token: 'This signup link has expired. Check your email for a newer link, or start again.'
+    token: 'This signup link has expired. Check your email for a newer link, or start again.',
+    paid: 'Your dues are already paid, so this signup cannot be cancelled here. Please contact us if something needs changing.',
+    cancel: 'We could not cancel your signup just now. Please try again in a few minutes, or contact us and we will clear it for you.'
   };
 
   function store(t) { token = t || ''; try { if (t) localStorage.setItem(KEY, t); else localStorage.removeItem(KEY); } catch (e) {} }
@@ -118,6 +122,9 @@
   }
   function show(id, step) {
     $('join-loading').hidden = true;
+    // Starting over is offered once there is a signup to throw away, until dues are paid.
+    $('join-restart').hidden = !(id === 'join-2' || id === 'join-3');
+    if (id !== 'join-1') $('join-cancelled').hidden = true;
     Array.prototype.forEach.call(root.querySelectorAll('.join-panel, #join-off'), function (el) { el.hidden = el.id !== id; });
     Array.prototype.forEach.call($('join-steps').children, function (li) {
       var n = Number(li.getAttribute('data-step'));
@@ -191,6 +198,26 @@
     error(j.error);
   }
 
+  // Start over: deletes the unpaid signup in Dolibarr, then shows step 1 again.
+  $('join-restart-btn').addEventListener('click', function (ev) {
+    if (!window.confirm('Cancel this signup? What you have signed and your ID photo are deleted. You can start again straight away.')) return;
+    var btn = ev.target;
+    busy(btn, true);
+    call('cancel', { token: token }).then(function (j) {
+      busy(btn, false);
+      if (j.ok || j.error === 'token') {
+        if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+        store('');
+        error('');
+        $('join-1').reset();
+        show('join-1', 1);
+        $('join-cancelled').hidden = false;
+        return;
+      }
+      error(j.error === 'paid' ? 'paid' : 'cancel');
+    });
+  });
+
   // Step 1
   $('join-1').addEventListener('submit', function (ev) {
     ev.preventDefault();
@@ -199,7 +226,7 @@
     busy(btn, true);
     call('start', {
       firstname: f.firstname.value, lastname: f.lastname.value, email: f.email.value, discord: f.discord.value,
-      notify_events: f.notify_events.checked, notify_news: f.notify_news.checked, website: f.website.value,
+      notify_events: f.notify_events.checked, website: f.website.value,
       'cf-turnstile-response': ts ? ts.value : ''
     }).then(function (j) {
       busy(btn, false);
