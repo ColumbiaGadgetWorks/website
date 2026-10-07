@@ -35,7 +35,7 @@ export function joinConfigured(env) {
   return Boolean(env.DOLIBARR_URL && env.DOLIBARR_API_KEY);
 }
 
-async function dolibarr(env, action, body) {
+export async function dolibarr(env, action, body) {
   const url = `${env.DOLIBARR_URL.replace(/\/+$/, '')}/custom/onboarding/public/api.php?action=${action}`;
   let r;
   try {

@@ -111,20 +111,22 @@ layout box. Re-mux phone footage with `ffmpeg -i in.mp4 -c copy -movflags +fasts
 ## Email updates list
 
 The "Get updates by email" box sits above the footer on every page
-(`layouts/_partials/updates-signup.html`). Submissions go to `src/subscribe.js` and are stored
-in a Cloudflare KV namespace bound as `SUBSCRIBERS`.
+(`layouts/_partials/updates-signup.html`). Submissions go to `src/subscribe.js`.
 
-**No setup needed.** The binding in `wrangler.jsonc` deliberately has no id: Wrangler creates the
-namespace on the first deploy and keeps it linked (automatic provisioning). This works in Workers
-Builds because its default token has KV edit permission. It does *not* have D1 permission, so do
-not switch this to a D1 database the same way.
+**The list lives in Dolibarr.** With `DOLIBARR_URL` and `DOLIBARR_API_KEY` set (the same secrets
+as the membership signup below), each address becomes a Dolibarr contact tagged **Email
+updates**, or an existing contact gets that tag. Updates are sent from Dolibarr: Tools,
+EMailing, recipients from Contacts filtered by that tag. See the
+[module's README](https://github.com/ColumbiaGadgetWorks/dolibarr-onboarding#email-updates).
 
-To read the list: Cloudflare dashboard, **Storage & Databases, KV**, open the namespace. Each key
-is `sub:<email address>`. Deleting a key unsubscribes that person. Signing up twice updates one
-record rather than creating a duplicate, and each connection is limited to five signups an hour.
+**Fallback.** Until those secrets are set, or whenever Dolibarr cannot be reached, the address is
+stored in the Cloudflare KV namespace bound as `SUBSCRIBERS` instead, so a signup is never lost.
+Each key is `sub:<email address>`. The namespace also holds the rate limit (five signups an
+hour per connection). The binding has no id on purpose: Wrangler creates it on the first deploy.
 
-Optional: set `SUBSCRIBERS_EXPORT_TOKEN` as a secret to download the list as CSV from
-`/api/subscribers?token=...`. Without it that address returns 404.
+To move what is in KV into Dolibarr: set `SUBSCRIBERS_EXPORT_TOKEN` as a secret, download
+`/api/subscribers?token=...` (a CSV), and paste it into **Import email list** on the module's
+setup page. Without the token that address returns 404.
 
 ## Donate button
 

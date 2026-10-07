@@ -1,8 +1,12 @@
 ---
 title: Membership
 subtitle: 24/7 access to the shop, a locker for your project, and a say in how the place runs.
-description: Join Columbia Gadget Works. Membership includes 24/7 shop access, a storage locker, class discounts, and voting rights. Dues fund the space; scholarships available.
+description: Join Columbia Gadget Works. Membership includes 24/7 shop access, a storage locker, class discounts, and voting rights. Dues fund the space.
 ---
+
+Visited on a Thursday and ready to join? Signing up online takes about ten minutes.
+
+{{< button href="/membership/join/" text="Start your membership" class="btn-primary btn-lg" />}}
 
 ## What members get
 
@@ -18,12 +22,19 @@ description: Join Columbia Gadget Works. Membership includes 24/7 shop access, a
 | Level | Monthly | Who it's for |
 |---|---|---|
 | **Standard** | $50 | Full access for one adult. |
-| **Supporter** | $100 | Full access, plus you're subsidizing a Thursday night or a scholarship. |
-| **Scholarship** | $0 – reduced | Board-approved for students and anyone for whom dues are a barrier. Just ask. |
+| **Supporter** | $100 | Full access, plus you're helping keep the doors open for everyone. |
 
 Dues are billed monthly through Givebutter and can be cancelled at any time. Dues are not tax-deductible to the extent you receive access in return; [donations](/donate/) are.
 
+{{< hidden >}}
+
+Scholarship memberships, hidden for now. To restore, put this row back at the end of the dues table and delete these hidden lines around the paragraph:
+
+| **Scholarship** | $0 – reduced | Board-approved for students and anyone for whom dues are a barrier. Just ask. |
+
 Cost should never be the reason someone doesn't join. If the standard rate is out of reach, [talk to us](/contact/) about a scholarship membership. It's a normal conversation and nobody will make it awkward.
+
+{{< /hidden >}}
 
 ## How to join
 

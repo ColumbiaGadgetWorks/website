@@ -49,7 +49,8 @@ disableKinds = ["taxonomy", "term"]
   github = "https://github.com/ColumbiaGadgetWorks"
   mapsQuery = "Columbia Gadget Works, 1404 Grand Ave, Columbia, MO 65203"
   calendarPublicUrl = ""           # optional: PUBLIC .ics address of the calendar, used only for the "add to your calendar" buttons.
-                                   # Leave empty if the calendar is not shared publicly. The address the Worker reads is
+                                   # Empty means the buttons use the site's own feed, /api/calendar.ics, which the Worker
+                                   # rebuilds from the calendar. Leave empty if the calendar is not shared publicly. The address the Worker reads is
                                    # the CALENDAR_ICS_URL secret, which must never be put in this file.
                                    # Left empty on purpose: the public address of columbiagadgetworks@gmail.com is a
                                    # DIFFERENT, abandoned calendar (its hack night ended April 2022). Set this only to the
