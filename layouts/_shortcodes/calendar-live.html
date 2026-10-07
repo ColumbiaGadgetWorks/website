@@ -1,8 +1,15 @@
 {{- /* Live calendar, fed by GET /api/calendar (src/calendar.js).
-       Month grid on wider screens, agenda list everywhere. No library, no
-       third-party script, and the surrounding page keeps real text so the page
-       still says something useful without JavaScript. */ -}}
-{{- $p := site.Params -}}
+       "This week" lists the next seven days in full, then one month grid at
+       every width: event titles on wider screens, dots on a phone. Clicking an
+       event (or a day, on a phone) opens its details in a dialog. No library,
+       no third-party script, and the surrounding page keeps real text so the
+       page still says something useful without JavaScript. */ -}}
+<section class="cal-week" id="this-week" aria-labelledby="cal-week-title">
+  <h2 id="cal-week-title">This week</h2>
+  <p class="cal-note" id="cal-week-status" role="status">Loading this week.</p>
+  <div id="cal-week-days"></div>
+</section>
+
 <section class="cal" id="calendar">
   <div class="cal-bar">
     <h2 class="cal-title" id="cal-title">Calendar</h2>
@@ -15,6 +22,7 @@
 
   <p class="cal-note" id="cal-status" role="status">Loading the calendar.</p>
 
+  <p class="cal-note cal-hint" id="cal-hint" hidden>Tap a day to see its events.</p>
   <table class="cal-grid" id="cal-grid" hidden>
     <caption class="sr" id="cal-caption">Events by day</caption>
     <thead>
@@ -31,28 +39,31 @@
     <tbody id="cal-body"></tbody>
   </table>
 
-  <h3 class="cal-sub" id="cal-agenda-head" hidden>What is on</h3>
-  <ol class="cal-agenda" id="cal-agenda"></ol>
-
   <noscript>
-    <p class="cal-note">The month-by-month view needs JavaScript. <a href="/contact/">Get in touch</a> and we will tell you what is coming up.</p>
+    <p class="cal-note">The calendar needs JavaScript. <a href="/contact/">Get in touch</a> and we will tell you what is coming up.</p>
   </noscript>
 </section>
+
+<dialog class="cal-dialog" id="cal-dialog" aria-labelledby="cal-dialog-title">
+  <div class="cal-dialog-bar">
+    <h2 class="cal-dialog-title" id="cal-dialog-title"></h2>
+    <button class="cal-btn" type="button" id="cal-dialog-close">Close</button>
+  </div>
+  <ol class="cal-agenda" id="cal-dialog-list"></ol>
+</dialog>
 <script>
 (function () {
   var TZ = 'America/Chicago';
-  var grid = document.getElementById('cal-grid');
-  var body = document.getElementById('cal-body');
-  var agenda = document.getElementById('cal-agenda');
-  var agendaHead = document.getElementById('cal-agenda-head');
-  var title = document.getElementById('cal-title');
-  var caption = document.getElementById('cal-caption');
-  var status = document.getElementById('cal-status');
+  var $ = function (id) { return document.getElementById(id); };
+  var grid = $('cal-grid'), body = $('cal-body'), title = $('cal-title'), caption = $('cal-caption');
+  var status = $('cal-status'), hint = $('cal-hint');
+  var dialog = $('cal-dialog');
   if (!grid || !body) return;
 
   var MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-  var cache = {};           // "YYYY-MM" -> array of occurrences
+  var cache = {};           // "YYYY-MM" -> promise of that month's occurrences
   var cursor = todayParts();
+  var shown = [];           // the month on the grid, so a click can find its event
 
   function todayParts() {
     var f = new Intl.DateTimeFormat('en-CA', { timeZone: TZ, year: 'numeric', month: '2-digit', day: '2-digit' });
@@ -61,10 +72,18 @@
     return { y: +p.year, m: +p.month, today: p.year + '-' + p.month + '-' + p.day };
   }
   function key(y, m) { return y + '-' + String(m).padStart(2, '0'); }
+  function addDays(dayStr, n) {
+    var p = dayStr.split('-');
+    return new Date(Date.UTC(+p[0], +p[1] - 1, +p[2] + n)).toISOString().slice(0, 10);
+  }
 
   function timeLabel(iso) {
     return new Intl.DateTimeFormat('en-US', { timeZone: TZ, hour: 'numeric', minute: '2-digit' })
       .format(new Date(iso)).replace(':00', '').toLowerCase().replace(/\s/g, '');
+  }
+  function timeRange(e) {
+    if (e.allDay) return 'All day';
+    return timeLabel(e.start) + (e.end && e.end !== e.start ? ' to ' + timeLabel(e.end) : '');
   }
   function dayLabel(dayStr) {
     var p = dayStr.split('-');
@@ -73,14 +92,124 @@
   }
 
   function load(y, m) {
+    // Cache the request, not the answer, so this week and the grid share one
+    // fetch for the current month. A failure is forgotten and retried.
     var k = key(y, m);
-    if (cache[k]) return Promise.resolve(cache[k]);
-    return fetch('/api/calendar?from=' + k + '&months=1', { headers: { accept: 'application/json' } })
-      .then(function (r) { return r.json(); })
-      .then(function (d) {
-        if (!d.ok) throw new Error(d.error || 'unavailable');
-        cache[k] = d.events || [];
-        return cache[k];
+    if (!cache[k]) {
+      cache[k] = fetch('/api/calendar?from=' + k + '&months=1', { headers: { accept: 'application/json' } })
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+          if (!d.ok) throw new Error(d.error || 'unavailable');
+          return d.events || [];
+        });
+      cache[k].catch(function () { delete cache[k]; });
+    }
+    return cache[k];
+  }
+
+  function byDay(events) {
+    var map = {};
+    events.forEach(function (e) { (map[e.day] = map[e.day] || []).push(e); });
+    return map;
+  }
+
+  // Google Calendar descriptions are often HTML. Read them as text (the
+  // parser runs no scripts and loads nothing), keeping line breaks.
+  function plain(s) {
+    if (!/<[a-z][\s\S]*>/i.test(s)) return s;
+    var html = s.replace(/<br\s*\/?>/gi, '\n').replace(/<\/(p|div|li)>/gi, '\n');
+    var doc = new DOMParser().parseFromString(html, 'text/html');
+    return (doc.body.textContent || '').replace(/\n{3,}/g, '\n\n').trim();
+  }
+  // Text with web addresses turned into links, built as nodes so nothing in
+  // the feed is ever parsed as markup on this page.
+  function linked(el, text) {
+    var re = /https?:\/\/[^\s<>"']+[^\s<>"'.,;:!?)]/g, at = 0, m;
+    while ((m = re.exec(text))) {
+      el.appendChild(document.createTextNode(text.slice(at, m.index)));
+      var a = document.createElement('a');
+      a.href = m[0]; a.rel = 'noopener'; a.target = '_blank'; a.textContent = m[0];
+      el.appendChild(a);
+      at = m.index + m[0].length;
+    }
+    el.appendChild(document.createTextNode(text.slice(at)));
+  }
+  function el(tag, cls, text) {
+    var x = document.createElement(tag);
+    if (cls) x.className = cls;
+    if (text !== undefined) x.textContent = text;
+    return x;
+  }
+
+  // One event in full: time, title, place with a map link, description.
+  // `short` trims a long description and offers the dialog for the rest.
+  function detail(e, short) {
+    var li = el('li', 'cal-item');
+    var when = el('p', 'cal-when');
+    when.appendChild(el('strong', '', timeRange(e)));
+    li.appendChild(when);
+    li.appendChild(el('p', 'cal-what', e.title));
+    if (e.location) {
+      var loc = el('p', 'cal-where');
+      var a = el('a', '', e.location);
+      a.href = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(e.location);
+      a.rel = 'noopener'; a.target = '_blank';
+      loc.appendChild(a);
+      li.appendChild(loc);
+    }
+    var text = e.description ? plain(e.description) : '';
+    if (text) {
+      var desc = el('p', 'cal-desc');
+      var cut = short && text.length > 280;
+      linked(desc, cut ? text.slice(0, 280).replace(/\s+\S*$/, '') + '...' : text);
+      li.appendChild(desc);
+      if (cut) {
+        var more = el('button', 'cal-link', 'More details');
+        more.type = 'button';
+        more.addEventListener('click', function () { open(e.day, [e]); });
+        li.appendChild(more);
+      }
+    }
+    return li;
+  }
+
+  function open(day, events) {
+    $('cal-dialog-title').textContent = dayLabel(day);
+    var list = $('cal-dialog-list');
+    list.innerHTML = '';
+    events.forEach(function (e) { list.appendChild(detail(e, false)); });
+    if (dialog.showModal) dialog.showModal(); else dialog.setAttribute('open', '');
+  }
+  $('cal-dialog-close').addEventListener('click', function () { dialog.close(); });
+  // A click on the backdrop lands on the dialog element itself.
+  dialog.addEventListener('click', function (ev) { if (ev.target === dialog) dialog.close(); });
+
+  // This week: today and the six days after it, every event in full.
+  function drawWeek() {
+    var days = [];
+    for (var i = 0; i < 7; i++) days.push(addDays(cursor.today, i));
+    var months = {};
+    days.forEach(function (d) { months[d.slice(0, 7)] = true; });
+    var wstatus = $('cal-week-status'), wrap = $('cal-week-days');
+    Promise.all(Object.keys(months).map(function (k) { return load(+k.slice(0, 4), +k.slice(5)); }))
+      .then(function (lists) {
+        var map = byDay([].concat.apply([], lists));
+        wrap.innerHTML = '';
+        var any = false;
+        days.forEach(function (d, i) {
+          if (!map[d]) return;
+          any = true;
+          var h = el('h3', 'cal-week-day', (i === 0 ? 'Today, ' : i === 1 ? 'Tomorrow, ' : '') + dayLabel(d));
+          var ol = el('ol', 'cal-agenda');
+          map[d].forEach(function (e) { ol.appendChild(detail(e, true)); });
+          wrap.appendChild(h);
+          wrap.appendChild(ol);
+        });
+        wstatus.hidden = any;
+        wstatus.textContent = 'Nothing on the calendar in the next seven days.';
+      })
+      .catch(function () {
+        wstatus.textContent = 'This week is not available right now. Please try again shortly.';
       });
   }
 
@@ -92,103 +221,90 @@
     status.hidden = false;
 
     load(y, m).then(function (events) {
+      if (y !== cursor.y || m !== cursor.m) return; // moved on while loading
+      shown = events;
       status.hidden = true;
       grid.hidden = false;
-      agendaHead.hidden = false;
-      drawGrid(y, m, events);
-      drawAgenda(events);
+      hint.hidden = !events.length;
+      drawGrid(y, m, byDay(events));
+      if (!events.length) {
+        status.hidden = false;
+        status.textContent = 'Nothing on the calendar in ' + MONTHS[m - 1] + '.';
+      }
     }).catch(function () {
+      if (y !== cursor.y || m !== cursor.m) return;
       grid.hidden = true;
-      agendaHead.hidden = true;
-      agenda.innerHTML = '';
+      hint.hidden = true;
       status.hidden = false;
       status.textContent = 'The calendar is not available right now. Please try again shortly, or get in touch through the contact page.';
     });
   }
 
-  function byDay(events) {
-    var map = {};
-    events.forEach(function (e) { (map[e.day] = map[e.day] || []).push(e); });
-    return map;
-  }
-
-  function drawGrid(y, m, events) {
-    var map = byDay(events);
+  function drawGrid(y, m, map) {
     var first = new Date(Date.UTC(y, m - 1, 1));
     var startPad = first.getUTCDay();
     var total = new Date(Date.UTC(y, m, 0)).getUTCDate();
     var cells = [];
     for (var i = 0; i < startPad; i++) cells.push(null);
     for (var d = 1; d <= total; d++) cells.push(d);
-    while (cells.length % 7) cells.push(null);
+    // Always six weeks, so the grid keeps its height from month to month.
+    while (cells.length < 42) cells.push(null);
 
     body.innerHTML = '';
-    for (var w = 0; w < cells.length / 7; w++) {
+    for (var w = 0; w < 6; w++) {
       var tr = document.createElement('tr');
       for (var c = 0; c < 7; c++) {
         var d2 = cells[w * 7 + c];
         var td = document.createElement('td');
-        if (d2 === null) { td.className = 'cal-empty'; tr.appendChild(td); continue; }
+        if (d2 === null) { td.className = 'cal-empty'; td.appendChild(el('div', 'cal-cell')); tr.appendChild(td); continue; }
         var ds = key(y, m) + '-' + String(d2).padStart(2, '0');
-        if (ds === cursor.today) td.className = 'cal-today';
-        var num = document.createElement('span');
-        num.className = 'cal-daynum';
-        num.textContent = d2;
-        td.appendChild(num);
-        (map[ds] || []).forEach(function (e) {
-          var item = document.createElement('span');
-          item.className = 'cal-chip';
-          item.textContent = (e.allDay ? '' : timeLabel(e.start) + ' ') + e.title;
-          item.title = e.title;
-          td.appendChild(item);
+        var list = map[ds] || [];
+        var cls = [];
+        if (ds === cursor.today) cls.push('cal-today');
+        if (list.length) { cls.push('cal-busy'); td.setAttribute('data-day', ds); }
+        td.className = cls.join(' ');
+        // The cell's box has a fixed height and clips, so no week can grow.
+        var cell = el('div', 'cal-cell');
+        cell.appendChild(el('span', 'cal-daynum', d2));
+        // Two events, each up to two lines, fit a cell. A busier day shows
+        // the first and a count, so nothing is ever clipped out of sight.
+        var few = list.length > 2 ? list.slice(0, 1) : list;
+        few.forEach(function (e) {
+          var chip = el('button', 'cal-chip');
+          chip.type = 'button';
+          chip.setAttribute('data-i', shown.indexOf(e));
+          if (!e.allDay) { chip.appendChild(el('strong', '', timeLabel(e.start))); chip.appendChild(document.createTextNode(' ')); }
+          chip.appendChild(document.createTextNode(e.title));
+          cell.appendChild(chip);
         });
+        if (few.length < list.length) {
+          var more = el('button', 'cal-more', '+' + (list.length - few.length) + ' more');
+          more.type = 'button';
+          more.setAttribute('aria-label', 'All ' + list.length + ' events on ' + dayLabel(ds));
+          cell.appendChild(more);
+        }
+        td.appendChild(cell);
         tr.appendChild(td);
       }
       body.appendChild(tr);
     }
   }
 
-  function drawAgenda(events) {
-    agenda.innerHTML = '';
-    if (!events.length) {
-      var none = document.createElement('li');
-      none.className = 'cal-none';
-      none.textContent = 'Nothing on the calendar this month.';
-      agenda.appendChild(none);
+  // An event opens on its own; anywhere else in a busy day (the whole cell on
+  // a phone, where events are dots) opens every event that day.
+  body.addEventListener('click', function (ev) {
+    var chip = ev.target.closest('.cal-chip');
+    if (chip) {
+      var e = shown[+chip.getAttribute('data-i')];
+      if (e) open(e.day, [e]);
       return;
     }
-    var map = byDay(events);
-    Object.keys(map).sort().forEach(function (day) {
-      map[day].forEach(function (e) {
-        var li = document.createElement('li');
-        li.className = 'cal-item';
-
-        var when = document.createElement('p');
-        when.className = 'cal-when';
-        when.textContent = dayLabel(day) + (e.allDay ? '' : ', ' + timeLabel(e.start) + (e.end && e.end !== e.start ? ' to ' + timeLabel(e.end) : ''));
-        li.appendChild(when);
-
-        var h = document.createElement('p');
-        h.className = 'cal-what';
-        h.textContent = e.title;
-        li.appendChild(h);
-
-        if (e.location) {
-          var loc = document.createElement('p');
-          loc.className = 'cal-where';
-          loc.textContent = e.location;
-          li.appendChild(loc);
-        }
-        if (e.description) {
-          var desc = document.createElement('p');
-          desc.className = 'cal-desc';
-          desc.textContent = e.description.length > 400 ? e.description.slice(0, 400) + '...' : e.description;
-          li.appendChild(desc);
-        }
-        agenda.appendChild(li);
-      });
-    });
-  }
+    var td = ev.target.closest('td[data-day]');
+    if (td) {
+      var day = td.getAttribute('data-day');
+      open(day, shown.filter(function (x) { return x.day === day; }));
+    }
+  });
 
   function step(delta) {
     var m = cursor.m + delta, y = cursor.y;
@@ -197,12 +313,13 @@
     cursor.y = y; cursor.m = m;
     render();
   }
-  document.getElementById('cal-prev').addEventListener('click', function () { step(-1); });
-  document.getElementById('cal-next').addEventListener('click', function () { step(1); });
-  document.getElementById('cal-today').addEventListener('click', function () {
+  $('cal-prev').addEventListener('click', function () { step(-1); });
+  $('cal-next').addEventListener('click', function () { step(1); });
+  $('cal-today').addEventListener('click', function () {
     var t = todayParts(); cursor.y = t.y; cursor.m = t.m; render();
   });
 
+  drawWeek();
   render();
 })();
 </script>
