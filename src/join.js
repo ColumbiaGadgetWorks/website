@@ -4,6 +4,7 @@
 //   POST /api/join/status         where an applicant is in the signup
 //   POST /api/join/sign           step 2: sign the waiver or the agreement
 //   POST /api/join/id             step 2: upload the ID photo
+//   POST /api/join/cancel         start over: delete an unpaid signup
 //   POST /api/givebutter-webhook  Givebutter tells us about dues payments
 //
 // The Worker keeps nothing about applicants. Everything is forwarded to the
@@ -116,6 +117,10 @@ export async function handleJoin(request, env, pathname) {
   const token = str(data.token, 64);
   if (!TOKEN_RE.test(token)) return fail('token', 400);
 
+  if (pathname === '/api/join/cancel') {
+    const r = await dolibarr(env, 'cancel', { token });
+    return json(r.data, r.status);
+  }
   if (pathname === '/api/join/status') {
     const r = await dolibarr(env, 'status', { token });
     return json(r.data, r.status);

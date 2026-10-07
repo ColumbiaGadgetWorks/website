@@ -216,6 +216,8 @@ ul.plain li{margin:0 0 .35em}
 .join-steps li.is-done{color:var(--ok)}
 .join .contact-form{max-width:none}
 .join-check{display:flex;gap:10px;align-items:flex-start;margin:0 0 12px;font-size:.97rem}
+.join-restart{margin-top:1.6em}
+.join-link{font:inherit;padding:0;border:0;background:none;color:var(--rust-dark);text-decoration:underline;cursor:pointer}
 .join-check input{margin-top:.25em;flex:none}
 .join-task{border-top:1px solid var(--line);padding:6px 0 18px}
 .join-task h3{margin:.9em 0 .6em}
