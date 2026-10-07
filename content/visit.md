@@ -42,6 +42,6 @@ The shop is on one level with a wide roll-up door and a step-free entrance. Rest
 
 Most day-to-day chatter (who's coming Thursday, class announcements, "does anyone know how to fix a…") happens on our Discord server. You don't need it to visit, but it's the best way to hear about things first.
 
-<p class="cta-row"><a class="btn btn-primary" href="/contact/">Ask a question</a> <a class="btn btn-outline" rel="noopener" href="https://discord.gg/F7kM7ardMs">Join the Discord</a></p>
+<p class="cta-row"><a class="btn btn-primary" href="/contact/">Ask a question</a> <a class="btn btn-outline" rel="noopener" href="https://discord.gg/yjpeBrAjuR">Join the Discord</a></p>
 
 Ready for more than Thursdays? [Membership](/membership/) gets you 24/7 access, and our [member wiki](https://wiki.comogadget.casa/) has the tool guides and policies once you join.

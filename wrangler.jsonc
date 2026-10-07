@@ -19,5 +19,12 @@
   "kv_namespaces": [{ "binding": "SUBSCRIBERS" }],
   // Do not delete variables/secrets that were set in the dashboard on each deploy.
   "keep_vars": true,
+  "vars": {
+    // CALENDAR_ICS_URL is NOT here: it is a secret set in the dashboard (see
+    // src/calendar.js). A var of the same name would clash with it on deploy.
+    // The fundbot sheet's read-only campaigns endpoint, fetched by /api/fund/campaigns
+    // for the shop touchscreen page at /kiosk/.
+    "FUNDBOT_API_URL": "https://fundbot.adman.casa/api/campaigns"
+  },
   "observability": { "enabled": true }
 }
