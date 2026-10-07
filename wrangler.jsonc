@@ -22,9 +22,16 @@
   "vars": {
     // CALENDAR_ICS_URL is NOT here: it is a secret set in the dashboard (see
     // src/calendar.js). A var of the same name would clash with it on deploy.
-    // The fundbot sheet's read-only campaigns endpoint, fetched by /api/fund/campaigns
-    // for the shop touchscreen page at /kiosk/.
-    "FUNDBOT_API_URL": "https://fundbot.adman.casa/api/campaigns"
+    // The old fundbot sheet's campaigns endpoint. /api/fund/campaigns uses it only
+    // while FUND_DB is not bound; delete it once the D1 database is live.
+    "FUNDBOT_API_URL": "https://fundbot.adman.casa/api/campaigns",
+    // Default donate link for new /fund campaigns and the /fund list button.
+    "DONATE_URL": "https://givebutter.com/v7RxV6",
+    // "false" hides donor names on /kiosk/ (Discord still shows them).
+    "SHOW_DONORS": "true"
+    // Secrets, set in the dashboard (Settings > Variables and Secrets):
+    //   DISCORD_PUBLIC_KEY  Discord app public key (/fund commands)
+    //   DISCORD_BOT_TOKEN   Discord bot token (edits and pins /fund boards)
   },
   "observability": { "enabled": true }
 }

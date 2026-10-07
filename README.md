@@ -65,6 +65,36 @@ and a month calendar.
 * Keep "Shop Fund" in the page title: kiosk-manager's watchdog uses it to tell
   the right page from an error or login page.
 
+## Shop fund database and the /fund Discord commands
+
+The fund campaigns and donations live in the `fundraiser` D1 database, bound as
+`FUND_DB` in `wrangler.jsonc`. The schema is `db/fund-schema.sql`. Discord ids
+are stored as text, because they are too large for JavaScript numbers.
+
+The `/fund` slash commands (`create`, `link`, `add`, `show`, `list`, `board`,
+`undo`) are answered by `src/fund-discord.js` at `/api/discord/interactions`.
+No bot process runs anywhere: Discord sends each command to that address, signed
+with the app's key, and the Worker answers it from D1. `/kiosk/` reads the same
+database through `/api/fund/campaigns`.
+
+Setup, once:
+
+1. Secrets (Settings > Variables and Secrets, type *Secret*):
+   `DISCORD_PUBLIC_KEY` (Developer Portal > your app > General Information >
+   Public Key) and `DISCORD_BOT_TOKEN` (Bot > Reset Token; used only to edit
+   and pin `/fund board` messages).
+2. Deploy, then check `/api/health` shows `FUND_DB`, `DISCORD_PUBLIC_KEY` and
+   `DISCORD_BOT_TOKEN` as `true`.
+3. Developer Portal > General Information > **Interactions Endpoint URL**:
+   `https://columbiagadgetworks.org/api/discord/interactions`, then Save.
+   Discord tests the address before accepting it. From then on every `/fund`
+   command comes here instead of to a running bot.
+
+The commands the old bot registered keep working. If they ever go missing, run
+`scripts/register-fund-commands.mjs` (usage at the top of the file).
+
+Query the data: `npx wrangler d1 execute fundraiser --remote --command "SELECT * FROM donation ORDER BY id DESC LIMIT 10"`.
+
 ## Video
 
 Drop an MP4 in `static/video/` and a poster still in `assets/img/`, then:
