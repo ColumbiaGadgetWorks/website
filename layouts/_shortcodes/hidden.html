@@ -1,0 +1,12 @@
+{{- /* Temporarily hides a block of page content without deleting it.
+
+       Wrap any section in {{< hidden >}} ... {{< /hidden >}} and it stops
+       rendering, while the markdown stays in the content file where it is easy
+       to read and to restore. Nothing is sent to the browser, so hidden text
+       does not appear in the page source or in search results.
+
+       To bring a section back, delete the two wrapper lines around it.
+
+       Hugo refuses a paired shortcode that never evaluates .Inner, so it is
+       assigned here and deliberately not output. */ -}}
+{{- $hidden := .Inner -}}

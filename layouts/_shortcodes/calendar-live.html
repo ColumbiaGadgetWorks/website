@@ -35,7 +35,7 @@
   <ol class="cal-agenda" id="cal-agenda"></ol>
 
   <noscript>
-    <p class="cal-note">The month-by-month view needs JavaScript. The standing schedule is below, and you can add the calendar to your own phone or computer with the buttons underneath it.</p>
+    <p class="cal-note">The month-by-month view needs JavaScript. <a href="/contact/">Get in touch</a> and we will tell you what is coming up.</p>
   </noscript>
 </section>
 <script>
@@ -102,7 +102,7 @@
       agendaHead.hidden = true;
       agenda.innerHTML = '';
       status.hidden = false;
-      status.textContent = 'The calendar is not available right now. The standing schedule below is still accurate, and you can always reach us through the contact page.';
+      status.textContent = 'The calendar is not available right now. Please try again shortly, or get in touch through the contact page.';
     });
   }
 
@@ -153,7 +153,7 @@
     if (!events.length) {
       var none = document.createElement('li');
       none.className = 'cal-none';
-      none.textContent = 'Nothing scheduled this month beyond the standing weekly sessions below.';
+      none.textContent = 'Nothing on the calendar this month.';
       agenda.appendChild(none);
       return;
     }
