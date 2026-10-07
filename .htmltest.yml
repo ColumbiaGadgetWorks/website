@@ -5,3 +5,5 @@ IgnoreAltEmpty: true
 IgnoreDirectoryMissingTrailingSlash: true
 IgnoreURLs:
   - "^/api/"
+  # /kiosk/ links to kioskmgr://, which only the shop touchscreen handles.
+  - "^kioskmgr:"

@@ -1,0 +1,1184 @@
+{{- /* The shop touchscreen page at /kiosk/ (not linked from the site).
+       Standalone: no site header, footer or signup box. Two panels, the
+       shop fund and a CGW calendar, swapped in place. QR codes are drawn at
+       build time from the links in hugo.toml. kiosk-manager's watchdog
+       recognises the page by "Shop Fund" in the <title>; keep it there. */ -}}
+{{- $p := site.Params -}}
+{{- $links := dict
+      "donate" $p.givebutterDonate
+      "venmo" $p.venmoDonate
+      "discord" ($p.kioskDiscord | default $p.discord)
+      "membership" ("membership/" | absURL) -}}
+{{- $qr := dict -}}
+{{- range $name, $url := $links -}}
+  {{- with $url -}}
+    {{- $img := images.QR . (dict "scale" 6 "targetDir" "img/kiosk") -}}
+    {{- $qr = merge $qr (dict $name $img.RelPermalink) -}}
+  {{- end -}}
+{{- end -}}
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- kiosk-manager's watchdog recognises this page by "Shop Fund" in the
+     title; keep it in there (or change watchdog.expected_title to match). -->
+<title>Shop Fund — Status Sheet</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="/favicon-32.png" sizes="32x32">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper:    #FBFAF6;
+    --grid:     #D2E1E7;
+    --ink:      #101A22;
+    --graphite: #61727C;
+    --rule:     #C4CBCE;
+    --cut:      #C8102E;
+    --met:      #157F5B;
+
+    /* Always-light, independent of theme: text sitting on a solid accent
+       fill (buttons, badges) and the QR card, which stays light so it
+       keeps scanning reliably regardless of page theme. */
+    --paper-fixed: #FBFAF6;
+
+    /* Columbia Gadget Works orange, for the information panel and the
+       button that opens it. --fund-red is the solid fill of the button
+       back, kept dark enough for light text in either theme. */
+    --cgw-orange: #C8501E;
+    --fund-red:   #C8102E;
+    --info-paper: #FCF8F3;
+    --info-grid:  #F1DCCD;
+
+    --sheet-max: 62rem;
+    --step: 1.5rem;
+  }
+
+  :root[data-theme="dark"] {
+    --paper:    #14191D;
+    --grid:     #202B31;
+    --ink:      #ECEEF0;
+    --graphite: #8FA0AA;
+    --rule:     #33404A;
+    --cut:      #FF5D72;
+    --met:      #2ECC91;
+
+    --cgw-orange: #D2561F;
+    --fund-red:   #C8203A;
+    --info-paper: #1B1613;
+    --info-grid:  #2E231C;
+  }
+
+  * { box-sizing: border-box; }
+
+  /* The hidden attribute has to beat the display rules on .qr-card and
+     .titleblock, or they render with placeholder values while loading. */
+  [hidden] { display: none !important; }
+
+  html { -webkit-text-size-adjust: 100%; }
+
+  body {
+    margin: 0;
+    padding: clamp(1rem, 4vw, 3rem) clamp(1rem, 4vw, 2rem) 4rem;
+    background-color: var(--paper);
+    background-image:
+      linear-gradient(var(--grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size: var(--step) var(--step);
+    background-position: -1px -1px;
+    color: var(--ink);
+    font-family: "IBM Plex Sans", system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+  }
+
+  .sheet {
+    max-width: var(--sheet-max);
+    margin: 0 auto;
+    background: var(--paper);
+    border: 1.5px solid var(--ink);
+    box-shadow: 0 1px 0 var(--rule), 0 18px 40px -30px rgba(16, 26, 34, .55);
+  }
+
+  /* ---------- masthead ---------- */
+
+  .masthead {
+    padding: clamp(1.5rem, 4vw, 2.75rem);
+    border-bottom: 1.5px solid var(--ink);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem 2.5rem;
+    flex-wrap: wrap;
+  }
+
+  .masthead-main {
+    flex: 1 1 20rem;
+    min-width: 0;
+  }
+
+  .eyebrow {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: .6875rem;
+    font-weight: 500;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--graphite);
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem 1.25rem;
+    margin-bottom: 1.25rem;
+  }
+  .eyebrow span::before { content: "⌀ "; color: var(--rule); }
+  .eyebrow span:first-child::before { content: none; }
+
+  h1 {
+    font-family: "IBM Plex Sans Condensed", sans-serif;
+    font-weight: 700;
+    font-size: clamp(2rem, 6vw, 3.5rem);
+    line-height: .95;
+    letter-spacing: .01em;
+    text-transform: uppercase;
+    margin: 0;
+  }
+  h1 em {
+    font-style: normal;
+    display: block;
+    color: var(--cut);
+  }
+
+  /* ---------- masthead side: a stack of small controls ---------- */
+
+  .side-actions {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: .5rem;
+    min-width: 8.5rem;
+  }
+
+  /* One shared shape for every control in the stack, so they line up. */
+  .side-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .4375rem;
+    padding: .5rem .75rem;
+    border: 1.5px solid var(--ink);
+    background: var(--paper);
+    color: var(--ink);
+    text-decoration: none;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: .6875rem;
+    font-weight: 600;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    text-align: center;
+    cursor: pointer;
+    box-shadow: 2px 2px 0 var(--ink);
+    transition: transform .12s ease, box-shadow .12s ease;
+  }
+  .side-btn:hover,
+  .side-btn:focus-visible,
+  .side-btn:active {
+    transform: translate(1px, 1px);
+    box-shadow: 1px 1px 0 var(--ink);
+  }
+  .side-btn:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+
+  .theme-toggle-icon { font-size: .875rem; line-height: 1; }
+
+  /* kioskmgr:// only resolves on the terminal, so hide it everywhere else. */
+  .open-gui { display: none; }
+
+  /* ---------- QR band: codes to scan beside the big panel switch ---------- */
+
+  .give-band {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+    gap: 1.25rem;
+    padding: clamp(1.25rem, 3vw, 2rem) clamp(1.5rem, 4vw, 2.75rem);
+    border-bottom: 1.5px solid var(--ink);
+  }
+  .give-band.at-foot { border-bottom: 0; border-top: 1.5px solid var(--ink); }
+
+  .qr-card {
+    flex: 0 0 auto;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: .625rem;
+  }
+
+  /* The code stays on a light card so it scans regardless of page theme. */
+  .qr-img {
+    line-height: 0;
+    padding: .375rem;
+    background: var(--paper-fixed);
+    border: 1.5px solid var(--ink);
+    box-shadow: 3px 3px 0 var(--ink);
+  }
+  .qr-img img {
+    display: block;
+    image-rendering: pixelated;
+    width: clamp(110px, 16vw, 168px);
+    height: clamp(110px, 16vw, 168px);
+  }
+
+  .qr-cap {
+    max-width: 12rem;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: .75rem;
+    font-weight: 600;
+    line-height: 1.3;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    text-align: center;
+    color: var(--ink);
+    text-decoration: none;
+  }
+  /* On the web the caption is the link; on the kiosk it is a label. */
+  a.qr-cap[href] { color: var(--cut); }
+  a.qr-cap[href]::after { content: " \2192"; }
+
+  /* The panel switch: as tall as the QR cards, impossible to miss. */
+  .swap-btn {
+    flex: 1 1 11rem;
+    min-height: 9rem;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: .375rem;
+    padding: 1.125rem 1.375rem;
+    border: 1.5px solid var(--ink);
+    background: var(--swap-bg);
+    color: var(--paper-fixed);
+    font-family: "IBM Plex Sans Condensed", sans-serif;
+    font-size: clamp(1.375rem, 3.4vw, 2rem);
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: .015em;
+    text-transform: uppercase;
+    text-align: left;
+    cursor: pointer;
+    box-shadow: 4px 4px 0 var(--ink);
+    transition: transform .12s ease, box-shadow .12s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .swap-btn:hover,
+  .swap-btn:focus-visible,
+  .swap-btn:active {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0 var(--ink);
+  }
+  .swap-btn:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+  .swap-btn small {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: .6875rem;
+    font-weight: 500;
+    letter-spacing: .14em;
+    opacity: .85;
+  }
+  .swap-arrow { display: inline-block; transition: transform .2s ease; }
+  .swap-btn:hover .swap-arrow { transform: translateX(.25rem); }
+  .swap-btn.back:hover .swap-arrow { transform: translateX(-.25rem); }
+
+  /* Each button wears the colour of the panel it opens. */
+  .to-info { --swap-bg: var(--cgw-orange); }
+  .to-fund { --swap-bg: var(--fund-red); }
+
+  /* ---------- kiosk mode (?kiosk): the shop touchscreen ----------
+     Links would open pages in a tab the kiosk cannot leave, so QR captions
+     are plain labels there, and the terminal gains buttons that raise the
+     kiosk-manager window or minimise the page to reveal it. */
+
+  :root[data-kiosk] .open-gui { display: inline-flex; }
+  :root[data-kiosk] .qr-img img {
+    width: min(200px, 26vw);
+    height: min(200px, 26vw);
+  }
+
+  .kiosk-min { display: none; }
+  :root[data-kiosk] .kiosk-min {
+    display: inline-flex;
+    position: fixed;
+    top: .5rem;
+    right: .5rem;
+    z-index: 10;
+    padding: .4375rem .75rem;
+  }
+  .kiosk-min-bar {
+    display: inline-block;
+    width: .75rem;
+    height: 2px;
+    background: currentColor;
+    transform: translateY(.1875rem);
+  }
+
+  /* ---------- campaign ---------- */
+
+  .campaign {
+    padding: clamp(1.5rem, 4vw, 2.75rem);
+    border-bottom: 1px solid var(--rule);
+  }
+  .campaign:last-of-type { border-bottom: 0; }
+  .campaign.finished {
+    filter: grayscale(1);
+    opacity: .55;
+  }
+
+  .campaign-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: .5rem 1.5rem;
+    margin-bottom: 2.25rem;
+  }
+
+  .campaign-name {
+    font-family: "IBM Plex Sans Condensed", sans-serif;
+    font-weight: 600;
+    font-size: clamp(1.375rem, 3.5vw, 1.875rem);
+    text-transform: uppercase;
+    letter-spacing: .015em;
+    margin: 0;
+  }
+
+  .tally {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: .8125rem;
+    color: var(--graphite);
+    white-space: nowrap;
+  }
+  .tally b {
+    font-weight: 600;
+    font-size: 1.0625rem;
+    color: var(--ink);
+  }
+
+  /* ---------- the gauge: ruler + track + dimension line ---------- */
+
+  .gauge { --pct: 0; }
+
+  .scale {
+    position: relative;
+    height: 12px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .scale i {
+    position: absolute;
+    bottom: 0;
+    width: 1px;
+    height: 4px;
+    background: var(--rule);
+  }
+  .scale i.major { height: 9px; background: var(--graphite); }
+
+  .track {
+    position: relative;
+    height: 26px;
+    border: 1px solid var(--ink);
+    border-top: 0;
+    background:
+      repeating-linear-gradient(
+        -45deg,
+        transparent 0 5px,
+        rgba(97, 114, 124, .12) 5px 6px
+      );
+  }
+  .fill {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: calc(var(--pct) * 100%);
+    max-width: 100%;
+    background: var(--cut);
+  }
+  .overrun {
+    position: absolute;
+    top: 50%;
+    right: .5rem;
+    transform: translateY(-50%);
+    font-family: "IBM Plex Mono", monospace;
+    font-size: .6875rem;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--paper-fixed);
+  }
+
+  /* ISO-style dimension line beneath the filled span */
+  .dim {
+    position: relative;
+    width: calc(var(--pct) * 100%);
+    max-width: 100%;
+    min-width: 8.5rem;
+    margin-top: .5rem;
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+  }
+  .dim::before,
+  .dim::after {
+    content: "";
+    position: absolute;
+    top: -.5rem;
+    width: 1px;
+    height: .5rem;
+    background: var(--graphite);
+  }
+  .dim::before { left: 0; }
+  .dim::after  { right: 0; }
+
+  .dim-line {
+    flex: 1 1 auto;
+    height: 1px;
+    background: var(--graphite);
+    position: relative;
+  }
+  .dim-line::before {
+    content: "";
+    position: absolute;
+    top: -3px;
+    border-block: 3.5px solid transparent;
+  }
+  .dim-line.l::before {
+    left: 0;
+    border-right: 7px solid var(--graphite);
+  }
+  .dim-line.r::before {
+    right: 0;
+    border-left: 7px solid var(--graphite);
+  }
+
+  .dim-val {
+    font-family: "IBM Plex Mono", monospace;
+    font-weight: 600;
+    font-size: .9375rem;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    color: var(--ink);
+  }
+
+  .remaining {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: .75rem;
+    letter-spacing: .04em;
+    color: var(--graphite);
+    margin-top: .75rem;
+  }
+  /* ---------- donors ---------- */
+
+  .ledger {
+    margin: 1.75rem 0 0;
+    border-top: 1px dashed var(--rule);
+    padding-top: 1rem;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: .8125rem;
+  }
+  .ledger-label {
+    font-size: .625rem;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--graphite);
+    margin-bottom: .625rem;
+  }
+  .ledger ol { list-style: none; margin: 0; padding: 0; }
+  .ledger li {
+    display: flex;
+    align-items: baseline;
+    gap: .5rem;
+    padding: .1875rem 0;
+  }
+  .ledger .lead {
+    flex: 1 1 auto;
+    border-bottom: 1px dotted var(--rule);
+    transform: translateY(-.2em);
+  }
+  .ledger .amt { font-variant-numeric: tabular-nums; }
+
+  /* ---------- title block ---------- */
+
+  .titleblock {
+    border-top: 1.5px solid var(--ink);
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+    font-family: "IBM Plex Mono", monospace;
+  }
+  .titleblock div {
+    padding: .875rem 1rem;
+    border-right: 1px solid var(--rule);
+  }
+  .titleblock div:last-child { border-right: 0; }
+  .titleblock dt {
+    font-size: .625rem;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--graphite);
+    margin-bottom: .25rem;
+  }
+  .titleblock dd {
+    margin: 0;
+    font-size: .9375rem;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ---------- states ---------- */
+
+  .notice {
+    padding: clamp(1.5rem, 4vw, 2.75rem);
+    font-family: "IBM Plex Mono", monospace;
+    font-size: .875rem;
+    color: var(--graphite);
+  }
+  .notice b {
+    display: block;
+    font-family: "IBM Plex Sans Condensed", sans-serif;
+    font-size: 1.25rem;
+    text-transform: uppercase;
+    color: var(--ink);
+    margin-bottom: .375rem;
+  }
+
+  /* ---------- two panels, one page ----------
+     Both panels are in the document from the start, so switching is a class
+     change with no request behind it. The outgoing panel slides away and the
+     incoming one slides in from the side it was parked on. */
+
+  .stage {
+    display: grid;
+    max-width: var(--sheet-max);
+    margin: 0 auto;
+  }
+  .panel {
+    grid-area: 1 / 1;
+    align-self: start;
+    width: 100%;
+    transition:
+      transform .5s cubic-bezier(.2, .8, .2, 1),
+      opacity .4s ease;
+  }
+  .panel.parked-left  { transform: translateX(-14%) scale(.97); opacity: 0; }
+  .panel.parked-right { transform: translateX(14%) scale(.97);  opacity: 0; }
+  .panel.parked-left,
+  .panel.parked-right { pointer-events: none; }
+
+  /* The quadrille ground cross-fades to the orange sheet with the panel. */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background-color: var(--info-paper);
+    background-image:
+      linear-gradient(var(--info-grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--info-grid) 1px, transparent 1px);
+    background-size: var(--step) var(--step);
+    background-position: -1px -1px;
+    opacity: 0;
+    transition: opacity .5s ease;
+  }
+  :root[data-panel="info"] body::before { opacity: 1; }
+
+  /* ---------- information panel: Columbia Gadget Works, orange ---------- */
+
+  .panel-info {
+    --paper:    var(--info-paper);
+    --grid:     var(--info-grid);
+    --ink:      #1F1F23;
+    --graphite: #6B5E55;
+    --rule:     #DCCBBE;
+    --cut:      var(--cgw-orange);
+  }
+  :root[data-theme="dark"] .panel-info {
+    --ink:      #F2ECE6;
+    --graphite: #B4A194;
+    --rule:     #4B3A2F;
+    --cut:      #FF8F4F;
+  }
+
+  /* The orange sheet: orange frame and a thick top bar, the shop's name in
+     orange, and orange rules wherever the fund sheet uses red. */
+  .panel-info {
+    border-color: var(--cgw-orange);
+    border-top-width: .5rem;
+    box-shadow: 6px 6px 0 var(--cgw-orange), 0 18px 40px -30px rgba(16, 26, 34, .55);
+  }
+  .panel-info h1 { color: var(--cut); }
+  .panel-info h1 em { color: var(--ink); }
+  .panel-info .eyebrow { color: var(--cut); }
+
+  /* ---------- calendar: month grid in the CGW website's vernacular ---------- */
+
+  .cal { padding: clamp(1.5rem, 4vw, 2.75rem); }
+
+  .cal-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: .75rem 1.25rem;
+    padding-bottom: .875rem;
+    margin-bottom: 1rem;
+    border-bottom: 1.5px solid var(--ink);
+  }
+  .cal-title {
+    font-family: "IBM Plex Sans Condensed", sans-serif;
+    font-weight: 700;
+    font-size: clamp(1.5rem, 4vw, 2.25rem);
+    line-height: 1;
+    text-transform: uppercase;
+    letter-spacing: .015em;
+    margin: 0;
+  }
+  .cal-nav { display: flex; gap: .5rem; }
+  .cal-nav .side-btn { min-width: 3.25rem; min-height: 2.75rem; font-size: .75rem; }
+  .cal-nav .cal-arrow { font-size: 1.25rem; line-height: 1; }
+
+  .cal-grid {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    transition: opacity .2s ease;
+  }
+  .cal-grid.loading { opacity: .45; }
+  .cal-grid th {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: .625rem;
+    font-weight: 600;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    text-align: left;
+    color: var(--graphite);
+    padding: 0 0 .375rem .375rem;
+  }
+  .cal-grid td {
+    height: clamp(4.5rem, 10vw, 6.5rem);
+    padding: .25rem .3125rem;
+    vertical-align: top;
+    border: 1px solid var(--rule);
+    background: var(--paper);
+    overflow: hidden;
+  }
+  .cal-grid td.cal-empty { background: transparent; border-color: transparent; }
+  .cal-grid td.cal-today {
+    border-color: var(--cut);
+    box-shadow: inset 0 3px 0 var(--cut);
+  }
+  .cal-daynum {
+    display: block;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: .75rem;
+    color: var(--graphite);
+    margin-bottom: .1875rem;
+  }
+  .cal-today .cal-daynum { color: var(--cut); font-weight: 600; }
+  .cal-chip {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+    font-size: .75rem;
+    line-height: 1.25;
+    padding: .0625rem 0 .0625rem .375rem;
+    margin-bottom: .25rem;
+    border-left: 2px solid var(--cut);
+    overflow-wrap: anywhere;
+  }
+  .cal-chip b {
+    font-family: "IBM Plex Mono", monospace;
+    font-weight: 600;
+    font-size: .6875rem;
+    color: var(--graphite);
+  }
+  /* Phones: a dot per event is all a day cell has room for. */
+  @media (max-width: 560px) {
+    .cal-chip {
+      font-size: 0;
+      height: .375rem;
+      padding: 0;
+      border-left: 0;
+      background: var(--cut);
+    }
+  }
+  .cal-note {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: .75rem;
+    letter-spacing: .04em;
+    color: var(--graphite);
+    margin: .875rem 0 0;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; }
+  }
+</style>
+<script>
+  // ?kiosk (or ?kiosk=1) marks the shop touchscreen; ?kiosk=0 turns it off.
+  // Runs before first paint so the kiosk layout never flashes the web one.
+  (function () {
+    const v = new URLSearchParams(location.search).get("kiosk");
+    if (v !== null && !/^(0|false|no|off)$/i.test(v)) {
+      document.documentElement.setAttribute("data-kiosk", "");
+    }
+  })();
+</script>
+</head>
+<body>
+
+<a class="side-btn kiosk-min" href="kioskmgr://minimize" aria-label="Minimize the kiosk page">
+  <span class="kiosk-min-bar" aria-hidden="true"></span> Minimize
+</a>
+
+<div class="stage">
+
+<!-- ================= panel 1: the shop fund ================= -->
+<main class="sheet panel panel-fund" id="panel-fund">
+  <header class="masthead">
+    <div class="masthead-main">
+      <p class="eyebrow">
+        <span>Status sheet</span>
+        <span>Live from Discord</span>
+        <span id="rev">Rev —</span>
+      </p>
+      <h1>Shop fund<em>Where we stand</em></h1>
+    </div>
+
+    <div class="side-actions">
+      <button type="button" class="side-btn theme-toggle" aria-pressed="true">
+        <span class="theme-toggle-icon" aria-hidden="true">&#9789;</span>
+        <span class="theme-toggle-text">Dark</span>
+      </button>
+      <a class="side-btn open-gui" href="kioskmgr://show">Open GUI</a>
+    </div>
+  </header>
+
+  <section class="give-band" aria-label="Ways to give">
+    <figure class="qr-card" data-qr="donate"{{ if not (index $qr "donate") }} hidden{{ end }}>
+      <div class="qr-img"><img src="{{ index $qr "donate" }}" alt="QR code to donate with a credit card" width="168" height="168"></div>
+      <figcaption><a class="qr-cap" target="_blank" rel="noopener">Donate with credit card</a></figcaption>
+    </figure>
+    <figure class="qr-card" data-qr="venmo"{{ if not (index $qr "venmo") }} hidden{{ end }}>
+      <div class="qr-img"><img src="{{ index $qr "venmo" }}" alt="QR code to donate with Venmo" width="168" height="168"></div>
+      <figcaption><a class="qr-cap" target="_blank" rel="noopener">Donate with Venmo</a></figcaption>
+    </figure>
+    <button type="button" class="swap-btn to-info" data-show="info">
+      <span>View information <span class="swap-arrow" aria-hidden="true">&rarr;</span></span>
+      <small>Calendar &middot; Discord &middot; Membership</small>
+    </button>
+  </section>
+
+  <div id="sheet-body">
+    <div class="notice"><b>Loading</b>Pulling the latest figures.</div>
+  </div>
+
+  <dl class="titleblock" id="titleblock" hidden>
+    <div><dt>Campaigns</dt><dd id="tb-count">—</dd></div>
+    <div><dt>Total raised</dt><dd id="tb-raised">—</dd></div>
+    <div><dt>Donations</dt><dd id="tb-gifts">—</dd></div>
+    <div><dt>Updated</dt><dd id="tb-updated">—</dd></div>
+  </dl>
+</main>
+
+<!-- ================= panel 2: Columbia Gadget Works ================= -->
+<main class="sheet panel panel-info parked-right" id="panel-info" hidden>
+  <header class="masthead">
+    <div class="masthead-main">
+      <p class="eyebrow">
+        <span>Community makerspace</span>
+        <span>Columbia, Missouri</span>
+        <span>Since 2017</span>
+      </p>
+      <h1>Columbia Gadget Works<em>What's on at the shop</em></h1>
+    </div>
+
+    <div class="side-actions">
+      <button type="button" class="side-btn theme-toggle" aria-pressed="true">
+        <span class="theme-toggle-icon" aria-hidden="true">&#9789;</span>
+        <span class="theme-toggle-text">Dark</span>
+      </button>
+      <a class="side-btn open-gui" href="kioskmgr://show">Open GUI</a>
+    </div>
+  </header>
+
+  <section class="cal" aria-labelledby="cal-title">
+    <div class="cal-bar">
+      <h2 class="cal-title" id="cal-title">Calendar</h2>
+      <div class="cal-nav">
+        <button type="button" class="side-btn" id="cal-prev" aria-label="Previous month"><span class="cal-arrow" aria-hidden="true">&lsaquo;</span></button>
+        <button type="button" class="side-btn" id="cal-today">This month</button>
+        <button type="button" class="side-btn" id="cal-next" aria-label="Next month"><span class="cal-arrow" aria-hidden="true">&rsaquo;</span></button>
+      </div>
+    </div>
+    <table class="cal-grid" id="cal-grid">
+      <thead>
+        <tr><th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th></tr>
+      </thead>
+      <tbody id="cal-body"></tbody>
+    </table>
+    <p class="cal-note" id="cal-note" role="status"></p>
+  </section>
+
+  <dl class="titleblock">
+    <div><dt>Open Hack Night</dt><dd>Thursdays 6–8 pm</dd></div>
+    <div><dt>Where</dt><dd>1404 Grand Ave</dd></div>
+    <div><dt>Online</dt><dd>columbiagadgetworks.org</dd></div>
+  </dl>
+
+  <section class="give-band at-foot" aria-label="Get involved">
+    <figure class="qr-card" data-qr="discord"{{ if not (index $qr "discord") }} hidden{{ end }}>
+      <div class="qr-img"><img src="{{ index $qr "discord" }}" alt="QR code to join the Discord" width="168" height="168"></div>
+      <figcaption><a class="qr-cap" target="_blank" rel="noopener">Join the Discord</a></figcaption>
+    </figure>
+    <figure class="qr-card" data-qr="membership"{{ if not (index $qr "membership") }} hidden{{ end }}>
+      <div class="qr-img"><img src="{{ index $qr "membership" }}" alt="QR code to become a member" width="168" height="168"></div>
+      <figcaption><a class="qr-cap" target="_blank" rel="noopener">Become a member</a></figcaption>
+    </figure>
+    <button type="button" class="swap-btn to-fund back" data-show="fund">
+      <span><span class="swap-arrow" aria-hidden="true">&larr;</span> View fundraising</span>
+      <small>Shop fund progress</small>
+    </button>
+  </section>
+</main>
+
+</div>
+
+<script>
+const kiosk = document.documentElement.hasAttribute("data-kiosk");
+const body = document.getElementById("sheet-body");
+const tb = document.getElementById("titleblock");
+let rev = 0;
+
+/* ---------- theme (one toggle per panel, kept in step) ---------- */
+
+const themeToggles = [...document.querySelectorAll(".theme-toggle")];
+
+function setTheme(mode) {
+  document.documentElement.setAttribute("data-theme", mode);
+  for (const t of themeToggles) {
+    t.setAttribute("aria-pressed", String(mode === "dark"));
+    t.querySelector(".theme-toggle-icon").textContent = mode === "dark" ? "☽" : "☀";
+    t.querySelector(".theme-toggle-text").textContent = mode === "dark" ? "Dark" : "Light";
+  }
+}
+
+for (const t of themeToggles) {
+  t.addEventListener("click", () => {
+    const current = document.documentElement.getAttribute("data-theme");
+    setTheme(current === "dark" ? "light" : "dark");
+  });
+}
+
+/* ---------- QR cards ---------- */
+
+const qrCards = [...document.querySelectorAll(".qr-card")];
+const qrBroken = new Set();
+
+for (const card of qrCards) {
+  card.querySelector("img").addEventListener("error", () => {
+    qrBroken.add(card.dataset.qr);
+    card.hidden = true;
+  });
+}
+
+// A card shows only when the server has a link for it. Off the kiosk the
+// caption doubles as the link, for visitors already on their phone.
+function applyLinks(links) {
+  for (const card of qrCards) {
+    const url = (links || {})[card.dataset.qr];
+    const cap = card.querySelector(".qr-cap");
+    card.hidden = !url || qrBroken.has(card.dataset.qr);
+    if (url && !kiosk) cap.href = url;
+    else cap.removeAttribute("href");
+  }
+}
+
+// The links are fixed when the site is built.
+applyLinks({{ $links }});
+
+/* ---------- switching panels ---------- */
+
+const panels = {
+  fund: document.getElementById("panel-fund"),
+  info: document.getElementById("panel-info"),
+};
+const SWAP_MS = 520;
+let current = "fund";
+let swapTimer = 0;
+
+function showPanel(name) {
+  if (name === current || !panels[name]) return;
+  const incoming = panels[name];
+  const outgoing = panels[current];
+  // fund lives on the left, info on the right.
+  const away = current === "fund" ? "parked-left" : "parked-right";
+
+  clearTimeout(swapTimer);
+  incoming.hidden = false;
+  incoming.inert = false;
+  incoming.getBoundingClientRect();          // commit the parked position
+  incoming.classList.remove("parked-left", "parked-right");
+  outgoing.classList.add(away);
+  outgoing.inert = true;
+  document.documentElement.setAttribute("data-panel", name);
+  window.scrollTo({ top: 0, behavior: "smooth" });
+  current = name;
+
+  // Drop the old panel from layout once it has slid away, so the page is
+  // only as tall as the panel on screen.
+  swapTimer = setTimeout(() => { outgoing.hidden = true; }, SWAP_MS);
+  if (name === "info") calendarShow();
+  armIdle();
+}
+
+for (const btn of document.querySelectorAll("[data-show]")) {
+  btn.addEventListener("click", () => showPanel(btn.dataset.show));
+}
+
+// On the kiosk, an information panel nobody is touching returns to the fund
+// sheet, so the screen is never left on a month someone browsed to.
+const IDLE_MS = 120000;
+let idleTimer = 0;
+function armIdle() {
+  clearTimeout(idleTimer);
+  if (kiosk && current === "info") {
+    idleTimer = setTimeout(() => showPanel("fund"), IDLE_MS);
+  }
+}
+document.addEventListener("pointerdown", armIdle, { passive: true });
+
+/* ---------- calendar ---------- */
+
+const TZ = "America/Chicago";
+const MONTHS = ["January", "February", "March", "April", "May", "June", "July",
+  "August", "September", "October", "November", "December"];
+const calBody = document.getElementById("cal-body");
+const calGrid = document.getElementById("cal-grid");
+const calTitle = document.getElementById("cal-title");
+const calNote = document.getElementById("cal-note");
+const calCache = {};
+let calCursor = null;
+let calLive = null;    // null until the first answer, then true / false
+
+function todayParts() {
+  const p = {};
+  new Intl.DateTimeFormat("en-CA", { timeZone: TZ, year: "numeric", month: "2-digit", day: "2-digit" })
+    .formatToParts(new Date()).forEach(x => { p[x.type] = x.value; });
+  return { y: +p.year, m: +p.month, today: `${p.year}-${p.month}-${p.day}` };
+}
+const monthKey = (y, m) => `${y}-${String(m).padStart(2, "0")}`;
+
+function timeLabel(iso) {
+  return new Intl.DateTimeFormat("en-US", { timeZone: TZ, hour: "numeric", minute: "2-digit" })
+    .format(new Date(iso)).replace(":00", "").replace(/\s/g, "").toLowerCase();
+}
+
+// Placeholder until the website's calendar feed is connected: the standing
+// schedule the site itself lists. Weekly Open Hack Night, plus the free City
+// of Columbia class on the first Thursday from Nov 2026 to Oct 2027.
+function standingSchedule(y, m) {
+  const out = [];
+  const days = new Date(Date.UTC(y, m, 0)).getUTCDate();
+  let thursdays = 0;
+  for (let d = 1; d <= days; d++) {
+    if (new Date(Date.UTC(y, m - 1, d)).getUTCDay() !== 4) continue;
+    thursdays++;
+    const day = `${monthKey(y, m)}-${String(d).padStart(2, "0")}`;
+    const key = y * 100 + m;
+    if (thursdays === 1 && key >= 202611 && key <= 202710) {
+      out.push({ day, time: "6pm", title: "Free public class" });
+    }
+    out.push({ day, time: "6pm", title: "Open Hack Night" });
+  }
+  return out;
+}
+
+async function calendarEvents(y, m) {
+  const k = monthKey(y, m);
+  if (calCache[k]) return calCache[k];
+  try {
+    const res = await fetch(`/api/calendar?from=${k}&months=1`, { headers: { accept: "application/json" } });
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.error);
+    calLive = true;
+    return (calCache[k] = data.events.map(e => ({
+      day: e.day, title: e.title, time: e.allDay ? "" : timeLabel(e.start),
+    })));
+  } catch (e) {
+    calLive = false;
+    return standingSchedule(y, m);   // not cached: retry the feed next time
+  }
+}
+
+async function calendarRender() {
+  const { y, m } = calCursor;
+  const { today } = todayParts();
+  calTitle.textContent = `${MONTHS[m - 1]} ${y}`;
+  calGrid.classList.add("loading");
+
+  const events = await calendarEvents(y, m);
+  if (calCursor.y !== y || calCursor.m !== m) return;   // moved on meanwhile
+
+  const byDay = {};
+  for (const e of events) (byDay[e.day] = byDay[e.day] || []).push(e);
+
+  const pad = new Date(Date.UTC(y, m - 1, 1)).getUTCDay();
+  const days = new Date(Date.UTC(y, m, 0)).getUTCDate();
+  const cells = Array(pad).fill(null).concat([...Array(days)].map((_, i) => i + 1));
+  while (cells.length % 7) cells.push(null);
+
+  let html = "";
+  for (let w = 0; w < cells.length; w += 7) {
+    html += "<tr>";
+    for (const d of cells.slice(w, w + 7)) {
+      if (d === null) { html += `<td class="cal-empty"></td>`; continue; }
+      const ds = `${monthKey(y, m)}-${String(d).padStart(2, "0")}`;
+      const chips = (byDay[ds] || []).map(e =>
+        `<span class="cal-chip" title="${esc(e.title)}">${e.time ? `<b>${esc(e.time)}</b> ` : ""}${esc(e.title)}</span>`
+      ).join("");
+      html += `<td class="${ds === today ? "cal-today" : ""}"><span class="cal-daynum">${d}</span>${chips}</td>`;
+    }
+    html += "</tr>";
+  }
+  calBody.innerHTML = html;
+  calGrid.classList.remove("loading");
+  calNote.textContent = calLive
+    ? "Live from the Columbia Gadget Works calendar."
+    : "Showing the standing schedule. Holidays and one-off events are announced on Discord.";
+}
+
+function calendarStep(delta) {
+  let { y, m } = calCursor;
+  m += delta;
+  if (m < 1) { m = 12; y--; }
+  if (m > 12) { m = 1; y++; }
+  calCursor = { y, m };
+  calendarRender();
+}
+
+// Opening the panel always starts on the current month.
+function calendarShow() {
+  const t = todayParts();
+  calCursor = { y: t.y, m: t.m };
+  calendarRender();
+}
+
+document.getElementById("cal-prev").addEventListener("click", () => calendarStep(-1));
+document.getElementById("cal-next").addEventListener("click", () => calendarStep(1));
+document.getElementById("cal-today").addEventListener("click", calendarShow);
+
+/* ---------- fund sheet ---------- */
+
+const money = (cur, n) =>
+  cur + n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+function ticks() {
+  let out = "";
+  for (let i = 0; i <= 20; i++) {
+    const major = i % 5 === 0;
+    out += `<i class="${major ? "major" : ""}" style="left:${i * 5}%"></i>`;
+  }
+  return out;
+}
+
+function campaignHTML(c) {
+  const met = c.raised >= c.goal;
+  const pct = Math.min(c.pct, 1);
+  const short = Math.max(0, c.goal - c.raised);
+
+  const ledger = c.recent.length ? `
+    <div class="ledger">
+      <p class="ledger-label">Most recent</p>
+      <ol>${c.recent.map(d => `
+        <li><span>${esc(d.donor)}</span><span class="lead"></span>
+            <span class="amt">${money(c.currency, d.amount)}</span></li>`).join("")}
+      </ol>
+    </div>` : "";
+
+  return `
+    <section class="campaign ${met ? "finished" : ""}">
+      <div class="campaign-head">
+        <h2 class="campaign-name">${esc(c.name)}</h2>
+        <p class="tally"><b>${money(c.currency, c.raised)}</b> of ${money(c.currency, c.goal)}</p>
+      </div>
+
+      <div class="gauge" style="--pct:${pct}">
+        <div class="scale">${ticks()}</div>
+        <div class="track">
+          <div class="fill"></div>
+          ${met ? `<span class="overrun">Finished!</span>` : ""}
+        </div>
+        <div class="dim">
+          <span class="dim-line l"></span>
+          <span class="dim-val">${(c.pct * 100).toFixed(1)}%</span>
+          <span class="dim-line r"></span>
+        </div>
+      </div>
+
+      <p class="remaining">${met
+        ? `Finished! ${money(c.currency, c.raised)} raised across ${c.count} gift${c.count === 1 ? "" : "s"}.`
+        : `${money(c.currency, short)} to go · ${c.count} gift${c.count === 1 ? "" : "s"} so far`}</p>
+
+      ${ledger}
+    </section>`;
+}
+
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, ch =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]));
+}
+
+async function load() {
+  let data;
+  try {
+    const res = await fetch("/api/fund/campaigns", { cache: "no-store" });
+    if (!res.ok) throw new Error(res.status);
+    data = await res.json();
+  } catch (e) {
+    body.innerHTML = `<div class="notice"><b>Can't reach the tracker</b>
+      The sheet will retry on its own in 30 seconds.</div>`;
+    tb.hidden = true;
+    return;
+  }
+
+
+  // Active campaigns first, finished ones sink to the bottom; alphabetical
+  // order within each group is preserved since Array#sort is stable and the
+  // API already returns rows ordered by name.
+  const cs = [...data.campaigns].sort((a, b) => {
+    const aMet = a.raised >= a.goal, bMet = b.raised >= b.goal;
+    return aMet === bMet ? 0 : aMet ? 1 : -1;
+  });
+
+  if (!cs.length) {
+    body.innerHTML = `<div class="notice"><b>Nothing running yet</b>
+      Start one in Discord with /fund create, then it shows up here.</div>`;
+    tb.hidden = true;
+    return;
+  }
+
+  body.innerHTML = cs.map(campaignHTML).join("");
+
+  document.getElementById("tb-count").textContent = cs.length;
+  document.getElementById("tb-raised").textContent =
+    money(cs[0].currency, cs.reduce((s, c) => s + c.raised, 0));
+  document.getElementById("tb-gifts").textContent =
+    cs.reduce((s, c) => s + c.count, 0);
+  document.getElementById("tb-updated").textContent =
+    new Date(data.generated).toLocaleString(undefined,
+      { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+  document.getElementById("rev").textContent = "Rev " + String(++rev).padStart(3, "0");
+  tb.hidden = false;
+}
+
+load();
+setInterval(load, 30000);
+</script>
+</body>
+</html>

@@ -19,5 +19,13 @@
   "kv_namespaces": [{ "binding": "SUBSCRIBERS" }],
   // Do not delete variables/secrets that were set in the dashboard on each deploy.
   "keep_vars": true,
+  "vars": {
+    // The calendar's PUBLIC address, so it can live here. If the calendar is ever
+    // made private, delete this line and set CALENDAR_ICS_URL as a secret instead.
+    "CALENDAR_ICS_URL": "https://calendar.google.com/calendar/ical/columbiagadgetworks%40gmail.com/public/basic.ics",
+    // The fundbot sheet's read-only campaigns endpoint, fetched by /api/fund/campaigns
+    // for the shop touchscreen page at /kiosk/.
+    "FUNDBOT_API_URL": "https://fundbot.adman.casa/api/campaigns"
+  },
   "observability": { "enabled": true }
 }

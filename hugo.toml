@@ -39,15 +39,17 @@ disableKinds = ["taxonomy", "term"]
   # Payment / community links
   givebutterMembership = "https://givebutter.com/kxk2FA"
   givebutterDonate = "https://givebutter.com/v7RxV6"
+  venmoDonate = "https://www.paypal.com/qrcodes/venmocs/da49c07b-2aeb-42b7-9cd4-731507b6012b?created=1791391114"  # Venmo QR link, shown on /kiosk/
   givebutterAccount = "T9BSo58XoxQgK1XH"   # from the Givebutter embed script (acct=...)
   givebutterWidgetId = "j9Mr6K"          # the id from the <givebutter-widget id="..."> tag; its form offers one-time, monthly and yearly gifts
   discord = "https://discord.gg/F7kM7ardMs"
+  kioskDiscord = "https://discord.gg/yjpeBrAjuR"  # never-expiring invite for the QR code on /kiosk/
   wiki = "https://wiki.comogadget.casa/"
   facebook = "https://www.facebook.com/columbiagadgetworks/"
   bluesky = "https://bsky.app/profile/comogadgetworks.bsky.social"
   github = "https://github.com/ColumbiaGadgetWorks"
   mapsQuery = "Columbia Gadget Works, 1404 Grand Ave, Columbia, MO 65203"
-  calendarPublicUrl = ""           # optional: PUBLIC .ics address of the calendar, used only for the "add to your calendar" buttons.
+  calendarPublicUrl = "https://calendar.google.com/calendar/ical/columbiagadgetworks%40gmail.com/public/basic.ics"  # optional: PUBLIC .ics address of the calendar, used only for the "add to your calendar" buttons.
                                    # Leave empty if the calendar is not shared publicly. The address the Worker reads is
                                    # the CALENDAR_ICS_URL secret, which must never be put in this file.
   contactEndpoint = "/api/contact" # handled by the Worker in src/index.js

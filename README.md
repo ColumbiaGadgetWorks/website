@@ -47,6 +47,24 @@ The site deploys as a Cloudflare Worker: Hugo's `public/` folder is served as st
 
 Manual deploy from a machine with Wrangler logged in: `npm run deploy`.
 
+## Shop touchscreen page (/kiosk/)
+
+`/kiosk/` is the page the shop's touchscreen shows (opened by
+[kiosk-manager](https://github.com/ColumbiaGadgetWorks/kiosk-manager) as
+`/kiosk/?kiosk`). Nothing on the site links to it, and it is kept out of the
+sitemap and search results. It is one standalone template,
+`layouts/kiosk.html`, with two panels the visitor swaps between: the shop fund
+and a month calendar.
+
+* **Fund figures** come from the fundbot Discord bot. `/api/fund/campaigns`
+  (`src/fund.js`) passes through `FUNDBOT_API_URL`, set in `wrangler.jsonc`.
+* **Calendar** is the same `/api/calendar` the calendar page uses.
+* **QR codes** are drawn by Hugo at build time from `hugo.toml`:
+  `givebutterDonate` (credit card), `venmoDonate`, `kioskDiscord` and the
+  `/membership/` page. Change a link there and the next deploy redraws it.
+* Keep "Shop Fund" in the page title: kiosk-manager's watchdog uses it to tell
+  the right page from an error or login page.
+
 ## Video
 
 Drop an MP4 in `static/video/` and a poster still in `assets/img/`, then:
