@@ -28,11 +28,11 @@ Cost should never be the reason someone doesn't join. If the standard rate is ou
 ## How to join
 
 1. **Visit on a Thursday.** Get a tour, meet a few members, and make sure the shop is what you're looking for. Most people visit two or three times before joining.
-2. **Sign the waiver and do a safety orientation.** Orientation takes about 30 minutes and covers shop rules, cleanup expectations, and where things are.
-3. **Set up dues.** Use the button below; pick the level and "monthly".
+2. **Sign up online.** Use the button below. You will sign the liability waiver and the membership agreement, upload a photo of your ID, and set up monthly dues through Givebutter. It takes about ten minutes, and you can stop and come back.
+3. **Do a safety orientation.** Orientation takes about 30 minutes and covers shop rules, cleanup expectations, and where things are.
 4. **Get your credential.** A member of the membership team will set up door access, a locker, and your wiki and Discord accounts, and introduce you to the zone leads.
 
-{{< givebutter campaign="membership" label="Set up membership dues" >}}
+{{< button href="/membership/join/" text="Start your membership" class="btn-primary btn-lg" />}}
 
 ## Training
 
