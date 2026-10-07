@@ -4,6 +4,7 @@ import { handleContact } from './contact.js';
 import { handleSubscribe, handleExport } from './subscribe.js';
 import { handleCalendar } from './calendar.js';
 import { handleFund } from './fund.js';
+import { handleDiscord } from './fund-discord.js';
 import { handleJoin, handleGivebutterWebhook, joinConfigured } from './join.js';
 
 export default {
@@ -25,6 +26,10 @@ export default {
       if (request.method !== 'GET') return new Response('GET only', { status: 405 });
       return handleFund(request, env, ctx);
     }
+    if (pathname === '/api/discord/interactions') {
+      if (request.method !== 'POST') return new Response('POST only', { status: 405 });
+      return handleDiscord(request, env, ctx);
+    }
     if (pathname === '/api/subscribers') {
       if (request.method !== 'GET') return new Response('GET only', { status: 405 });
       return handleExport(request, env);
@@ -44,6 +49,9 @@ export default {
           TURNSTILE_SECRET: Boolean(env.TURNSTILE_SECRET),
           CALENDAR_ICS_URL: Boolean(env.CALENDAR_ICS_URL),
           FUNDBOT_API_URL: Boolean(env.FUNDBOT_API_URL),
+          FUND_DB: Boolean(env.FUND_DB),
+          DISCORD_PUBLIC_KEY: Boolean(env.DISCORD_PUBLIC_KEY),
+          DISCORD_BOT_TOKEN: Boolean(env.DISCORD_BOT_TOKEN),
           SUBSCRIBERS: Boolean(env.SUBSCRIBERS),
           SUBSCRIBERS_EXPORT_TOKEN: Boolean(env.SUBSCRIBERS_EXPORT_TOKEN),
           DISCORD_SIGNUP_WEBHOOK_URL: Boolean(env.DISCORD_SIGNUP_WEBHOOK_URL),
