@@ -2,24 +2,13 @@
 title: Calendar
 linkTitle: Calendar
 subtitle: Everything happening at the shop, kept in one place.
+wide: true
 description: "Columbia Gadget Works calendar: free Open Hack Night every Thursday 6–8 pm, free monthly classes, board meetings, and the annual member meeting in Columbia, Missouri."
 ---
 
 This calendar is the schedule of record for Columbia Gadget Works. It updates as we add things, so if it is here it is happening.
 
 {{< calendar-live >}}
-
-{{< hidden >}}
-
-## The standing schedule
-
-Some things happen on the same rhythm all year, whether or not they appear above.
-
-{{< recurring >}}
-
-**Open Hack Night is the one to start with.** Every Thursday from 6 to 8 pm the shop is open to the public. No membership, no sign-up, no experience, and nothing to bring. Someone will give you a tour, and you can use the beginner-friendly tools the same evening. [What to expect on a visit](/visit/).
-
-{{< /hidden >}}
 
 {{< calendar-subscribe >}}
 
