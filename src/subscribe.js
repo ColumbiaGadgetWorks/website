@@ -1,11 +1,20 @@
 // Email updates signup, mounted by src/index.js (Cloudflare Worker):
 //   POST /api/subscribe    add an address to the list
-//   GET  /api/subscribers  export the list as CSV (optional, see below)
+//   GET  /api/subscribers  export what is held in KV as CSV (optional, see below)
+//
+// The list lives in Dolibarr: once DOLIBARR_URL and DOLIBARR_API_KEY are set
+// (the same two secrets as the membership signup, src/join.js), each address
+// becomes a Dolibarr contact tagged "Email updates", and mass emailings are sent
+// from there. Until then, or if Dolibarr cannot be reached, the address is kept
+// in KV instead so no signup is lost; the CSV export plus the module's "Import
+// email list" page move those across.
 //
 // Bindings:
-//   SUBSCRIBERS  (KV namespace) - declared in wrangler.jsonc WITHOUT an id, so
-//                Wrangler creates it automatically on the first deploy. Nothing
-//                to set up by hand. It appears under Storage & Databases -> KV.
+//   DOLIBARR_URL, DOLIBARR_API_KEY (secrets) - see src/join.js.
+//   SUBSCRIBERS  (KV namespace) - the fallback store and the rate limit. Declared
+//                in wrangler.jsonc WITHOUT an id, so Wrangler creates it
+//                automatically on the first deploy. It appears under Storage &
+//                Databases -> KV.
 //   TURNSTILE_SECRET (secret, optional) - the same Turnstile widget as the
 //                contact form. Add it only AFTER params.turnstileSiteKey has
 //                deployed, or every signup is rejected.
@@ -16,6 +25,7 @@
 //                Discord channel.
 
 import { verifyTurnstile } from './turnstile.js';
+import { dolibarr, joinConfigured } from './join.js';
 
 const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 const SIGNUPS_PER_HOUR = 5;
@@ -45,6 +55,18 @@ export async function handleSubscribe(request, env) {
   const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
   if (await isRateLimited(env.SUBSCRIBERS, ip)) return done(request, back, 'slow', 429, 'Too many signups');
 
+  const country = request.headers.get('CF-IPCountry') || '';
+  if (joinConfigured(env)) {
+    const r = await dolibarr(env, 'subscribe', { email, page: back, source: 'the website', country, ip });
+    if (r.data && r.data.ok) {
+      if (r.data.result !== 'already') await ping(env, { email, subscribed: new Date().toISOString() });
+      return done(request, back, 'ok', 200);
+    }
+    if (r.data && r.data.error === 'invalid') return done(request, back, 'invalid', 400, 'Invalid email address');
+    // Dolibarr is down or misconfigured: keep the address in KV rather than lose it.
+    console.error('subscribe: Dolibarr refused or unreachable, kept in KV', r.status, r.data && r.data.error);
+  }
+
   // Keyed by lowercased email, so signing up twice updates one record.
   const key = `sub:${email.toLowerCase()}`;
   const existing = await env.SUBSCRIBERS.get(key, { type: 'json' }).catch(() => null);
@@ -54,7 +76,7 @@ export async function handleSubscribe(request, env) {
     subscribed: (existing && existing.subscribed) || now,
     updated: now,
     page: back,
-    country: request.headers.get('CF-IPCountry') || '',
+    country,
   };
   await env.SUBSCRIBERS.put(key, JSON.stringify(record));
   if (!existing) await ping(env, record);
