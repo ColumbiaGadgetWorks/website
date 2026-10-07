@@ -12,7 +12,7 @@ The Columbia Gadget Works website has been rebuilt from the ground up. The old s
 
 - **A page for every part of the shop.** The [tools section](/tools/) covers the [laser cutter](/tools/laser-cutter/), [CNC router](/tools/cnc-router/), [3D printers](/tools/3d-printers/), [metal shop](/tools/metal-shop/), [metal casting](/tools/metal-casting/), [electronics bench](/tools/electronics-bench/), and [woodshop](/tools/woodshop/): what each one does, what people make with it, and which tools need training first.
 - **A guide for first-time visitors.** The [visit page](/visit/) explains what to expect at Open Hack Night, every Thursday from 6 to 8 pm. No membership, no experience, and nothing to bring.
-- **Classes and events in one place.** The [classes page](/classes/) collects the workshops members have taught and explains how to propose one, and the [events calendar](/events/) lists Open Hack Night, the free monthly City of Columbia grant classes starting in November, and board meetings.
+- **Classes and events in one place.** The [classes page](/classes/) collects the workshops members have taught and explains how to propose one, and the [events calendar](/calendar/) lists Open Hack Night, the free monthly City of Columbia grant classes starting in November, and board meetings.
 - **Easier giving.** You can donate directly on the [donate page](/donate/), as a one-time, monthly, or yearly gift, and [membership](/membership/) dues and scholarship options are laid out plainly.
 - **Ways to reach us.** There is a [contact form](/contact/), and you can sign up for email updates about new classes and events.
 

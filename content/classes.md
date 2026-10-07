@@ -18,13 +18,13 @@ Members run classes roughly monthly, usually on a Thursday at 6 pm in place of t
 - **Machining:** the Bridgeport mill and the Clausing lathe, from reading the dials to taking a real cut. [Recap](/news/metalworking-class/)
 - **Field trips:** like our tour of KOPN community radio's studios. [Details](/news/kopn-tour-april-23/)
 
-Classes on the calendar for the year ahead: laser cutting basics, CNC router basics, 3D printing basics, intro to electronics and Arduino, welding, and woodshop safety. Dates are announced about a month ahead on the [events page](/events/), the [news page](/news/), and Discord.
+Classes on the calendar for the year ahead: laser cutting basics, CNC router basics, 3D printing basics, intro to electronics and Arduino, welding, and woodshop safety. Dates are announced about a month ahead on the [events page](/calendar/), the [news page](/news/), and Discord.
 
 <!-- TODO: confirm the planned-class list above reflects what the zone leads intend to offer. -->
 
 ### City of Columbia grant classes, Nov 2026 – Oct 2027
 
-Thanks to a grant from the City of Columbia Office of Cultural Affairs, we're running a **free public class on the first Thursday of every month** for a year, starting November 5, 2026. Topics rotate through every zone in the shop. No membership needed; some classes have limited seats, so watch the [calendar](/events/) for sign-up links.
+Thanks to a grant from the City of Columbia Office of Cultural Affairs, we're running a **free public class on the first Thursday of every month** for a year, starting November 5, 2026. Topics rotate through every zone in the shop. No membership needed; some classes have limited seats, so watch the [calendar](/calendar/) for sign-up links.
 
 ## Cost
 

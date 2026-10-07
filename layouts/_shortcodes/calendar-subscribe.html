@@ -1,0 +1,27 @@
+{{- /* "Add to your calendar" buttons. Only rendered when a PUBLIC calendar
+       address is configured. The feed the Worker reads may be a Google secret
+       address, which is a credential and must never appear in a page. */ -}}
+{{- with site.Params.calendarPublicUrl -}}
+{{- $ics := . -}}
+{{- /* webcal:// is not a scheme Go's html/template treats as safe, so without
+       safeURL the href is rewritten to #ZgotmplZ and the button goes nowhere.
+       The value is our own configuration, never anything a visitor supplies. */ -}}
+{{- $webcal := replaceRE "^https?://" "webcal://" $ics | safeURL -}}
+{{- /* Adding a public Google calendar by its calendar id subscribes to it
+       live. Adding it by feed URL instead makes Google poll the .ics, which can
+       lag most of a day. Only the /public/ form is matched, so a secret address
+       put here by mistake is still never turned into a link. Any other provider
+       falls back to the feed URL. */ -}}
+{{- $gid := replaceRE `^https?://calendar\.google\.com/calendar/ical/([^/]+)/public/basic\.ics$` "$1" $ics -}}
+{{- $cid := cond (ne $gid $ics) $gid ($ics | urlquery) -}}
+{{- /* The id out of the path is already percent-encoded, so the whole href is
+       marked safe. Interpolating it normally makes Go re-encode the percent and
+       Google then receives a calendar id that does not exist. */ -}}
+{{- $addGoogle := printf "https://calendar.google.com/calendar/render?cid=%s" $cid | safeURL -}}
+<p class="cal-subscribe">
+  <a class="btn btn-outline" href="{{ $addGoogle }}" rel="noopener">Add to Google Calendar</a>
+  <a class="btn btn-outline" href="{{ $webcal }}">Add to Apple or Outlook</a>
+  <a class="btn btn-outline" href="{{ $ics }}">Download the .ics file</a>
+</p>
+<p class="small muted">Subscribing keeps it up to date on your own device. Changes we make here show up on yours.</p>
+{{- end -}}

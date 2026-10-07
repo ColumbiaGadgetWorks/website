@@ -13,3 +13,4 @@
 /wp-login.php                                  /                                         301
 /wp-admin/*                                    /                                         301
 /wp-content/*                                  /                                         301
+/events/                                       /calendar/                                301

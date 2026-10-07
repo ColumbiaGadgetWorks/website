@@ -2,9 +2,10 @@
 // only /api/* reaches this script. See wrangler.jsonc.
 import { handleContact } from './contact.js';
 import { handleSubscribe, handleExport } from './subscribe.js';
+import { handleCalendar } from './calendar.js';
 
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     const { pathname } = new URL(request.url);
     if (pathname === '/api/contact') {
       if (request.method !== 'POST') return new Response('POST only', { status: 405 });
@@ -13,6 +14,10 @@ export default {
     if (pathname === '/api/subscribe') {
       if (request.method !== 'POST') return new Response('POST only', { status: 405 });
       return handleSubscribe(request, env);
+    }
+    if (pathname === '/api/calendar') {
+      if (request.method !== 'GET') return new Response('GET only', { status: 405 });
+      return handleCalendar(request, env, ctx);
     }
     if (pathname === '/api/subscribers') {
       if (request.method !== 'GET') return new Response('GET only', { status: 405 });
@@ -26,6 +31,7 @@ export default {
         configured: {
           DISCORD_WEBHOOK_URL: Boolean(env.DISCORD_WEBHOOK_URL),
           TURNSTILE_SECRET: Boolean(env.TURNSTILE_SECRET),
+          CALENDAR_ICS_URL: Boolean(env.CALENDAR_ICS_URL),
           SUBSCRIBERS: Boolean(env.SUBSCRIBERS),
           SUBSCRIBERS_EXPORT_TOKEN: Boolean(env.SUBSCRIBERS_EXPORT_TOKEN),
           DISCORD_SIGNUP_WEBHOOK_URL: Boolean(env.DISCORD_SIGNUP_WEBHOOK_URL),

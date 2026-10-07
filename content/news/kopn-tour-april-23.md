@@ -18,4 +18,4 @@ Members toured the radio station and its studios, and heard about the new tower 
 
 Field trips like this one are a regular part of what we do. Not everything worth understanding is in our building, and Columbia has a lot of places quietly running interesting equipment. A community radio station is a good example: it is a working broadcast operation kept going by volunteers, which is a description that will sound familiar to anyone who spends Thursday evenings at the shop.
 
-If you know somewhere that would host a group of curious people for an hour, tell us on [Discord](https://discord.gg/F7kM7ardMs) or through the [contact form](/contact/). Past trips and classes are listed on the [classes page](/classes/), and upcoming ones go on the [events calendar](/events/).
+If you know somewhere that would host a group of curious people for an hour, tell us on [Discord](https://discord.gg/F7kM7ardMs) or through the [contact form](/contact/). Past trips and classes are listed on the [classes page](/classes/), and upcoming ones go on the [events calendar](/calendar/).
