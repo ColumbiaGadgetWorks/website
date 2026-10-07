@@ -60,7 +60,7 @@ and a month calendar.
   (`src/fund.js`) passes through `FUNDBOT_API_URL`, set in `wrangler.jsonc`.
 * **Calendar** is the same `/api/calendar` the calendar page uses.
 * **QR codes** are drawn by Hugo at build time from `hugo.toml`:
-  `givebutterDonate` (credit card), `venmoDonate`, `kioskDiscord` and the
+  `givebutterDonate` (credit card), `venmoDonate`, `discord` and the
   `/membership/` page. Change a link there and the next deploy redraws it.
 * Keep "Shop Fund" in the page title: kiosk-manager's watchdog uses it to tell
   the right page from an error or login page.

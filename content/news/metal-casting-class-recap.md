@@ -20,6 +20,6 @@ Everyone went home with something they had cast themselves.
 
 Aluminum bronze is one of several metals the shop's furnace handles. Members have also poured aluminum, brass, copper, and sterling silver.
 
-If you have an idea for a future class, or something you would like to cast in metal, join the [Discord server](https://discord.gg/F7kM7ardMs) or email [mail@columbiagadgetworks.org](mailto:mail@columbiagadgetworks.org).
+If you have an idea for a future class, or something you would like to cast in metal, join the [Discord server](https://discord.gg/yjpeBrAjuR) or email [mail@columbiagadgetworks.org](mailto:mail@columbiagadgetworks.org).
 
 Curious how the setup works? See the [metal casting](/tools/metal-casting/) page.

@@ -7,7 +7,7 @@
 {{- $links := dict
       "donate" $p.givebutterDonate
       "venmo" $p.venmoDonate
-      "discord" ($p.kioskDiscord | default $p.discord)
+      "discord" $p.discord
       "membership" ("membership/" | absURL) -}}
 {{- $qr := dict -}}
 {{- range $name, $url := $links -}}
