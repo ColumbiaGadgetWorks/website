@@ -10,7 +10,11 @@
     "directory": "./public",
     "binding": "ASSETS",
     "html_handling": "auto-trailing-slash",
-    "not_found_handling": "404-page"
+    "not_found_handling": "404-page",
+    // Send /api/* to src/index.js even when a browser opens it directly. Without
+    // this, a visit typed into the address bar counts as a page navigation and
+    // gets the site's 404 page before the Worker runs (fetch() calls were fine).
+    "run_worker_first": ["/api/*"]
   },
   // Email updates list. No id on purpose: Wrangler creates the namespace on the
   // first deploy and keeps it linked afterwards (automatic provisioning, wrangler
