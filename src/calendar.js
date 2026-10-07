@@ -101,3 +101,123 @@ function startOfCurrentMonth() {
     .reduce((a, x) => ((a[x.type] = x.value), a), {});
   return `${p.year}-${p.month}`;
 }
+
+// Subscribable feed, mounted at GET /api/calendar.ics by src/index.js.
+//
+// Visitors add this address to their own calendar app. It is rebuilt from the
+// same occurrences the page shows, NOT a copy of the source feed: the source
+// address is a credential, and its raw events can carry organizer and attendee
+// addresses that were never meant to be published. Each occurrence becomes a
+// plain event, so recurrence rules and exceptions are already resolved.
+const FEED_MONTHS_BACK = 1;
+const FEED_MONTHS_AHEAD = 12;
+
+export async function handleCalendarFeed(request, env, ctx) {
+  const icsUrl = env.CALENDAR_ICS_URL;
+  if (!icsUrl) return new Response('Calendar not configured', { status: 503, headers: { 'cache-control': 'no-store' } });
+
+  const cacheKey = new Request('https://calendar.internal/v1/feed.ics', { method: 'GET' });
+  const cache = caches.default;
+  const hit = await cache.match(cacheKey);
+  if (hit) return hit;
+
+  let text;
+  try {
+    const res = await fetch(icsUrl, {
+      headers: { 'user-agent': 'columbiagadgetworks.org calendar' },
+      cf: { cacheTtl: CACHE_SECONDS, cacheEverything: true },
+    });
+    if (!res.ok) return new Response('Calendar unavailable', { status: 502, headers: { 'cache-control': 'no-store' } });
+    text = await res.text();
+  } catch {
+    return new Response('Calendar unavailable', { status: 502, headers: { 'cache-control': 'no-store' } });
+  }
+
+  let body;
+  try {
+    const [y, m] = startOfCurrentMonth().split('-').map(Number);
+    const windowStart = new Date(Date.UTC(y, m - 1 - FEED_MONTHS_BACK, 1));
+    const windowEnd = new Date(Date.UTC(y, m - 1 + FEED_MONTHS_AHEAD, 1));
+    const events = expand(parseICS(text, SITE_TZ), windowStart, windowEnd, SITE_TZ).slice(0, MAX_EVENTS * 2);
+    body = await toICS(events, new URL(request.url).host);
+  } catch {
+    return new Response('Calendar unavailable', { status: 502, headers: { 'cache-control': 'no-store' } });
+  }
+
+  const res = new Response(body, {
+    headers: {
+      'content-type': 'text/calendar; charset=utf-8',
+      'content-disposition': 'inline; filename="columbia-gadget-works.ics"',
+      'cache-control': `public, max-age=${CACHE_SECONDS}`,
+      'access-control-allow-origin': '*',
+      'x-robots-tag': 'noindex',
+    },
+  });
+  if (ctx && ctx.waitUntil) ctx.waitUntil(cache.put(cacheKey, res.clone()));
+  else await cache.put(cacheKey, res.clone());
+  return res;
+}
+
+export async function toICS(events, host) {
+  const stamp = icsUtc(new Date().toISOString());
+  const out = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//Columbia Gadget Works//Calendar//EN',
+    'CALSCALE:GREGORIAN',
+    'METHOD:PUBLISH',
+    'X-WR-CALNAME:Columbia Gadget Works',
+    `X-WR-TIMEZONE:${SITE_TZ}`,
+    // How often a subscribed app should check for changes.
+    'REFRESH-INTERVAL;VALUE=DURATION:PT6H',
+    'X-PUBLISHED-TTL:PT6H',
+  ];
+  for (const e of events) {
+    // The source UID is not passed through, so derive a stable one from the
+    // occurrence. Editing an event's title makes apps see it as replaced.
+    const uid = `${await sha1(`${e.start}|${e.title}`)}@${host}`;
+    out.push('BEGIN:VEVENT', `UID:${uid}`, `DTSTAMP:${stamp}`);
+    if (e.allDay) {
+      out.push(`DTSTART;VALUE=DATE:${e.start.slice(0, 10).replace(/-/g, '')}`);
+      out.push(`DTEND;VALUE=DATE:${e.end.slice(0, 10).replace(/-/g, '')}`);
+    } else {
+      out.push(`DTSTART:${icsUtc(e.start)}`, `DTEND:${icsUtc(e.end)}`);
+    }
+    out.push(`SUMMARY:${icsText(e.title)}`);
+    if (e.location) out.push(`LOCATION:${icsText(e.location)}`);
+    if (e.description) out.push(`DESCRIPTION:${icsText(e.description)}`);
+    if (/^https?:\/\//i.test(e.url)) out.push(`URL:${e.url}`);
+    out.push('END:VEVENT');
+  }
+  out.push('END:VCALENDAR');
+  return out.map(fold).join('\r\n') + '\r\n';
+}
+
+function icsUtc(iso) {
+  return iso.replace(/\.\d{3}/, '').replace(/[-:]/g, '');
+}
+
+function icsText(s) {
+  return String(s).replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\r?\n/g, '\\n');
+}
+
+// RFC 5545 lines are at most 75 octets; longer ones continue on lines that
+// start with a space. Split on characters, never inside a multi-byte one.
+function fold(line) {
+  const enc = new TextEncoder();
+  if (enc.encode(line).length <= 75) return line;
+  const parts = [];
+  let cur = '', bytes = 0, limit = 75;
+  for (const ch of line) {
+    const n = enc.encode(ch).length;
+    if (bytes + n > limit) { parts.push(cur); cur = ''; bytes = 0; limit = 74; }
+    cur += ch; bytes += n;
+  }
+  parts.push(cur);
+  return parts.join('\r\n ');
+}
+
+async function sha1(s) {
+  const buf = await crypto.subtle.digest('SHA-1', new TextEncoder().encode(s));
+  return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
+}

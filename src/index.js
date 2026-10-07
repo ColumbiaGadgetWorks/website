@@ -2,7 +2,7 @@
 // only /api/* reaches this script. See wrangler.jsonc.
 import { handleContact } from './contact.js';
 import { handleSubscribe, handleExport } from './subscribe.js';
-import { handleCalendar } from './calendar.js';
+import { handleCalendar, handleCalendarFeed } from './calendar.js';
 import { handleFund } from './fund.js';
 import { handleDiscord, discordPublicKey } from './fund-discord.js';
 import { handleJoin, handleGivebutterWebhook, joinConfigured } from './join.js';
@@ -21,6 +21,10 @@ export default {
     if (pathname === '/api/calendar') {
       if (request.method !== 'GET') return new Response('GET only', { status: 405 });
       return handleCalendar(request, env, ctx);
+    }
+    if (pathname === '/api/calendar.ics') {
+      if (request.method !== 'GET' && request.method !== 'HEAD') return new Response('GET only', { status: 405 });
+      return handleCalendarFeed(request, env, ctx);
     }
     if (pathname === '/api/fund/campaigns') {
       if (request.method !== 'GET') return new Response('GET only', { status: 405 });
