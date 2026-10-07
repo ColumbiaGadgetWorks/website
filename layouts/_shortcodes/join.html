@@ -85,7 +85,6 @@
       <a class="btn btn-outline btn-lg" id="join-pay-supporter" target="_blank" rel="noopener">Supporter</a>
     </p>
     <p class="muted" id="join-waiting" hidden>Waiting for Givebutter to confirm your payment. This page updates on its own, usually within a minute. You will also get an email, so it is safe to close this page.</p>
-    <p class="small muted">If dues are a barrier, <a href="/contact/">talk to us about a scholarship membership</a> before paying. Your paperwork is already on file.</p>
   </div>
 
   <div class="callout ok join-panel" id="join-4" hidden>
@@ -169,7 +168,9 @@
     markTask($('join-id'), s.id);
     var fill = function () {
       ['waiver', 'agreement'].forEach(function (d) {
-        root.querySelector('[data-doc="' + d + '"] .join-doc').textContent = docs[d].text;
+        // Dolibarr can hand the text back with its line breaks still escaped
+        // as a literal backslash-n; turn those into real line breaks.
+        root.querySelector('[data-doc="' + d + '"] .join-doc').textContent = docs[d].text.replace(/(?:\\r)?\\n/g, '\n');
       });
     };
     if (docs) fill();

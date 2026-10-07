@@ -7,7 +7,7 @@ url: /membership/join/
 
 Joining takes four steps and about ten minutes. You will sign two documents on screen and upload a picture of a government-issued photo ID, so have it handy. You can stop part way and come back: after the first step we email you a link that picks up where you left off.
 
-We ask everyone to visit in person at least once before joining, so you can see the shop and meet a few members first. If you have not been yet, [come to a Thursday Open Hack Night](/visit/); it is free and you do not need to sign up. If dues are a barrier, [ask us about a scholarship membership](/contact/); it is a normal conversation.
+We ask everyone to visit in person at least once before joining, so you can see the shop and meet a few members first. If you have not been yet, [come to a Thursday Open Hack Night](/visit/); it is free and you do not need to sign up.
 
 {{< join >}}
 
