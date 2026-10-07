@@ -18,6 +18,7 @@
        marked safe. Interpolating it normally makes Go re-encode the percent and
        Google then receives a calendar id that does not exist. */ -}}
 {{- $addGoogle := printf "https://calendar.google.com/calendar/render?cid=%s" $cid | safeURL -}}
+<h2 id="add-it-to-your-own-calendar">Add it to your own calendar</h2>
 <p class="cal-subscribe">
   <a class="btn btn-outline" href="{{ $addGoogle }}" rel="noopener">Add to Google Calendar</a>
   <a class="btn btn-outline" href="{{ $webcal }}">Add to Apple or Outlook</a>

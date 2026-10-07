@@ -17,8 +17,6 @@ Some things happen on the same rhythm all year, whether or not they appear above
 
 **Open Hack Night is the one to start with.** Every Thursday from 6 to 8 pm the shop is open to the public. No membership, no sign-up, no experience, and nothing to bring. Someone will give you a tour, and you can use the beginner-friendly tools the same evening. [What to expect on a visit](/visit/).
 
-## Add it to your own calendar
-
 {{< calendar-subscribe >}}
 
 ## Getting something on the calendar
