@@ -12,4 +12,4 @@ Those two machines are what turn "I need a part that does not exist" into a part
 
 Machining is also the area where knowing what you are doing matters most. Both machines require a sign-off from the zone lead before you use them alone, which is exactly what classes like this one lead to.
 
-Want to learn the mill or the lathe yourself? See the [metal shop](/tools/metal-shop/) page for what is in the zone and what training involves, then watch the [events calendar](/events/) for the next session. You can also just come by on a [Thursday evening](/visit/) and ask for a demonstration.
+Want to learn the mill or the lathe yourself? See the [metal shop](/tools/metal-shop/) page for what is in the zone and what training involves, then watch the [events calendar](/calendar/) for the next session. You can also just come by on a [Thursday evening](/visit/) and ask for a demonstration.

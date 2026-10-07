@@ -21,4 +21,4 @@ Members were trained in both of the soldering methods the shop uses, and everyon
 
 Knowing both is the difference between being able to fix the electronics you own and only being able to look at them.
 
-The [electronics bench](/tools/electronics-bench/) is the most beginner-friendly corner of the shop and is open to visitors on a Thursday evening, so you do not need to wait for the next class to try this. Soldering is our most requested class, and it comes round regularly: watch the [events calendar](/events/).
+The [electronics bench](/tools/electronics-bench/) is the most beginner-friendly corner of the shop and is open to visitors on a Thursday evening, so you do not need to wait for the next class to try this. Soldering is our most requested class, and it comes round regularly: watch the [events calendar](/calendar/).

@@ -1,0 +1,208 @@
+{{- /* Live calendar, fed by GET /api/calendar (src/calendar.js).
+       Month grid on wider screens, agenda list everywhere. No library, no
+       third-party script, and the surrounding page keeps real text so the page
+       still says something useful without JavaScript. */ -}}
+{{- $p := site.Params -}}
+<section class="cal" id="calendar">
+  <div class="cal-bar">
+    <h2 class="cal-title" id="cal-title">Calendar</h2>
+    <div class="cal-nav">
+      <button class="cal-btn" type="button" id="cal-prev" aria-label="Previous month">Previous</button>
+      <button class="cal-btn" type="button" id="cal-today">This month</button>
+      <button class="cal-btn" type="button" id="cal-next" aria-label="Next month">Next</button>
+    </div>
+  </div>
+
+  <p class="cal-note" id="cal-status" role="status">Loading the calendar.</p>
+
+  <table class="cal-grid" id="cal-grid" hidden>
+    <caption class="sr" id="cal-caption">Events by day</caption>
+    <thead>
+      <tr>
+        <th scope="col"><abbr title="Sunday">Sun</abbr></th>
+        <th scope="col"><abbr title="Monday">Mon</abbr></th>
+        <th scope="col"><abbr title="Tuesday">Tue</abbr></th>
+        <th scope="col"><abbr title="Wednesday">Wed</abbr></th>
+        <th scope="col"><abbr title="Thursday">Thu</abbr></th>
+        <th scope="col"><abbr title="Friday">Fri</abbr></th>
+        <th scope="col"><abbr title="Saturday">Sat</abbr></th>
+      </tr>
+    </thead>
+    <tbody id="cal-body"></tbody>
+  </table>
+
+  <h3 class="cal-sub" id="cal-agenda-head" hidden>What is on</h3>
+  <ol class="cal-agenda" id="cal-agenda"></ol>
+
+  <noscript>
+    <p class="cal-note">The month-by-month view needs JavaScript. The standing schedule is below, and you can add the calendar to your own phone or computer with the buttons underneath it.</p>
+  </noscript>
+</section>
+<script>
+(function () {
+  var TZ = 'America/Chicago';
+  var grid = document.getElementById('cal-grid');
+  var body = document.getElementById('cal-body');
+  var agenda = document.getElementById('cal-agenda');
+  var agendaHead = document.getElementById('cal-agenda-head');
+  var title = document.getElementById('cal-title');
+  var caption = document.getElementById('cal-caption');
+  var status = document.getElementById('cal-status');
+  if (!grid || !body) return;
+
+  var MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  var cache = {};           // "YYYY-MM" -> array of occurrences
+  var cursor = todayParts();
+
+  function todayParts() {
+    var f = new Intl.DateTimeFormat('en-CA', { timeZone: TZ, year: 'numeric', month: '2-digit', day: '2-digit' });
+    var p = {};
+    f.formatToParts(new Date()).forEach(function (x) { p[x.type] = x.value; });
+    return { y: +p.year, m: +p.month, today: p.year + '-' + p.month + '-' + p.day };
+  }
+  function key(y, m) { return y + '-' + String(m).padStart(2, '0'); }
+
+  function timeLabel(iso) {
+    return new Intl.DateTimeFormat('en-US', { timeZone: TZ, hour: 'numeric', minute: '2-digit' })
+      .format(new Date(iso)).replace(':00', '').toLowerCase().replace(/\s/g, '');
+  }
+  function dayLabel(dayStr) {
+    var p = dayStr.split('-');
+    var d = new Date(Date.UTC(+p[0], +p[1] - 1, +p[2]));
+    return new Intl.DateTimeFormat('en-US', { timeZone: 'UTC', weekday: 'long', month: 'long', day: 'numeric' }).format(d);
+  }
+
+  function load(y, m) {
+    var k = key(y, m);
+    if (cache[k]) return Promise.resolve(cache[k]);
+    return fetch('/api/calendar?from=' + k + '&months=1', { headers: { accept: 'application/json' } })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        if (!d.ok) throw new Error(d.error || 'unavailable');
+        cache[k] = d.events || [];
+        return cache[k];
+      });
+  }
+
+  function render() {
+    var y = cursor.y, m = cursor.m;
+    title.textContent = MONTHS[m - 1] + ' ' + y;
+    caption.textContent = 'Events in ' + MONTHS[m - 1] + ' ' + y;
+    status.textContent = 'Loading ' + MONTHS[m - 1] + '.';
+    status.hidden = false;
+
+    load(y, m).then(function (events) {
+      status.hidden = true;
+      grid.hidden = false;
+      agendaHead.hidden = false;
+      drawGrid(y, m, events);
+      drawAgenda(events);
+    }).catch(function () {
+      grid.hidden = true;
+      agendaHead.hidden = true;
+      agenda.innerHTML = '';
+      status.hidden = false;
+      status.textContent = 'The calendar is not available right now. The standing schedule below is still accurate, and you can always reach us through the contact page.';
+    });
+  }
+
+  function byDay(events) {
+    var map = {};
+    events.forEach(function (e) { (map[e.day] = map[e.day] || []).push(e); });
+    return map;
+  }
+
+  function drawGrid(y, m, events) {
+    var map = byDay(events);
+    var first = new Date(Date.UTC(y, m - 1, 1));
+    var startPad = first.getUTCDay();
+    var total = new Date(Date.UTC(y, m, 0)).getUTCDate();
+    var cells = [];
+    for (var i = 0; i < startPad; i++) cells.push(null);
+    for (var d = 1; d <= total; d++) cells.push(d);
+    while (cells.length % 7) cells.push(null);
+
+    body.innerHTML = '';
+    for (var w = 0; w < cells.length / 7; w++) {
+      var tr = document.createElement('tr');
+      for (var c = 0; c < 7; c++) {
+        var d2 = cells[w * 7 + c];
+        var td = document.createElement('td');
+        if (d2 === null) { td.className = 'cal-empty'; tr.appendChild(td); continue; }
+        var ds = key(y, m) + '-' + String(d2).padStart(2, '0');
+        if (ds === cursor.today) td.className = 'cal-today';
+        var num = document.createElement('span');
+        num.className = 'cal-daynum';
+        num.textContent = d2;
+        td.appendChild(num);
+        (map[ds] || []).forEach(function (e) {
+          var item = document.createElement('span');
+          item.className = 'cal-chip';
+          item.textContent = (e.allDay ? '' : timeLabel(e.start) + ' ') + e.title;
+          item.title = e.title;
+          td.appendChild(item);
+        });
+        tr.appendChild(td);
+      }
+      body.appendChild(tr);
+    }
+  }
+
+  function drawAgenda(events) {
+    agenda.innerHTML = '';
+    if (!events.length) {
+      var none = document.createElement('li');
+      none.className = 'cal-none';
+      none.textContent = 'Nothing scheduled this month beyond the standing weekly sessions below.';
+      agenda.appendChild(none);
+      return;
+    }
+    var map = byDay(events);
+    Object.keys(map).sort().forEach(function (day) {
+      map[day].forEach(function (e) {
+        var li = document.createElement('li');
+        li.className = 'cal-item';
+
+        var when = document.createElement('p');
+        when.className = 'cal-when';
+        when.textContent = dayLabel(day) + (e.allDay ? '' : ', ' + timeLabel(e.start) + (e.end && e.end !== e.start ? ' to ' + timeLabel(e.end) : ''));
+        li.appendChild(when);
+
+        var h = document.createElement('p');
+        h.className = 'cal-what';
+        h.textContent = e.title;
+        li.appendChild(h);
+
+        if (e.location) {
+          var loc = document.createElement('p');
+          loc.className = 'cal-where';
+          loc.textContent = e.location;
+          li.appendChild(loc);
+        }
+        if (e.description) {
+          var desc = document.createElement('p');
+          desc.className = 'cal-desc';
+          desc.textContent = e.description.length > 400 ? e.description.slice(0, 400) + '...' : e.description;
+          li.appendChild(desc);
+        }
+        agenda.appendChild(li);
+      });
+    });
+  }
+
+  function step(delta) {
+    var m = cursor.m + delta, y = cursor.y;
+    while (m < 1) { m += 12; y--; }
+    while (m > 12) { m -= 12; y++; }
+    cursor.y = y; cursor.m = m;
+    render();
+  }
+  document.getElementById('cal-prev').addEventListener('click', function () { step(-1); });
+  document.getElementById('cal-next').addEventListener('click', function () { step(1); });
+  document.getElementById('cal-today').addEventListener('click', function () {
+    var t = todayParts(); cursor.y = t.y; cursor.m = t.m; render();
+  });
+
+  render();
+})();
+</script>
