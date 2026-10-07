@@ -1,5 +1,6 @@
 {{- /* Live calendar, fed by GET /api/calendar (src/calendar.js).
-       Month grid on wider screens, agenda list everywhere. No library, no
+       One month grid at every width: chips on wider screens, dots on a phone.
+       Picking a day lists that day's events under the grid. No library, no
        third-party script, and the surrounding page keeps real text so the page
        still says something useful without JavaScript. */ -}}
 {{- $p := site.Params -}}
@@ -31,8 +32,11 @@
     <tbody id="cal-body"></tbody>
   </table>
 
-  <h3 class="cal-sub" id="cal-agenda-head" hidden>What is on</h3>
-  <ol class="cal-agenda" id="cal-agenda"></ol>
+  <p class="cal-note cal-hint" id="cal-hint" hidden>Pick a day to see what is on.</p>
+  <div class="cal-day" id="cal-day" hidden>
+    <h3 class="cal-sub" id="cal-day-head"></h3>
+    <ol class="cal-agenda" id="cal-day-list"></ol>
+  </div>
 
   <noscript>
     <p class="cal-note">The month-by-month view needs JavaScript. <a href="/contact/">Get in touch</a> and we will tell you what is coming up.</p>
@@ -43,8 +47,10 @@
   var TZ = 'America/Chicago';
   var grid = document.getElementById('cal-grid');
   var body = document.getElementById('cal-body');
-  var agenda = document.getElementById('cal-agenda');
-  var agendaHead = document.getElementById('cal-agenda-head');
+  var dayBox = document.getElementById('cal-day');
+  var dayHead = document.getElementById('cal-day-head');
+  var dayList = document.getElementById('cal-day-list');
+  var hint = document.getElementById('cal-hint');
   var title = document.getElementById('cal-title');
   var caption = document.getElementById('cal-caption');
   var status = document.getElementById('cal-status');
@@ -53,6 +59,7 @@
   var MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
   var cache = {};           // "YYYY-MM" -> array of occurrences
   var cursor = todayParts();
+  var picked = null;        // "YYYY-MM-DD" shown under the grid, or null
 
   function todayParts() {
     var f = new Intl.DateTimeFormat('en-CA', { timeZone: TZ, year: 'numeric', month: '2-digit', day: '2-digit' });
@@ -92,15 +99,24 @@
     status.hidden = false;
 
     load(y, m).then(function (events) {
+      var map = byDay(events);
       status.hidden = true;
       grid.hidden = false;
-      agendaHead.hidden = false;
-      drawGrid(y, m, events);
-      drawAgenda(events);
+      // On a phone the grid shows only dots, so open on today when it has
+      // something on. Wider screens show the titles and wait for a pick.
+      if (!picked || picked.slice(0, 7) !== key(y, m)) {
+        picked = map[cursor.today] && window.matchMedia('(max-width:760px)').matches ? cursor.today : null;
+      }
+      drawGrid(y, m, map);
+      drawDay(map);
+      if (!events.length) {
+        status.hidden = false;
+        status.textContent = 'Nothing on the calendar in ' + MONTHS[m - 1] + '.';
+      }
     }).catch(function () {
       grid.hidden = true;
-      agendaHead.hidden = true;
-      agenda.innerHTML = '';
+      dayBox.hidden = true;
+      hint.hidden = true;
       status.hidden = false;
       status.textContent = 'The calendar is not available right now. Please try again shortly, or get in touch through the contact page.';
     });
@@ -112,8 +128,7 @@
     return map;
   }
 
-  function drawGrid(y, m, events) {
-    var map = byDay(events);
+  function drawGrid(y, m, map) {
     var first = new Date(Date.UTC(y, m - 1, 1));
     var startPad = first.getUTCDay();
     var total = new Date(Date.UTC(y, m, 0)).getUTCDate();
@@ -130,17 +145,33 @@
         var td = document.createElement('td');
         if (d2 === null) { td.className = 'cal-empty'; tr.appendChild(td); continue; }
         var ds = key(y, m) + '-' + String(d2).padStart(2, '0');
-        if (ds === cursor.today) td.className = 'cal-today';
+        var cls = [];
+        if (ds === cursor.today) cls.push('cal-today');
+        if (ds === picked) cls.push('cal-picked');
+        td.className = cls.join(' ');
+        var list = map[ds] || [];
+        // Days with events are buttons, so they can be picked by tap or keyboard.
+        var box = td;
+        if (list.length) {
+          box = document.createElement('button');
+          box.type = 'button';
+          box.className = 'cal-daybtn';
+          box.setAttribute('data-day', ds);
+          box.setAttribute('aria-pressed', ds === picked ? 'true' : 'false');
+          box.setAttribute('aria-label', dayLabel(ds) + ', ' + list.length + (list.length === 1 ? ' event' : ' events'));
+          td.appendChild(box);
+        }
         var num = document.createElement('span');
         num.className = 'cal-daynum';
         num.textContent = d2;
-        td.appendChild(num);
-        (map[ds] || []).forEach(function (e) {
+        box.appendChild(num);
+        list.forEach(function (e) {
           var item = document.createElement('span');
           item.className = 'cal-chip';
-          item.textContent = (e.allDay ? '' : timeLabel(e.start) + ' ') + e.title;
+          item.setAttribute('aria-hidden', 'true');
           item.title = e.title;
-          td.appendChild(item);
+          item.textContent = (e.allDay ? '' : timeLabel(e.start) + ' ') + e.title;
+          box.appendChild(item);
         });
         tr.appendChild(td);
       }
@@ -148,47 +179,57 @@
     }
   }
 
-  function drawAgenda(events) {
-    agenda.innerHTML = '';
-    if (!events.length) {
-      var none = document.createElement('li');
-      none.className = 'cal-none';
-      none.textContent = 'Nothing on the calendar this month.';
-      agenda.appendChild(none);
-      return;
-    }
-    var map = byDay(events);
-    Object.keys(map).sort().forEach(function (day) {
-      map[day].forEach(function (e) {
-        var li = document.createElement('li');
-        li.className = 'cal-item';
+  function drawDay(map) {
+    var list = picked ? map[picked] || [] : [];
+    hint.hidden = !!list.length || !Object.keys(map).length;
+    dayBox.hidden = !list.length;
+    dayList.innerHTML = '';
+    if (!list.length) return;
+    dayHead.textContent = dayLabel(picked);
+    list.forEach(function (e) {
+      var li = document.createElement('li');
+      li.className = 'cal-item';
 
-        var when = document.createElement('p');
-        when.className = 'cal-when';
-        when.textContent = dayLabel(day) + (e.allDay ? '' : ', ' + timeLabel(e.start) + (e.end && e.end !== e.start ? ' to ' + timeLabel(e.end) : ''));
-        li.appendChild(when);
+      var when = document.createElement('p');
+      when.className = 'cal-when';
+      when.textContent = e.allDay ? 'All day' : timeLabel(e.start) + (e.end && e.end !== e.start ? ' to ' + timeLabel(e.end) : '');
+      li.appendChild(when);
 
-        var h = document.createElement('p');
-        h.className = 'cal-what';
-        h.textContent = e.title;
-        li.appendChild(h);
+      var h = document.createElement('p');
+      h.className = 'cal-what';
+      h.textContent = e.title;
+      li.appendChild(h);
 
-        if (e.location) {
-          var loc = document.createElement('p');
-          loc.className = 'cal-where';
-          loc.textContent = e.location;
-          li.appendChild(loc);
-        }
-        if (e.description) {
-          var desc = document.createElement('p');
-          desc.className = 'cal-desc';
-          desc.textContent = e.description.length > 400 ? e.description.slice(0, 400) + '...' : e.description;
-          li.appendChild(desc);
-        }
-        agenda.appendChild(li);
-      });
+      if (e.location) {
+        var loc = document.createElement('p');
+        loc.className = 'cal-where';
+        loc.textContent = e.location;
+        li.appendChild(loc);
+      }
+      if (e.description) {
+        var desc = document.createElement('p');
+        desc.className = 'cal-desc';
+        desc.textContent = e.description.length > 400 ? e.description.slice(0, 400) + '...' : e.description;
+        li.appendChild(desc);
+      }
+      dayList.appendChild(li);
     });
   }
+
+  body.addEventListener('click', function (ev) {
+    var btn = ev.target.closest('.cal-daybtn');
+    if (!btn) return;
+    var ds = btn.getAttribute('data-day');
+    picked = picked === ds ? null : ds;
+    var map = byDay(cache[key(cursor.y, cursor.m)] || []);
+    drawGrid(cursor.y, cursor.m, map);
+    drawDay(map);
+    var again = body.querySelector('[data-day="' + ds + '"]');
+    if (again) again.focus();
+    if (picked && window.matchMedia('(max-width:760px)').matches) {
+      dayBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  });
 
   function step(delta) {
     var m = cursor.m + delta, y = cursor.y;

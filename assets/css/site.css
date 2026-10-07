@@ -244,8 +244,8 @@ ul.plain li{margin:0 0 .35em}
 .updates-msg{margin:0;padding:10px 14px;border:1px solid var(--line);border-left:4px solid var(--ok);border-radius:3px;background:#fff}
 .updates-msg.warn{border-left-color:var(--warn)}
 
-/* Calendar. Grid on wider screens, agenda everywhere. Colour lives in text and
-   rules, never as a background wash. */
+/* Calendar. One month grid at every width; picking a day lists its events
+   below. Colour lives in text and rules, never as a background wash. */
 .cal{margin:1.6em 0 2em}
 .cal-bar{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:12px;
   border-bottom:2px solid var(--ink);padding-bottom:10px;margin-bottom:16px}
@@ -270,9 +270,19 @@ ul.plain li{margin:0 0 .35em}
    box, so it sits square on all four sides. */
 .cal-grid td.cal-today{outline:2px solid var(--rust);outline-offset:-2px}
 .cal-grid td.cal-today .cal-daynum{color:var(--rust-dark);font-weight:700}
+.cal-grid td.cal-picked{box-shadow:inset 0 -4px 0 var(--rust)}
 .cal-chip{display:block;font-size:.76rem;line-height:1.25;padding:2px 0 2px 6px;margin-bottom:3px;
   border-left:2px solid var(--rust);color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* A day with events is a button filling its cell, so the whole square is the target. */
+.cal-grid td:has(.cal-daybtn){padding:0}
+/* Flex, because a button otherwise centres its content vertically. */
+.cal-daybtn{display:flex;flex-direction:column;justify-content:flex-start;width:100%;height:100%;min-height:94px;padding:4px 5px;margin:0;border:0;
+  background:transparent;font:inherit;text-align:left;color:inherit;cursor:pointer}
+.cal-daybtn:hover .cal-chip{color:var(--rust-dark)}
+.cal-daybtn:focus-visible{outline:2px solid var(--rust);outline-offset:-3px}
 
+.cal-hint{margin:0}
+.cal-day{margin:0}
 .cal-sub{font-size:1.05rem;margin:0 0 10px}
 .cal-agenda{list-style:none;padding:0;margin:0}
 .cal-item{border-top:1px solid var(--line);padding:14px 0 14px 16px;border-left:3px solid var(--rust);
@@ -283,20 +293,23 @@ ul.plain li{margin:0 0 .35em}
 .cal-what{font-weight:700;margin:0 0 .25em;font-size:1.02rem}
 .cal-where,.cal-desc{margin:.2em 0 0;font-size:.93rem;color:var(--muted)}
 .cal-desc{white-space:pre-line}
-.cal-none{color:var(--muted);padding:14px 0;border-top:1px solid var(--line)}
 
-/* The agenda says the same thing as the grid, so it earns its place only
-   on a phone, where the grid is hidden and it is the only view. */
-.cal-sub,.cal-agenda{display:none}
-
-/* The month grid is unreadable on a phone; the agenda says the same thing better. */
+/* On a phone seven columns leave no room for titles, so each event becomes a
+   dot and the cell a square tap target. The picked day's list carries the detail. */
 @media (max-width:760px){
-  .cal-grid{display:none}
   .cal-bar{border-bottom-width:1px}
-  /* :not([hidden]) so the script can still hide the heading when the
-     feed fails, which a bare display:block would override. */
-  .cal-sub:not([hidden]){display:block}
-  .cal-agenda{display:block}
+  .cal-title{font-size:1.2rem}
+  .cal-nav{width:100%}
+  .cal-btn{flex:1;padding:.6em .4em}
+  .cal-grid{margin-bottom:16px}
+  .cal-grid th{text-align:center;padding:0 0 6px}
+  .cal-grid td{height:auto;padding:0;text-align:center}
+  .cal-grid td > .cal-daynum{padding:8px 0}
+  .cal-daybtn{display:block;min-height:0;padding:8px 0 6px;text-align:center}
+  .cal-daynum{margin:0;font-size:.85rem;color:var(--ink)}
+  .cal-daybtn .cal-daynum{font-weight:700}
+  .cal-chip{display:inline-block;width:6px;height:6px;padding:0;margin:3px 1px 0;border:0;
+    border-radius:50%;background:var(--rust);font-size:0;vertical-align:top}
 }
 
 .cal-subscribe{display:flex;flex-wrap:wrap;gap:10px;margin:1em 0}
