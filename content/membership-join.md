@@ -5,9 +5,9 @@ description: Become a member of Columbia Gadget Works. Sign the waiver and membe
 url: /membership/join/
 ---
 
-Joining takes four steps and about ten minutes. Have a government-issued photo ID handy, since you will be asked for a picture of it. You can stop part way and come back: after the first step we email you a link that picks up where you left off.
+Joining takes four steps and about ten minutes. You will sign two documents on screen and upload a picture of a government-issued photo ID, so have it handy. You can stop part way and come back: after the first step we email you a link that picks up where you left off.
 
-If you have not visited yet, you are welcome to [come to a Thursday Open Hack Night](/visit/) first and see the shop before you sign anything. If dues are a barrier, [ask us about a scholarship membership](/contact/); it is a normal conversation.
+We ask everyone to visit in person at least once before joining, so you can see the shop and meet a few members first. If you have not been yet, [come to a Thursday Open Hack Night](/visit/); it is free and you do not need to sign up. If dues are a barrier, [ask us about a scholarship membership](/contact/); it is a normal conversation.
 
 {{< join >}}
 

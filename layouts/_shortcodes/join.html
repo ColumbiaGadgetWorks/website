@@ -23,6 +23,7 @@
     <div class="field"><label for="jn-last">Last name</label><input id="jn-last" name="lastname" required autocomplete="family-name" maxlength="100"></div>
     <div class="field"><label for="jn-email">Email</label><input id="jn-email" name="email" type="email" required autocomplete="email" maxlength="200"></div>
     <div class="field"><label for="jn-discord">Discord username <span class="muted">(optional)</span></label><input id="jn-discord" name="discord" autocomplete="off" maxlength="100"></div>
+    <label class="join-check"><input type="checkbox" name="visited" required> I have visited Columbia Gadget Works in person at least once</label>
     <label class="join-check"><input type="checkbox" name="notify_events" checked> I want to be notified regarding events at the CGW makerspace</label>
     <label class="join-check"><input type="checkbox" name="notify_news"> I want to be notified about news and updates from the CGW makerspace</label>
     <div class="hp" aria-hidden="true"><label>Leave this empty<input name="website" tabindex="-1" autocomplete="off"></label></div>
@@ -43,7 +44,10 @@
       <h3>1. Liability waiver <span class="join-done" hidden>Signed</span></h3>
       <div class="join-task-body">
         <div class="join-doc" tabindex="0"></div>
-        <div class="field"><label for="jn-waiver-name">Type your full legal name to sign</label><input id="jn-waiver-name" autocomplete="name" maxlength="200"></div>
+        <div class="field"><label for="jn-waiver-name">Your full legal name</label><input id="jn-waiver-name" autocomplete="name" maxlength="200"></div>
+        <div class="field"><label>Sign here with your finger or mouse</label>
+          <canvas class="join-sig" width="600" height="180" role="img" aria-label="Signature box"></canvas>
+          <button class="btn btn-light join-sig-clear" type="button">Clear</button></div>
         <label class="join-check"><input type="checkbox"> I have read the waiver above and I agree to it</label>
         <button class="btn btn-primary" type="button">Sign the waiver</button>
       </div>
@@ -53,7 +57,10 @@
       <h3>2. Membership agreement <span class="join-done" hidden>Signed</span></h3>
       <div class="join-task-body">
         <div class="join-doc" tabindex="0"></div>
-        <div class="field"><label for="jn-agreement-name">Type your full legal name to sign</label><input id="jn-agreement-name" autocomplete="name" maxlength="200"></div>
+        <div class="field"><label for="jn-agreement-name">Your full legal name</label><input id="jn-agreement-name" autocomplete="name" maxlength="200"></div>
+        <div class="field"><label>Sign here with your finger or mouse</label>
+          <canvas class="join-sig" width="600" height="180" role="img" aria-label="Signature box"></canvas>
+          <button class="btn btn-light join-sig-clear" type="button">Clear</button></div>
         <label class="join-check"><input type="checkbox"> I have read the agreement above and I agree to it</label>
         <button class="btn btn-primary" type="button">Sign the agreement</button>
       </div>
@@ -98,6 +105,7 @@
     stale: 'The document was updated while this page was open. Please read it again and sign.',
     size: 'That photo is too large or empty. Please try another.',
     type: 'That file is not a photo we can read. Please use a JPEG or PNG.',
+    signature: 'Please draw your signature in the box.',
     token: 'This signup link has expired. Check your email for a newer link, or start again.'
   };
 
@@ -144,7 +152,10 @@
         var a = $('join-pay-' + lv[0]);
         var amount = c[lv[0]];
         a.textContent = lv[1] + (amount ? ', $' + amount + ' a month' : '');
-        a.href = (c.url || root.getAttribute('data-fallback')) + '?amount=' + encodeURIComponent(amount || '') + '&frequency=monthly';
+        // Amount and frequency are documented by Givebutter. The name and email
+        // are sent too in case its form picks them up; it ignores what it does not know.
+        a.href = (c.url || root.getAttribute('data-fallback')) + '?amount=' + encodeURIComponent(amount || '') + '&frequency=monthly' +
+          '&email=' + encodeURIComponent(s.email || '') + '&first_name=' + encodeURIComponent(s.firstname || '') + '&last_name=' + encodeURIComponent(s.lastname || '');
         a.onclick = function () { $('join-waiting').hidden = false; };
       });
       pollTimer = setInterval(function () {
@@ -199,15 +210,40 @@
     });
   });
 
-  // Step 2: signatures
+  // Step 2: signatures. Each document has its own box to draw in.
+  function pad(canvas, clear) {
+    var ctx = canvas.getContext('2d'), drawing = false, used = false;
+    function blank() { ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, canvas.width, canvas.height); used = false; }
+    function at(ev) {
+      var r = canvas.getBoundingClientRect();
+      return [(ev.clientX - r.left) * canvas.width / r.width, (ev.clientY - r.top) * canvas.height / r.height];
+    }
+    blank();
+    ctx.lineWidth = 2.5; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.strokeStyle = '#111';
+    canvas.addEventListener('pointerdown', function (ev) {
+      ev.preventDefault(); drawing = true; used = true;
+      try { canvas.setPointerCapture(ev.pointerId); } catch (e) {}
+      var p = at(ev); ctx.beginPath(); ctx.moveTo(p[0], p[1]); ctx.lineTo(p[0] + 0.1, p[1] + 0.1); ctx.stroke();
+    });
+    canvas.addEventListener('pointermove', function (ev) {
+      if (!drawing) return;
+      ev.preventDefault();
+      var p = at(ev); ctx.lineTo(p[0], p[1]); ctx.stroke();
+    });
+    ['pointerup', 'pointercancel', 'pointerleave'].forEach(function (n) { canvas.addEventListener(n, function () { drawing = false; }); });
+    clear.addEventListener('click', blank);
+    return { used: function () { return used; }, png: function () { return canvas.toDataURL('image/png').split(',')[1]; } };
+  }
   ['waiver', 'agreement'].forEach(function (d) {
     var section = root.querySelector('[data-doc="' + d + '"]');
-    var btn = section.querySelector('button');
+    var btn = section.querySelector('button.btn-primary');
+    var sig = pad(section.querySelector('.join-sig'), section.querySelector('.join-sig-clear'));
     btn.addEventListener('click', function () {
       var name = section.querySelector('input:not([type=checkbox])').value.trim();
       if (name.length < 3 || !section.querySelector('input[type=checkbox]').checked || !docs) return error('invalid');
+      if (!sig.used()) return error('signature');
       busy(btn, true);
-      call('sign', { token: token, doc: d, name: name, version: docs[d].version }).then(function (j) {
+      call('sign', { token: token, doc: d, name: name, version: docs[d].version, signature: sig.png() }).then(function (j) {
         busy(btn, false);
         if (j.error === 'stale') docs = null;
         answer(j);
@@ -231,7 +267,7 @@
       img.src = url;
     });
   }
-  $('join-id').querySelector('button').addEventListener('click', function (ev) {
+  $('join-id').querySelector('button.btn-primary').addEventListener('click', function (ev) {
     var btn = ev.target, file = $('jn-id-file').files[0];
     if (!file) return error('type');
     busy(btn, true);

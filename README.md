@@ -114,13 +114,13 @@ Secrets to add to the Worker (Workers & Pages, website, Settings, Variables and 
 - `DOLIBARR_URL`: Dolibarr's address with no trailing slash. The Worker runs on Cloudflare's
   network, so this has to be reachable from the internet: a public hostname or a Cloudflare Tunnel.
 - `DOLIBARR_API_KEY`: the "Key for the website" shown on the module's setup page in Dolibarr.
-- `GIVEBUTTER_WEBHOOK_SECRET`: in Givebutter, add a webhook pointing at
-  `https://columbiagadgetworks.org/api/givebutter-webhook` for the events `transaction.succeeded`,
-  `plan.canceled`, `plan.failed`, `plan.paused` and `plan.resumed`, then copy its signing secret here.
+- `GIVEBUTTER_WEBHOOK_SECRET` (optional): only needed if Givebutter should report payments through
+  this site at `/api/givebutter-webhook`. The normal setup does not use it: the "Connect Givebutter"
+  button in the Dolibarr module points Givebutter straight at Dolibarr.
 
 Until the first two are set the join page says online signup is unavailable and links to Givebutter
-directly, so this can be merged before Dolibarr is ready. `/api/health` shows `DOLIBARR` and
-`GIVEBUTTER_WEBHOOK_SECRET` as true once they are present. The Turnstile widget on step 1 uses the
+directly, so this can be merged before Dolibarr is ready. `/api/health` shows `DOLIBARR` as true
+once they are present. The Turnstile widget on step 1 uses the
 action `join` with the same site key and secret as the contact form.
 
 ## After launch checklist

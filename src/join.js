@@ -90,7 +90,8 @@ export async function handleJoin(request, env, pathname) {
     return json(r.data, r.status);
   }
 
-  const data = await readJson(request, 20000);
+  // Large enough for a drawn signature, which arrives as a base64 PNG.
+  const data = await readJson(request, 400000);
   if (!data) return fail('invalid', 400);
 
   if (pathname === '/api/join/start') {
@@ -125,6 +126,7 @@ export async function handleJoin(request, env, pathname) {
       doc: str(data.doc, 20),
       name: str(data.name, 200),
       version: str(data.version, 64),
+      signature: str(data.signature, 380000),
       ip,
     });
     return json(r.data, r.status);
