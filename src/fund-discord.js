@@ -22,16 +22,17 @@ const BLURPLE = 0x5865f2;
 const GREEN = 0x2ecc71;
 
 export async function handleDiscord(request, env, ctx) {
-  if (!env.DISCORD_PUBLIC_KEY || !env.FUND_DB) {
-    return new Response('Not configured', { status: 503 });
-  }
+  if (!env.DISCORD_PUBLIC_KEY) return new Response('Not configured', { status: 503 });
   const body = await request.text();
   if (!(await verify(request, body, env.DISCORD_PUBLIC_KEY))) {
     return new Response('Bad signature', { status: 401 });
   }
   const interaction = JSON.parse(body);
 
-  if (interaction.type === 1) return reply({ type: 1 }); // PING
+  // Discord checks the endpoint with a PING before saving it; answer that even
+  // before the database is bound.
+  if (interaction.type === 1) return reply({ type: 1 });
+  if (!env.FUND_DB) return reply(message('The fund database is not connected yet.', true));
   if (interaction.type === 4) return reply({ type: 8, data: { choices: await autocomplete(interaction, env) } });
   if (interaction.type !== 2 || interaction.data?.name !== 'fund') {
     return reply(message('Unknown command.', true));
