@@ -256,12 +256,21 @@ export function parseICS(text, defaultTz = 'UTC') {
   const lines = unfold(text).split('\n');
   const events = [];
   let cur = null;
+  let nested = 0;
   for (const raw of lines) {
     const line = raw.trim();
     if (!line) continue;
-    if (line === 'BEGIN:VEVENT') { cur = { exdates: [] }; continue; }
-    if (line === 'END:VEVENT') { if (cur) events.push(cur); cur = null; continue; }
+    if (line === 'BEGIN:VEVENT') { cur = { exdates: [] }; nested = 0; continue; }
+    if (line === 'END:VEVENT') { if (cur) events.push(cur); cur = null; nested = 0; continue; }
     if (!cur) continue;
+    // A VEVENT can contain nested components, in practice VALARM. Their
+    // properties belong to the alarm, not the event: Google's default reminder
+    // carries DESCRIPTION:This is an event reminder, and an Apple-written alarm
+    // carries its own UID. Letting either through would overwrite the event's
+    // own fields and break RECURRENCE-ID matching, which is keyed on UID.
+    if (line.startsWith('BEGIN:')) { nested++; continue; }
+    if (line.startsWith('END:')) { if (nested > 0) nested--; continue; }
+    if (nested > 0) continue;
     const p = parseLine(line);
     if (!p) continue;
     switch (p.name) {
@@ -330,8 +339,9 @@ function toOccurrence(e, start, durationMs, tz) {
   const allDay = !!e.start.allDay;
   const end = new Date(start.getTime() + durationMs);
   const parts = wallParts(start, allDay ? 'UTC' : tz);
+  // Deliberately no uid, organizer or attendee: the browser does not need them,
+  // and a feed can carry a third party's address in those fields.
   return {
-    uid: e.uid || '',
     title: e.summary || 'Untitled event',
     description: e.description || '',
     location: e.location || '',
