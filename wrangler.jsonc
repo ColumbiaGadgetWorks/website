@@ -17,6 +17,11 @@
   // 4.45+). Workers Builds' default token has KV edit permission, so this needs no
   // manual setup. Do not add a D1 database the same way: that token has no D1 access.
   "kv_namespaces": [{ "binding": "SUBSCRIBERS" }],
+  // Shop fund campaigns and donations (db/fund-schema.sql). Created by hand in the
+  // dashboard, since the Workers Builds token cannot create D1 databases.
+  "d1_databases": [
+    { "binding": "FUND_DB", "database_name": "fundraiser", "database_id": "58d072fb-f28b-432f-b0c2-499b85d603d5" }
+  ],
   // Do not delete variables/secrets that were set in the dashboard on each deploy.
   "keep_vars": true,
   "vars": {

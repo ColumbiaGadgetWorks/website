@@ -68,7 +68,9 @@ and a month calendar.
 ## Shop fund database and the /fund Discord commands
 
 The fund campaigns and donations live in the `fundraiser` D1 database, bound as
-`FUND_DB` in `wrangler.jsonc`. The schema is `db/fund-schema.sql`. Discord ids
+`FUND_DB` in `wrangler.jsonc`. To load data into it, paste SQL into the
+dashboard (Storage & Databases > D1 > fundraiser > Console) or run
+`npx wrangler d1 execute fundraiser --remote --file=<file>.sql` from any folder. The schema is `db/fund-schema.sql`. Discord ids
 are stored as text, because they are too large for JavaScript numbers.
 
 The `/fund` slash commands (`create`, `link`, `add`, `show`, `list`, `board`,
