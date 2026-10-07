@@ -4,7 +4,7 @@ import { handleContact } from './contact.js';
 import { handleSubscribe, handleExport } from './subscribe.js';
 import { handleCalendar } from './calendar.js';
 import { handleFund } from './fund.js';
-import { handleDiscord } from './fund-discord.js';
+import { handleDiscord, discordPublicKey } from './fund-discord.js';
 import { handleJoin, handleGivebutterWebhook, joinConfigured } from './join.js';
 
 export default {
@@ -51,6 +51,7 @@ export default {
           FUNDBOT_API_URL: Boolean(env.FUNDBOT_API_URL),
           FUND_DB: Boolean(env.FUND_DB),
           DISCORD_PUBLIC_KEY: Boolean(env.DISCORD_PUBLIC_KEY),
+          DISCORD_PUBLIC_KEY_VALID: Boolean(discordPublicKey(env)),
           DISCORD_BOT_TOKEN: Boolean(env.DISCORD_BOT_TOKEN),
           SUBSCRIBERS: Boolean(env.SUBSCRIBERS),
           SUBSCRIBERS_EXPORT_TOKEN: Boolean(env.SUBSCRIBERS_EXPORT_TOKEN),
