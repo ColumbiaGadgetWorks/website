@@ -22,7 +22,7 @@ social:
 shop:
   - { name: Plan a visit, handle: "Open Hack Night, Thursdays 6 to 8 pm", url: /visit/, icon: visit }
   - { name: Events calendar, handle: "Classes, hack nights, and events", url: /calendar/, icon: calendar }
-  - { name: Free classes, handle: "First Thursday of every month", url: /classes/, icon: classes }
+  - { name: Free classes, handle: "First Thursday of every month", url: /calendar/#classes, icon: classes }
   - { name: Membership, handle: "24/7 access to the shop", url: /membership/, icon: membership }
   - { name: Donate, handle: "Tax-deductible, 501(c)(3)", url: /donate/, icon: donate }
   - { name: Member wiki, handle: "Tool guides and shop policies", param: wiki, icon: wiki }
