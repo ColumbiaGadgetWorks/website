@@ -6,6 +6,7 @@ import { handleCalendar, handleCalendarFeed } from './calendar.js';
 import { handleFund } from './fund.js';
 import { handleDiscord, discordPublicKey } from './fund-discord.js';
 import { handleJoin, handleGivebutterWebhook, joinConfigured } from './join.js';
+import { syncDiscordEvents, discordEventsConfigured } from './discord-events.js';
 
 export default {
   async fetch(request, env, ctx) {
@@ -61,11 +62,22 @@ export default {
           SUBSCRIBERS_EXPORT_TOKEN: Boolean(env.SUBSCRIBERS_EXPORT_TOKEN),
           DISCORD_SIGNUP_WEBHOOK_URL: Boolean(env.DISCORD_SIGNUP_WEBHOOK_URL),
           DOLIBARR: joinConfigured(env),
+          DISCORD_EVENTS_SYNC: discordEventsConfigured(env),
           GIVEBUTTER_WEBHOOK_SECRET: Boolean(env.GIVEBUTTER_WEBHOOK_SECRET),
         },
       });
     }
     if (pathname.startsWith('/api/')) return new Response('Not found', { status: 404 });
     return env.ASSETS.fetch(request);
+  },
+
+  // Cron trigger (wrangler.jsonc): copy upcoming calendar events to Discord.
+  async scheduled(event, env, ctx) {
+    ctx.waitUntil(
+      syncDiscordEvents(env).then(
+        (r) => console.log('discord events sync:', r),
+        (e) => console.error('discord events sync failed:', e.message),
+      ),
+    );
   },
 };
