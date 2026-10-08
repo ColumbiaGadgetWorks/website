@@ -48,6 +48,7 @@ disableKinds = ["taxonomy", "term"]
   bluesky = "https://bsky.app/profile/comogadgetworks.bsky.social"
   instagram = "https://www.instagram.com/columbiagadgetworks/"
   tiktok = "https://www.tiktok.com/@columbia.gadget.w"
+  linkedin = "https://www.linkedin.com/company/111805202/"
   github = "https://github.com/ColumbiaGadgetWorks"
   mapsQuery = "Columbia Gadget Works, 1404 Grand Ave, Columbia, MO 65203"
   calendarPublicUrl = ""           # optional: PUBLIC .ics address of the calendar, used only for the "add to your calendar" buttons.
