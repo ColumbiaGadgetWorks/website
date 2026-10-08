@@ -1,9 +1,8 @@
 // Registers the /fund slash commands for one Discord server.
 //
-// Not needed for the switch from the fundbot bot: Discord keeps the commands
-// the bot registered, and they reach the website as soon as the app's
-// Interactions Endpoint URL points at it. Run this only if the commands go
-// missing or their options change:
+// Run this after any change to the commands below (for example the Givebutter
+// subcommands: map, sync, review, assign, dismiss, history, remove), or if the
+// commands go missing:
 //
 //   DISCORD_BOT_TOKEN=... node scripts/register-fund-commands.mjs <application id> <server id>
 
@@ -15,6 +14,8 @@ if (!appId || !guildId || !token) {
 }
 
 const STRING = 3;
+const INTEGER = 4;
+const BOOLEAN = 5;
 const NUMBER = 10;
 const SUB = 1;
 const name = (autocomplete = true) => ({ type: STRING, name: 'name', description: 'Campaign name', required: true, autocomplete });
@@ -39,7 +40,28 @@ const fund = {
     { type: SUB, name: 'show', description: 'Show current progress', options: [name()] },
     { type: SUB, name: 'list', description: 'List every active fundraiser' },
     { type: SUB, name: 'board', description: 'Post a live-updating tracker in this channel', options: [name()] },
-    { type: SUB, name: 'undo', description: 'Remove the most recent donation', options: [name()] },
+    { type: SUB, name: 'undo', description: 'Remove the most recent hand-entered donation', options: [name()] },
+    { type: SUB, name: 'map', description: 'Count Givebutter gifts toward a campaign', options: [
+      name(),
+      { type: STRING, name: 'fund', description: 'Givebutter Fund code (the "designate to" choice)' },
+      { type: STRING, name: 'campaign', description: 'Givebutter campaign code, e.g. v7RxV6' },
+      { type: STRING, name: 'keywords', description: 'Comma list; untagged gifts mentioning one go to review' },
+    ] },
+    { type: SUB, name: 'sync', description: 'Check Givebutter for new gifts now', options: [
+      { type: BOOLEAN, name: 'full', description: 'Re-read all history, to bring in earlier gifts' },
+    ] },
+    { type: SUB, name: 'review', description: 'List Givebutter gifts waiting for a decision' },
+    { type: SUB, name: 'assign', description: 'Count a Givebutter gift toward a campaign', options: [
+      { type: STRING, name: 'transaction', description: 'Givebutter transaction id', required: true },
+      name(),
+    ] },
+    { type: SUB, name: 'dismiss', description: 'Skip a Givebutter gift in the review list', options: [
+      { type: STRING, name: 'transaction', description: 'Givebutter transaction id', required: true },
+    ] },
+    { type: SUB, name: 'history', description: 'List recent donations with their entry numbers', options: [name()] },
+    { type: SUB, name: 'remove', description: 'Remove one donation by entry number', options: [
+      name(), { type: INTEGER, name: 'entry', description: 'Entry number from /fund history', required: true },
+    ] },
   ],
 };
 

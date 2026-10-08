@@ -11,8 +11,20 @@
 //   DISCORD_PUBLIC_KEY app public key (Developer Portal > General Information)
 //   DISCORD_BOT_TOKEN  secret, used only to edit and pin the live /fund board
 //   DONATE_URL         default donate link for new campaigns and /fund list
+//   GIVEBUTTER_API_KEY, GIVEBUTTER_SYNC  see src/fund-givebutter.js
+//   FUND_LOG_CHANNEL_ID  optional channel id; the Givebutter sync posts what it
+//                        counted and what needs review there
 
 import { getCampaign, totals, recentDonations } from './fund.js';
+import {
+  ensureGivebutterSchema,
+  givebutterConfigured,
+  givebutterLive,
+  syncGivebutter,
+  assignTransaction,
+  setReview,
+  GivebutterError,
+} from './fund-givebutter.js';
 
 const API = 'https://discord.com/api/v10';
 const EPHEMERAL = 64;
@@ -51,6 +63,7 @@ export async function handleDiscord(request, env, ctx) {
   }
 
   try {
+    await ensureGivebutterSchema(env.FUND_DB);
     return reply(await runCommand(interaction, env, ctx));
   } catch (err) {
     console.error('fund command failed:', err);
@@ -88,7 +101,7 @@ async function runCommand(interaction, env, ctx) {
 
   const db = env.FUND_DB;
   const isAdmin = canManage(interaction);
-  const privileged = ['create', 'link', 'add', 'board', 'undo'];
+  const privileged = ['create', 'link', 'add', 'board', 'undo', 'map', 'sync', 'review', 'assign', 'dismiss', 'history', 'remove'];
   if (privileged.includes(sub?.name) && !isAdmin) {
     return message("You don't have permission to use that.", true);
   }
@@ -156,15 +169,141 @@ async function runCommand(interaction, env, ctx) {
     }
 
     case 'undo': {
+      // Only hand-entered gifts: a Givebutter gift would come back on the next
+      // sync. /fund remove takes those out for good.
       const { name } = opts;
       const last = await db
-        .prepare('SELECT id, amount FROM donation WHERE guild_id = ? AND name = ? ORDER BY id DESC LIMIT 1')
+        .prepare('SELECT id, amount FROM donation WHERE guild_id = ? AND name = ? AND external_id IS NULL ORDER BY id DESC LIMIT 1')
         .bind(guildId, name)
         .first();
-      if (!last) return message('Nothing to undo.', true);
+      if (!last) return message('No hand-entered donation to undo. See `/fund history` for Givebutter gifts.', true);
       await db.prepare('DELETE FROM donation WHERE id = ?').bind(last.id).run();
       ctx.waitUntil(refreshBoard(env, guildId, name));
       return message(`Removed last donation of ${money(last.amount)}.`, true);
+    }
+
+    case 'map': {
+      const { name } = opts;
+      if (await missing(name)) return noCampaign(name);
+      const clean = (v) => String(v ?? '').trim() || null;
+      const fund = clean(opts.fund);
+      const campaign = clean(opts.campaign);
+      const keywords = clean(opts.keywords);
+      await db
+        .prepare('UPDATE campaign SET gb_fund = ?, gb_campaign = ?, gb_keywords = ? WHERE guild_id = ? AND name = ?')
+        .bind(fund, campaign, keywords, guildId, name)
+        .run();
+      if (!fund && !campaign && !keywords) {
+        return message(`**${name}** is no longer linked to Givebutter. Gifts already counted stay.`, true);
+      }
+      const parts = [];
+      if (fund) parts.push(`Fund \`${fund}\``);
+      if (campaign) parts.push(`campaign \`${campaign}\``);
+      const lines = [
+        parts.length
+          ? `Givebutter gifts to ${parts.join(' and ')} now count toward **${name}**.`
+          : `No Fund or campaign code set, so nothing is counted toward **${name}** automatically.`,
+      ];
+      if (keywords) lines.push(`Other gifts whose message mentions ${keywords.split(',').map((k) => `"${k.trim()}"`).join(', ')} go to \`/fund review\`.`);
+      lines.push('Run `/fund sync full:True` to bring in earlier gifts.');
+      if (!givebutterConfigured(env)) lines.push('The Givebutter API key is not set yet, so nothing will sync until it is.');
+      return message(lines.join('\n'), true);
+    }
+
+    case 'sync': {
+      if (!givebutterConfigured(env)) return message('Set the GIVEBUTTER_API_KEY secret on the website Worker first.', true);
+      const full = Boolean(opts.full);
+      ctx.waitUntil(
+        followUp(interaction, async () => {
+          const r = await runSync(env, { full, fromCommand: true });
+          return r.text;
+        }),
+      );
+      return { type: 5, data: { flags: EPHEMERAL } };
+    }
+
+    case 'review': {
+      const { results } = await db
+        .prepare("SELECT external_id, guess, amount, donor, note, ts FROM gb_review WHERE guild_id = ? AND status = 'open' ORDER BY ts DESC LIMIT 15")
+        .bind(guildId)
+        .all();
+      if (!results.length) return message('Nothing waiting for review.', true);
+      const lines = results.map(
+        (r) =>
+          `\`${r.external_id}\` ${day(r.ts)} · ${money(r.amount)} · ${r.donor || 'Anonymous'}` +
+          (r.note ? ` · "${r.note.slice(0, 80)}"` : '') +
+          (r.guess ? ` → **${r.guess}**?` : ''),
+      );
+      lines.push('', 'Count one with `/fund assign`, or skip it with `/fund dismiss`.');
+      return message(lines.join('\n').slice(0, 1990), true);
+    }
+
+    case 'assign': {
+      const { name } = opts;
+      const tx = String(opts.transaction ?? '').trim();
+      if (await missing(name)) return noCampaign(name);
+      if (!/^[A-Za-z0-9_-]{1,40}$/.test(tx)) return message('Give the Givebutter transaction id, as shown in `/fund review`.', true);
+      ctx.waitUntil(
+        followUp(interaction, async () => {
+          let r;
+          try {
+            r = await assignTransaction(env, guildId, tx, name);
+          } catch (err) {
+            return givebutterProblem(err);
+          }
+          if (r.error === 'no-key') return 'Set the GIVEBUTTER_API_KEY secret on the website Worker first.';
+          if (r.error === 'not-found') return `Givebutter has no transaction \`${tx}\`.`;
+          if (r.error === 'not-paid') return `Transaction \`${tx}\` is ${r.tx.status || 'not paid'}, so it was not counted.`;
+          await refreshBoard(env, guildId, name);
+          if (r.before && r.before.name !== name) await refreshBoard(env, r.before.guild_id, r.before.name);
+          return `Counted ${money(r.tx.amount)} from ${r.tx.donor || 'Anonymous'} toward **${name}**.` +
+            (r.before && r.before.name !== name ? ` Moved from **${r.before.name}**.` : '');
+        }),
+      );
+      return { type: 5, data: { flags: EPHEMERAL } };
+    }
+
+    case 'dismiss': {
+      const tx = String(opts.transaction ?? '').trim();
+      const row = await db.prepare('SELECT guild_id, amount, donor, ts FROM gb_review WHERE external_id = ?').bind(tx).first();
+      if (!row || row.guild_id !== guildId) return message(`No Givebutter gift \`${tx}\` in the review list.`, true);
+      await setReview(db, guildId, tx, 'dismissed', row);
+      return message(`Skipped \`${tx}\`. It won't be counted or listed again.`, true);
+    }
+
+    case 'history': {
+      const { name } = opts;
+      if (await missing(name)) return noCampaign(name);
+      const { results } = await db
+        .prepare('SELECT id, amount, donor, ts, external_id FROM donation WHERE guild_id = ? AND name = ? ORDER BY id DESC LIMIT 20')
+        .bind(guildId, name)
+        .all();
+      if (!results.length) return message(`No donations recorded for **${name}** yet.`, true);
+      const lines = results.map(
+        (r) =>
+          `#${r.id} · ${day(r.ts)} · ${money(r.amount)} · ${r.donor || 'Anonymous'} · ` +
+          (r.external_id ? `Givebutter \`${r.external_id}\`` : 'entered by hand'),
+      );
+      lines.push('', 'Take one out with `/fund remove`.');
+      return message(`**${name}**, latest 20\n` + lines.join('\n').slice(0, 1900), true);
+    }
+
+    case 'remove': {
+      const { name, entry } = opts;
+      const row = await db
+        .prepare('SELECT id, amount, donor, ts, external_id FROM donation WHERE id = ? AND guild_id = ? AND name = ?')
+        .bind(entry, guildId, name)
+        .first();
+      if (!row) return message(`No entry #${entry} in **${name}**. See \`/fund history\`.`, true);
+      await db.prepare('DELETE FROM donation WHERE id = ?').bind(row.id).run();
+      // Otherwise the next sync would count the Givebutter gift again.
+      if (row.external_id) await setReview(db, guildId, row.external_id, 'dismissed', row);
+      ctx.waitUntil(refreshBoard(env, guildId, name));
+      return message(
+        `Removed #${row.id}, ${money(row.amount)} from ${row.donor || 'Anonymous'}.` +
+          (row.external_id ? ' The sync will leave that Givebutter gift out from now on.' : ''),
+        true,
+      );
     }
 
     default:
@@ -288,6 +427,10 @@ function bar(pct, width = 22) {
   return '█'.repeat(filled) + '░'.repeat(width - filled);
 }
 
+function day(ts) {
+  return String(ts || '').slice(0, 10);
+}
+
 function money(n) {
   return Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
@@ -308,6 +451,86 @@ async function discordApi(env, method, path, body) {
     },
     body: body ? JSON.stringify(body) : undefined,
   });
+}
+
+// ---------- slow commands and the Givebutter sync ----------
+
+// Runs work after a deferred ("thinking…") reply and puts its text in that reply.
+async function followUp(interaction, work) {
+  let content;
+  try {
+    content = await work();
+  } catch (err) {
+    console.error('fund follow-up failed:', err);
+    content = "That didn't go through. Check the website Worker's logs for details.";
+  }
+  const res = await fetch(`${API}/webhooks/${interaction.application_id}/${interaction.token}/messages/@original`, {
+    method: 'PATCH',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ content: String(content).slice(0, 1990) }),
+  });
+  if (!res.ok) console.error('fund follow-up: edit failed', res.status);
+}
+
+function givebutterProblem(err) {
+  if (err instanceof GivebutterError) {
+    if (err.status === 401 || err.status === 403) return 'Givebutter refused the API key. Check GIVEBUTTER_API_KEY.';
+    if (err.status === 429) return 'Givebutter is rate limiting us. Try again in a few minutes.';
+    return `Givebutter answered ${err.status}. Try again later.`;
+  }
+  throw err;
+}
+
+// One sync, from the cron or /fund sync. Refreshes affected boards and posts
+// what changed to FUND_LOG_CHANNEL_ID. Returns the summary as text.
+export async function runSync(env, { full = false, fromCommand = false } = {}) {
+  const apply = givebutterLive(env);
+  let r;
+  try {
+    r = await syncGivebutter(env, { apply, full });
+  } catch (err) {
+    const text = givebutterProblem(err);
+    console.error('givebutter sync:', text);
+    return { text };
+  }
+  const text = summarize(r);
+  if (apply) {
+    for (const t of r.touched) await refreshBoard(env, t.guild_id, t.name);
+    const changed = r.added.length || r.moved.length || r.removed.length || r.review.length;
+    if (changed && env.FUND_LOG_CHANNEL_ID && env.DISCORD_BOT_TOKEN && !fromCommand) {
+      const res = await discordApi(env, 'POST', `/channels/${env.FUND_LOG_CHANNEL_ID}/messages`, {
+        content: text.slice(0, 1990),
+        allowed_mentions: { parse: [] },
+      });
+      if (!res.ok) console.error('givebutter sync: log post failed', res.status);
+    }
+  }
+  console.log(
+    `givebutter sync${apply ? '' : ' (dry run)'}: ${r.scanned} read, ${r.added.length} added, ` +
+      `${r.moved.length} moved, ${r.removed.length} removed, ${r.review.length} to review`,
+  );
+  return { text, result: r };
+}
+
+function summarize(r) {
+  if (r.empty) return 'No campaign is linked to Givebutter yet. Link one with `/fund map`.';
+  const lines = [r.apply ? '**Givebutter sync**' : '**Givebutter sync preview** (dry run: nothing was saved)'];
+  lines.push(`Read ${r.scanned} transaction${r.scanned !== 1 ? 's' : ''}${r.full ? ', full history' : ''}.`);
+  const gift = (t) => `${money(t.amount)} from ${t.donor || 'Anonymous'} (\`${t.id}\`, ${day(t.ts)})`;
+  const section = (title, items, fmt) => {
+    if (!items.length) return;
+    lines.push('', `${title}: ${items.length}`);
+    for (const t of items.slice(0, 12)) lines.push(`• ${fmt(t)}`);
+    if (items.length > 12) lines.push(`• …and ${items.length - 12} more`);
+  };
+  section(r.apply ? 'Counted' : 'Would count', r.added, (t) => `${gift(t)} → **${t.name}**`);
+  section(r.apply ? 'Moved' : 'Would move', r.moved, (t) => `${gift(t)}: **${t.from}** → **${t.name}**`);
+  section(r.apply ? 'Taken out (refunded or failed)' : 'Would take out (refunded or failed)', r.removed, (t) => `${gift(t)} out of **${t.name}**`);
+  section('Needs review', r.review, (t) => `${gift(t)}${t.note ? ` "${t.note.slice(0, 60)}"` : ''} → **${t.name}**?`);
+  if (!r.added.length && !r.moved.length && !r.removed.length && !r.review.length) lines.push('Nothing new.');
+  if (r.review.length && r.apply) lines.push('', 'See `/fund review`.');
+  if (!r.apply) lines.push('', 'Set GIVEBUTTER_SYNC to `on` on the website Worker to start counting.');
+  return lines.join('\n');
 }
 
 // Edit the pinned tracker message, if one exists. A board that was deleted or

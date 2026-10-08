@@ -41,8 +41,14 @@
     // Secrets, set in the dashboard (Settings > Variables and Secrets):
     //   DISCORD_PUBLIC_KEY  Discord app public key (/fund commands)
     //   DISCORD_BOT_TOKEN   Discord bot token (edits and pins /fund boards)
+    //   GIVEBUTTER_API_KEY  Givebutter API key (counts Givebutter gifts toward /fund goals)
+    // Variables, set in the dashboard so a deploy does not reset them:
+    //   GIVEBUTTER_SYNC      "on" to record Givebutter gifts; anything else is a dry run
+    //   FUND_LOG_CHANNEL_ID  Discord channel the Givebutter sync reports to (optional)
   },
   // Hourly: copy upcoming calendar events to the Discord server (src/discord-events.js).
-  "triggers": { "crons": ["17 * * * *"] },
+  // Every five minutes: count new Givebutter gifts toward /fund goals (src/fund-givebutter.js).
+  // src/index.js tells them apart by the expression, so change both together.
+  "triggers": { "crons": ["17 * * * *", "*/5 * * * *"] },
   "observability": { "enabled": true }
 }

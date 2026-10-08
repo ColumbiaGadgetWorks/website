@@ -4,7 +4,8 @@ import { handleContact } from './contact.js';
 import { handleSubscribe, handleExport } from './subscribe.js';
 import { handleCalendar, handleCalendarFeed } from './calendar.js';
 import { handleFund } from './fund.js';
-import { handleDiscord, discordPublicKey } from './fund-discord.js';
+import { handleDiscord, discordPublicKey, runSync } from './fund-discord.js';
+import { givebutterConfigured, givebutterLive } from './fund-givebutter.js';
 import { handleJoin, handleGivebutterWebhook, joinConfigured } from './join.js';
 import { syncDiscordEvents, discordEventsConfigured } from './discord-events.js';
 
@@ -64,6 +65,9 @@ export default {
           DOLIBARR: joinConfigured(env),
           DISCORD_EVENTS_SYNC: discordEventsConfigured(env),
           GIVEBUTTER_WEBHOOK_SECRET: Boolean(env.GIVEBUTTER_WEBHOOK_SECRET),
+          GIVEBUTTER_API_KEY: givebutterConfigured(env),
+          GIVEBUTTER_SYNC_ON: givebutterLive(env),
+          FUND_LOG_CHANNEL_ID: Boolean(env.FUND_LOG_CHANNEL_ID),
         },
       });
     }
@@ -71,8 +75,15 @@ export default {
     return env.ASSETS.fetch(request);
   },
 
-  // Cron trigger (wrangler.jsonc): copy upcoming calendar events to Discord.
+  // Cron triggers (wrangler.jsonc): every five minutes, count new Givebutter
+  // gifts toward the shop fund; hourly, copy upcoming calendar events to Discord.
   async scheduled(event, env, ctx) {
+    if (event.cron === '*/5 * * * *') {
+      if (env.FUND_DB && givebutterConfigured(env) && givebutterLive(env)) {
+        ctx.waitUntil(runSync(env).catch((e) => console.error('givebutter sync failed:', e.message)));
+      }
+      return;
+    }
     ctx.waitUntil(
       syncDiscordEvents(env).then(
         (r) => console.log('discord events sync:', r),
