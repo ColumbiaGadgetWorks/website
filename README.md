@@ -108,6 +108,28 @@ Drop an MP4 in `static/video/` and a poster still in `assets/img/`, then:
 Nothing loads until the visitor presses play (`preload="none"`), and the poster reserves the
 layout box. Re-mux phone footage with `ffmpeg -i in.mp4 -c copy -movflags +faststart out.mp4`.
 
+## Discord events
+
+Every hour (cron trigger in `wrangler.jsonc`) the Worker copies the next 35 days of calendar
+events into the Discord server's **Events** list (`src/discord-events.js`). Changes and
+deletions on the calendar follow within the hour. Only events the bot created are touched;
+events people add in Discord by hand are left alone. All-day entries are not sent.
+
+Setup, once:
+
+1. In Discord, give the bot's role the **Create Events** permission (Server Settings, Roles).
+   **Manage Events** works too.
+2. Optional: set `DISCORD_GUILD_ID` (the server ID: Developer Mode on, right-click the server,
+   Copy Server ID) as a variable on the Worker. Without it the server is found automatically
+   as long as the bot is only in one.
+3. Optional: `DISCORD_EVENTS_DAYS` changes how far ahead events are posted (default 35, so the next
+   monthly class is always listed).
+
+It uses the `DISCORD_BOT_TOKEN` and `CALENDAR_ICS_URL` secrets that are already set.
+`/api/health` shows `DISCORD_EVENTS_SYNC` as true when both are present. Each run logs a line
+like `discord events sync: 2 created, 0 updated, 0 removed, 0 failed` (Workers, website,
+Observability).
+
 ## Email updates list
 
 The "Get updates by email" box sits above the footer on every page

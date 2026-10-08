@@ -42,5 +42,7 @@
     //   DISCORD_PUBLIC_KEY  Discord app public key (/fund commands)
     //   DISCORD_BOT_TOKEN   Discord bot token (edits and pins /fund boards)
   },
+  // Hourly: copy upcoming calendar events to the Discord server (src/discord-events.js).
+  "triggers": { "crons": ["17 * * * *"] },
   "observability": { "enabled": true }
 }

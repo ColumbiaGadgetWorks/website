@@ -221,3 +221,15 @@ async function sha1(s) {
   const buf = await crypto.subtle.digest('SHA-1', new TextEncoder().encode(s));
   return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
 }
+
+// The calendar's occurrences between two instants, for code outside a request
+// (the Discord events sync). Throws when the feed is missing or unreadable.
+export async function occurrences(env, windowStart, windowEnd) {
+  if (!env.CALENDAR_ICS_URL) throw new Error('CALENDAR_ICS_URL is not set');
+  const res = await fetch(env.CALENDAR_ICS_URL, {
+    headers: { 'user-agent': 'columbiagadgetworks.org calendar' },
+    cf: { cacheTtl: CACHE_SECONDS, cacheEverything: true },
+  });
+  if (!res.ok) throw new Error(`calendar feed answered ${res.status}`);
+  return expand(parseICS(await res.text(), SITE_TZ), windowStart, windowEnd, SITE_TZ).slice(0, MAX_EVENTS);
+}
