@@ -12,6 +12,7 @@
   --line:#E5DED4;
   --ok:#2F7A4B;
   --warn:#9C6A00;
+  --cancel:#B3261E;
   /* Ordinary, ubiquitous faces. Nothing is downloaded, so text paints on the
      first frame and there is no layout shift when a webfont arrives. */
   --font:Arial,"Helvetica Neue",Helvetica,sans-serif;
@@ -289,6 +290,10 @@ ul.plain li{margin:0 0 .35em}
   width:100%;font:inherit;font-size:.76rem;line-height:1.25;text-align:left;padding:1px 0 1px 6px;margin:0 0 3px;
   border:0;border-left:2px solid var(--rust);background:transparent;color:var(--ink);cursor:pointer}
 .cal-chip strong{font-weight:700}
+/* A cancelled event (its title says "Cancelled") is bold and red wherever it shows. */
+.cal-chip.is-cancelled,.is-cancelled .cal-what{color:var(--cancel);font-weight:700}
+.cal-chip.is-cancelled{border-left-color:var(--cancel)}
+li.cal-item.is-cancelled{border-left-color:var(--cancel)}
 .cal-chip:hover{color:var(--rust-dark)}
 .cal-chip:focus-visible,.cal-more:focus-visible{outline:2px solid var(--rust);outline-offset:1px}
 .cal-more{display:block;font:inherit;font-size:.72rem;font-weight:700;line-height:1.25;padding:1px 0 1px 8px;
@@ -330,6 +335,7 @@ li.cal-item{border-top:1px solid var(--line);padding:14px 0 14px 16px;border-lef
   .cal-busy .cal-daynum{font-weight:700}
   .cal-chip{display:inline-block;width:6px;height:6px;padding:0;margin:3px 1px 0;border:0;
     border-radius:50%;background:var(--rust);font-size:0;vertical-align:top}
+  .cal-chip.is-cancelled{background:var(--cancel)}
   .cal-more{display:none}
 }
 
