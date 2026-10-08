@@ -18,7 +18,7 @@ This calendar is the schedule of record for Columbia Gadget Works. It updates as
 
 If you are teaching a class, running a work night, or organising a field trip, it belongs here. Post in the `#classes` channel on [Discord](https://discord.gg/yjpeBrAjuR) or [send us a note](/contact/) with the date, how long it runs, and what people will leave able to do. The classes lead will put it on the calendar and help promote it. See [teaching a class](/classes/#teach) for what is involved.
 
-Class announcements also go out on [Discord](https://discord.gg/yjpeBrAjuR), [Facebook](https://www.facebook.com/columbiagadgetworks/), and [Bluesky](https://bsky.app/profile/comogadgetworks.bsky.social), and are posted in the [news](/news/). You can subscribe to the [news feed](/news/index.xml), or put your email in the box at the bottom of any page and we will tell you when something new is scheduled.
+Class announcements also go out on [Discord](https://discord.gg/yjpeBrAjuR), [Facebook](https://www.facebook.com/columbiagadgetworks/), [Bluesky](https://bsky.app/profile/comogadgetworks.bsky.social), [Instagram](https://www.instagram.com/columbiagadgetworks/), and [TikTok](https://www.tiktok.com/@columbia.gadget.w), and are posted in the [news](/news/). You can subscribe to the [news feed](/news/index.xml), or put your email in the box at the bottom of any page and we will tell you when something new is scheduled.
 
 ## Holidays and changes
 
