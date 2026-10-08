@@ -50,7 +50,7 @@ disableKinds = ["taxonomy", "term"]
   wiki = "https://wiki.comogadget.casa/"
   # Official bylaws and policies. /policies/ is built from this GitHub repository at build time
   # (content/policies/_content.gotmpl). If the repository moves, change it here.
-  governanceRepo = "adman234/bylaws"
+  governanceRepo = "ColumbiaGadgetWorks/bylaws"
   governanceRef = "main"
   facebook = "https://www.facebook.com/columbiagadgetworks/"
   bluesky = "https://bsky.app/profile/comogadgetworks.bsky.social"
