@@ -154,14 +154,35 @@ cash and checks in Givebutter as offline donations with the fund set, and keep
 
 Query the data: `npx wrangler d1 execute fundraiser --remote --command "SELECT * FROM donation ORDER BY id DESC LIMIT 10"`.
 
-## Training lookup (/training/)
+## Training: catalog, payment and lookup
 
-`/training/` lets anyone check which tools an email address is trained on.
-`src/training.js` asks the Dolibarr onboarding module (`action=trainings`, with
-the same `DOLIBARR_URL` and `DOLIBARR_API_KEY` as the join page) and returns
-tool, zone and date only. It is behind Turnstile (action `training`) and 20
-lookups per IP per hour. Trainings are recorded in Dolibarr from the Givebutter
-training campaign; see the onboarding module's README.
+**The catalog is `data/training.yaml`.** It lists the zones, the allowed fees,
+the trainers (with the badge code on their Dolibarr member card), and each
+tool: its zone, fee and who may train on it. To add a tool or a trainer, or
+change a fee, edit that file in a pull request (the pencil icon on GitHub
+works). The build checks it: an unknown zone, a fee not in the list, a trainer
+id that is not defined, or a repeated id fails the PR's build check with a
+message naming the line. A tool with no trainers is not offered.
+
+**`/training/pay/`** (`layouts/_shortcodes/training-pay.html`) is where trainees
+pay. Picking a tool shows its fee and zone and lists only its trainers. Submitting
+calls `POST /api/training/start` (`src/training.js`), which checks the tool and
+trainer against the published catalog (`/training/catalog/index.json`, built from
+the YAML) and registers the training in Dolibarr (`action=trainingstart`). The
+page then opens the Givebutter widget for the training campaign with the amount,
+name and email filled in from the page address. Givebutter cannot carry the tool
+or trainer, so Dolibarr matches the payment to the registration by email; the
+page tells the trainee to keep the same email.
+
+Set in `hugo.toml`: `givebutterTraining` (the training campaign's link; empty
+turns the page off) and `givebutterTrainingWidgetId` (its widget id; empty sends
+people to the link instead of embedding).
+
+**`/training/`** looks up what an email address is trained on (tool, zone, date
+only), from Dolibarr (`action=trainings`).
+
+Both POST routes use `DOLIBARR_URL` and `DOLIBARR_API_KEY` (as the join page
+does), Turnstile, and a per-IP hourly limit.
 
 ## Video
 

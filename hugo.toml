@@ -42,6 +42,8 @@ disableKinds = ["taxonomy", "term"]
   venmoDonate = "https://www.paypal.com/qrcodes/venmocs/da49c07b-2aeb-42b7-9cd4-731507b6012b?created=1791391114"  # Venmo QR link, shown on /kiosk/
   givebutterAccount = "T9BSo58XoxQgK1XH"   # from the Givebutter embed script (acct=...)
   givebutterWidgetId = "j9Mr6K"          # the id from the <givebutter-widget id="..."> tag; its form offers one-time, monthly and yearly gifts
+  givebutterTraining = ""                 # training fees campaign link, e.g. https://givebutter.com/XXXXXX ; empty turns /training/pay/ off
+  givebutterTrainingWidgetId = ""         # its widget id (Campaign > Sharing > Widgets); empty sends people to the link instead
   discord = "https://discord.gg/yjpeBrAjuR"
   wiki = "https://wiki.comogadget.casa/"
   facebook = "https://www.facebook.com/columbiagadgetworks/"

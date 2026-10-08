@@ -1,0 +1,112 @@
+{{- /* Training fee: pick a tool and trainer from data/training.yaml, register
+       through the Worker (src/training.js), then pay with the Givebutter widget.
+       Givebutter cannot carry our fields, so Dolibarr matches the payment to the
+       registration by the email used at checkout. */ -}}
+{{- $p := site.Params -}}
+{{- $c := partial "training-catalog.html" . -}}
+{{- $trainers := dict -}}
+{{- range $id, $t := $c.trainers }}{{ $trainers = merge $trainers (dict $id $t.name) }}{{ end -}}
+{{- if not $p.givebutterTraining }}
+<div class="callout warn"><p>Online training payment is not set up yet. Pay your trainer's zone boss in person, or <a href="/contact/">contact us</a>.</p></div>
+{{- else if not $c.tools }}
+<div class="callout"><p>No trainings are open for online payment yet.</p></div>
+{{- else }}
+<form class="contact-form" id="tp-form" data-campaign="{{ $p.givebutterTraining }}">
+  <div class="field"><label for="tp-tool">Tool or equipment</label>
+    <select id="tp-tool" name="tool" required><option value="">Choose…</option>
+      {{- range $zone := $c.zones }}{{ $in := where $c.tools "zone" $zone }}{{ with $in }}
+      <optgroup label="{{ $zone }}">{{ range . }}<option value="{{ .id }}">{{ .name }}</option>{{ end }}</optgroup>{{ end }}{{ end }}
+    </select></div>
+  <p class="tp-facts" id="tp-facts" hidden><span>Fee <strong id="tp-fee"></strong></span> <span>Zone <strong id="tp-zone"></strong></span></p>
+  <div class="field"><label for="tp-trainer">Who trained you?</label>
+    <select id="tp-trainer" name="trainer" required disabled><option value="">Pick the tool first</option></select></div>
+  <div class="field"><label for="tp-first">First name</label><input id="tp-first" name="firstname" required autocomplete="given-name" maxlength="100"></div>
+  <div class="field"><label for="tp-last">Last name</label><input id="tp-last" name="lastname" required autocomplete="family-name" maxlength="100"></div>
+  <div class="field"><label for="tp-email">Email</label><input id="tp-email" name="email" type="email" required autocomplete="email" maxlength="200"></div>
+  {{ with $p.turnstileSiteKey }}<div class="cf-turnstile" data-sitekey="{{ . }}" data-action="training-pay"></div><script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>{{ end }}
+  <button class="btn btn-primary" type="submit">Continue to payment</button>
+</form>
+<div class="callout warn" id="tp-error" role="alert" hidden></div>
+<div id="tp-pay" hidden>
+  <h2>Pay <span id="tp-pay-amount"></span></h2>
+  <p><strong>Use this email at checkout: <span id="tp-pay-email"></span></strong> We match your payment to your training by it.</p>
+  <div class="gb-embed" id="tp-widget"></div>
+  <p id="tp-link" hidden><a class="btn btn-primary btn-lg" rel="noopener" target="_blank">Pay on Givebutter</a></p>
+  <p class="muted small">Your training is recorded a minute or two after the payment goes through, and you get an email.</p>
+</div>
+<style>
+.tp-facts{display:flex;gap:1.5em;margin:-.25em 0 1em}
+.tp-facts strong{font-variant-numeric:tabular-nums}
+</style>
+<script>
+(function () {
+  var tools = {{ $c.tools | jsonify | safeJS }};
+  var names = {{ $trainers | jsonify | safeJS }};
+  var widgetId = {{ $p.givebutterTrainingWidgetId | default "" }};
+  var account = {{ $p.givebutterAccount | default "" }};
+  var f = document.getElementById('tp-form');
+  var $ = function (id) { return document.getElementById(id); };
+  var byId = {};
+  tools.forEach(function (t) { byId[t.id] = t; });
+  var why = {
+    invalid: 'Fill in every field with a valid email address.',
+    tool: 'That tool or trainer is no longer offered. Reload the page.',
+    captcha: 'The spam check did not pass. Try again.',
+    slow: 'Too many attempts from here. Try again in an hour.',
+    config: 'Online training payment is not available right now.'
+  };
+  $('tp-tool').addEventListener('change', function () {
+    var t = byId[this.value], sel = $('tp-trainer');
+    sel.textContent = '';
+    $('tp-facts').hidden = !t;
+    if (!t) { sel.disabled = true; sel.add(new Option('Pick the tool first', '')); return; }
+    $('tp-fee').textContent = '$' + t.fee;
+    $('tp-zone').textContent = t.zone;
+    sel.add(new Option('Choose…', ''));
+    t.trainers.forEach(function (id) { sel.add(new Option(names[id] || id, id)); });
+    sel.disabled = false;
+  });
+  f.addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    var btn = f.querySelector('button[type=submit]');
+    var ts = f.querySelector('[name="cf-turnstile-response"]');
+    var body = { tool: f.tool.value, trainer: f.trainer.value, firstname: f.firstname.value, lastname: f.lastname.value, email: f.email.value, 'cf-turnstile-response': ts ? ts.value : '' };
+    btn.disabled = true;
+    $('tp-error').hidden = true;
+    fetch('/api/training/start', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) })
+      .then(function (r) { return r.json(); }).catch(function () { return { ok: false }; })
+      .then(function (j) {
+        btn.disabled = false;
+        if (window.turnstile) { try { window.turnstile.reset(); } catch (e) {} }
+        if (!j.ok) { $('tp-error').textContent = why[j.error] || 'That did not go through. Try again later.'; $('tp-error').hidden = false; return; }
+        pay(j.amount, body);
+      });
+  });
+  function pay(amount, who) {
+    // Givebutter's widget and checkout read the amount and the payer's name and
+    // email from the page address.
+    var q = 'amount=' + encodeURIComponent(amount) + '&gb_first_name=' + encodeURIComponent(who.firstname) +
+      '&gb_last_name=' + encodeURIComponent(who.lastname) + '&gb_email=' + encodeURIComponent(who.email);
+    f.hidden = true;
+    $('tp-pay-amount').textContent = '$' + amount;
+    $('tp-pay-email').textContent = who.email;
+    $('tp-pay').hidden = false;
+    if (widgetId && account) {
+      history.replaceState(null, '', location.pathname + '?' + q);
+      var w = document.createElement('givebutter-widget');
+      w.setAttribute('id', widgetId);
+      $('tp-widget').appendChild(w);
+      var s = document.createElement('script');
+      s.async = true;
+      s.src = 'https://widgets.givebutter.com/latest.umd.cjs?acct=' + encodeURIComponent(account) + '&p=other';
+      document.body.appendChild(s);
+    } else {
+      var a = $('tp-link').querySelector('a');
+      a.href = f.getAttribute('data-campaign') + '?' + q;
+      $('tp-link').hidden = false;
+    }
+    $('tp-pay').scrollIntoView({ block: 'start' });
+  }
+})();
+</script>
+{{- end }}

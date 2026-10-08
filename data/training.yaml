@@ -1,0 +1,42 @@
+# Training catalog: which tools people can pay to be trained on, what each costs,
+# which zone's budget it feeds, and who may train on it.
+#
+# This file drives the /training/pay/ page and is read by the Dolibarr
+# onboarding module (through /training/catalog/index.json). To add a tool, a
+# trainer, or change a fee, edit this file in a pull request. The site build
+# checks it and fails with a message if anything is off.
+#
+#   zones     Each zone has a budget in Dolibarr. Spell them as here everywhere.
+#   fees      The fees a zone boss can pick for a tool.
+#   trainers  id      short key used in the tools list below (lowercase, no spaces)
+#             name    shown on the payment page
+#             member  their badge code on the Dolibarr member card (e.g. CGW-13),
+#                     so their share of each fee reaches the right account
+#   tools     id       short key (lowercase, dashes), never reused for another tool
+#             name     shown to trainees and on their "trained" record
+#             zone     one of the zones above
+#             fee      one of the fees above
+#             trainers ids of the people qualified to train on it. A tool with
+#                      no trainers is not offered yet.
+
+zones:
+  - Digital Fab
+  - Electronics
+  - Woodworking
+  - Machining
+  - Metalworking
+  - Crafting
+
+fees: [5, 10, 15, 20]
+
+trainers: []
+  # - id: adam
+  #   name: Adam
+  #   member: CGW-1
+
+tools: []
+  # - id: laser-cutter
+  #   name: Laser cutter
+  #   zone: Digital Fab
+  #   fee: 10
+  #   trainers: [adam]

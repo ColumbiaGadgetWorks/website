@@ -1,0 +1,33 @@
+{{- /* The training catalog (data/training.yaml), checked. Returns a dict:
+       zones, fees, trainers (id -> dict), tools (only those with trainers).
+       Any mistake in the file stops the build with a message saying where. */ -}}
+{{- $d := hugo.Data.training | default dict -}}
+{{- $zones := $d.zones | default slice -}}
+{{- $fees := $d.fees | default (slice 5 10 15 20) -}}
+{{- $trainers := dict -}}
+{{- range $i, $t := $d.trainers | default slice -}}
+  {{- if not (and $t.id $t.name) -}}{{- errorf "data/training.yaml: trainer #%d needs an id and a name" (add $i 1) -}}{{- end -}}
+  {{- if not (findRE `^[a-z0-9][a-z0-9-]*$` (string $t.id)) -}}{{- errorf "data/training.yaml: trainer id %q: use lowercase letters, digits and dashes" $t.id -}}{{- end -}}
+  {{- if isset $trainers (string $t.id) -}}{{- errorf "data/training.yaml: trainer id %q is used twice" $t.id -}}{{- end -}}
+  {{- $trainers = merge $trainers (dict (string $t.id) (dict "id" (string $t.id) "name" (string $t.name) "member" (string ($t.member | default "")))) -}}
+{{- end -}}
+{{- $tools := slice -}}
+{{- $seen := dict -}}
+{{- range $i, $t := $d.tools | default slice -}}
+  {{- $where := printf "data/training.yaml: tool %q" (string ($t.id | default (printf "#%d" (add $i 1)))) -}}
+  {{- if not (and $t.id $t.name $t.zone) -}}{{- errorf "%s needs an id, a name and a zone" $where -}}{{- end -}}
+  {{- if not (findRE `^[a-z0-9][a-z0-9-]*$` (string $t.id)) -}}{{- errorf "%s: id must be lowercase letters, digits and dashes" $where -}}{{- end -}}
+  {{- if isset $seen (string $t.id) -}}{{- errorf "%s is listed twice" $where -}}{{- end -}}
+  {{- $seen = merge $seen (dict (string $t.id) true) -}}
+  {{- if not (in $zones $t.zone) -}}{{- errorf "%s: zone %q is not in the zones list" $where $t.zone -}}{{- end -}}
+  {{- if not (in $fees $t.fee) -}}{{- errorf "%s: fee %v is not one of %v" $where $t.fee $fees -}}{{- end -}}
+  {{- $ids := slice -}}
+  {{- range $t.trainers | default slice -}}
+    {{- if not (isset $trainers (string .)) -}}{{- errorf "%s: trainer %q is not in the trainers list" $where . -}}{{- end -}}
+    {{- $ids = $ids | append (string .) -}}
+  {{- end -}}
+  {{- if $ids -}}
+    {{- $tools = $tools | append (dict "id" (string $t.id) "name" (string $t.name) "zone" (string $t.zone) "fee" $t.fee "trainers" $ids) -}}
+  {{- end -}}
+{{- end -}}
+{{- return dict "zones" $zones "fees" $fees "trainers" $trainers "tools" (sort $tools "name") -}}
