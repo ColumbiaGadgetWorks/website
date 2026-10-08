@@ -70,10 +70,6 @@ disableKinds = ["taxonomy", "term"]
     pageRef = "/tools"
     weight = 20
   [[menus.main]]
-    name = "Classes"
-    pageRef = "/classes"
-    weight = 30
-  [[menus.main]]
     name = "Calendar"
     pageRef = "/calendar"
     weight = 40

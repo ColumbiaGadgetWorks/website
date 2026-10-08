@@ -26,7 +26,7 @@ The process, roughly:
 
 ## Training and classes
 
-Because it involves molten metal, casting is only done with a trained member present. The good news: we teach it regularly as a free class. Our first metal casting class in February 2026 filled up fast, and we'll run it again. See [classes](/classes/) and the [recap](/news/metal-casting-class-recap/).
+Because it involves molten metal, casting is only done with a trained member present. The good news: we teach it regularly as a free class. Our first metal casting class in February 2026 filled up fast, and we'll run it again. See [classes](/calendar/#classes) and the [recap](/news/metal-casting-class-recap/).
 
 ## Safety
 

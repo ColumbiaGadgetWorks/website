@@ -34,7 +34,7 @@ Monthly gifts are especially helpful: they let us plan around predictable income
 - **By check:** payable to *Columbia Gadget Works*, mailed or dropped off at 1404 Grand Ave, Columbia, MO 65203.
 - **Employer matching:** many employers match charitable gifts. Search for us by EIN 27-3926809 in your company's matching portal, or [contact us](/contact/) for any paperwork.
 - **Equipment and materials:** we accept working tools, machines, electronics, and shop materials that fit our zones. Please [ask first](/contact/) so we can confirm we have space and a use for it. In-kind donations are acknowledged in writing.
-- **Your time:** teach a class, lead a zone, or help on a Thursday. See [classes](/classes/#teach) or just show up.
+- **Your time:** teach a class, lead a zone, or help on a Thursday. See [teaching a class](/calendar/#teach) or just show up.
 
 ## Become a member instead
 
