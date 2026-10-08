@@ -26,8 +26,4 @@ If you are running a work night or organising a field trip, it belongs here. Pos
 
 Class announcements also go out on [Discord](https://discord.gg/yjpeBrAjuR), [Facebook](https://www.facebook.com/columbiagadgetworks/), [Bluesky](https://bsky.app/profile/comogadgetworks.bsky.social), [Instagram](https://www.instagram.com/columbiagadgetworks/), and [TikTok](https://www.tiktok.com/@columbia.gadget.w), and are posted in the [news](/news/). You can subscribe to the [news feed](/news/index.xml), or put your email in the box at the bottom of any page and we will tell you when something new is scheduled.
 
-## Holidays and changes
-
-Open Hack Night is skipped only on major holidays. If a Thursday falls on one, assume we are closed unless the calendar above says otherwise. Anything cancelled at short notice is announced on Discord first.
-
 {{< /hidden >}}

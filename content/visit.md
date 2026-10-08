@@ -17,8 +17,6 @@ Here is what usually happens:
 - **Bring a project, or don't.** People show up with broken lamps, half-finished robots, a 3D file they want printed, or nothing at all. All of those are fine.
 - **Classes often happen on Thursdays.** Check the [events calendar](/calendar/) or the [news](/news/) page; class nights are announced a couple of weeks ahead.
 
-Open Hack Night is skipped only on major holidays. If a Thursday falls on one, assume we're closed unless the [calendar](/calendar/) says otherwise.
-
 ## Where we are
 
 **1404 Grand Ave, Columbia, MO 65203**, just off Business Loop 70 on the north side of town, a few minutes from downtown and the MU campus.
