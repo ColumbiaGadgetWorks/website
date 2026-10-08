@@ -11,4 +11,4 @@ Type the email you used to pay your training fee. You will see each tool you are
 
 ## Not on the list?
 
-Trainings are recorded when the training fee is paid on Givebutter. If you paid with a different email, try that one. If a training is missing, ask the zone boss or [contact us](/contact/) with the date and the name of your trainer.
+Trainings are recorded when the training fee is paid through [the training payment page](/training/pay/). If you paid with a different email, try that one. If a training is missing, ask the zone boss or [contact us](/contact/) with the date and the name of your trainer.

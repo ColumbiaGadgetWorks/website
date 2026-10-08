@@ -1,0 +1,4 @@
+{{- $c := partial "training-catalog.html" . -}}
+{{- $trainers := slice -}}
+{{- range $c.trainers }}{{ $trainers = $trainers | append . }}{{ end -}}
+{{- dict "zones" $c.zones "fees" $c.fees "trainers" (sort $trainers "name") "tools" $c.tools | jsonify (dict "indent" "  ") -}}
