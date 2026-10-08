@@ -589,12 +589,14 @@
     --graphite: #6B5E55;
     --rule:     #DCCBBE;
     --cut:      var(--cgw-orange);
+    --cancel:   #C8102E;  /* cancelled events: red, not the panel's orange */
   }
   :root[data-theme="dark"] .panel-info {
     --ink:      #F2ECE6;
     --graphite: #B4A194;
     --rule:     #4B3A2F;
     --cut:      #FF8F4F;
+    --cancel:   #FF5D72;
   }
 
   /* The orange sheet: orange frame and a thick top bar, the shop's name in
@@ -686,6 +688,9 @@
     border-left: 2px solid var(--cut);
     overflow-wrap: anywhere;
   }
+  /* A cancelled event (its title says "Cancelled") is bold and red. */
+  .cal-chip.is-cancelled, .cal-chip.is-cancelled b { color: var(--cancel); font-weight: 700; }
+  .cal-chip.is-cancelled { border-left-color: var(--cancel); }
   .cal-chip b {
     font-family: "IBM Plex Mono", monospace;
     font-weight: 600;
@@ -701,6 +706,7 @@
       border-left: 0;
       background: var(--cut);
     }
+    .cal-chip.is-cancelled { background: var(--cancel); }
   }
   .cal-note {
     font-family: "IBM Plex Mono", monospace;
@@ -1045,7 +1051,7 @@ async function calendarRender() {
       if (d === null) { html += `<td class="cal-empty"></td>`; continue; }
       const ds = `${monthKey(y, m)}-${String(d).padStart(2, "0")}`;
       const chips = (byDay[ds] || []).map(e =>
-        `<span class="cal-chip" title="${esc(e.title)}">${e.time ? `<b>${esc(e.time)}</b> ` : ""}${esc(e.title)}</span>`
+        `<span class="cal-chip${/\bcancel+ed\b/i.test(e.title) ? " is-cancelled" : ""}" title="${esc(e.title)}">${e.time ? `<b>${esc(e.time)}</b> ` : ""}${esc(e.title)}</span>`
       ).join("");
       html += `<td class="${ds === today ? "cal-today" : ""}"><span class="cal-daynum">${d}</span>${chips}</td>`;
     }

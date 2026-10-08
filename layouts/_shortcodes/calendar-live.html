@@ -141,10 +141,13 @@
     return x;
   }
 
+  // A week marked "Cancelled: ..." on the calendar (holiday closures) is shown in red.
+  function cancelled(e) { return /\bcancel+ed\b/i.test(e.title); }
+
   // One event in full: time, title, place with a map link, description.
   // `short` trims a long description and offers the dialog for the rest.
   function detail(e, short) {
-    var li = el('li', 'cal-item');
+    var li = el('li', 'cal-item' + (cancelled(e) ? ' is-cancelled' : ''));
     var when = el('p', 'cal-when');
     when.appendChild(el('strong', '', timeRange(e)));
     li.appendChild(when);
@@ -270,7 +273,7 @@
         // the first and a count, so nothing is ever clipped out of sight.
         var few = list.length > 2 ? list.slice(0, 1) : list;
         few.forEach(function (e) {
-          var chip = el('button', 'cal-chip');
+          var chip = el('button', 'cal-chip' + (cancelled(e) ? ' is-cancelled' : ''));
           chip.type = 'button';
           chip.setAttribute('data-i', shown.indexOf(e));
           if (!e.allDay) { chip.appendChild(el('strong', '', timeLabel(e.start))); chip.appendChild(document.createTextNode(' ')); }
