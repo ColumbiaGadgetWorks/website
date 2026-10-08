@@ -31,7 +31,9 @@ Columbia Gadget Works is a **membership organization**. Every member in good sta
 
 The shop itself is divided into **zones**: woodworking, metalworking, digital fabrication (laser, CNC, 3D printing), electronics, and casting. Each zone is run by a volunteer "zone lead" who sets it up, keeps it safe, and decides what training its tools require. Other volunteers take on functions like membership, classes, facilities, and communications.
 
-Decisions are written down on our [member wiki](https://wiki.comogadget.casa/). If it isn't on the wiki, it isn't policy.
+### Bylaws and policies
+
+Our [bylaws and policies](/policies/) are public. The official text lives in a repository on GitHub, and this site publishes it directly from there. Any member can propose a change: the board votes on policies, and the members vote on the bylaws. See [how we decide](/policies/how-we-decide/).
 
 ### Board of directors
 
@@ -63,7 +65,7 @@ Our income comes from membership dues, individual donations, and occasional gran
 
 ## Nondiscrimination
 
-Columbia Gadget Works welcomes everyone. We do not discriminate on the basis of race, color, religion, national origin, sex, sexual orientation, gender identity or expression, age, disability, veteran status, or any other characteristic protected by law, in membership, in access to our programs, or in anything else we do. Our [code of conduct](/code-of-conduct/) spells out what we expect of each other in the shop.
+Columbia Gadget Works welcomes everyone. We do not discriminate on the basis of race, color, religion, national origin, sex, sexual orientation, gender identity or expression, age, disability, veteran status, or any other characteristic protected by law, in membership, in access to our programs, or in anything else we do. Our [code of conduct](/policies/conduct-and-safety/) spells out what we expect of each other in the shop.
 
 ## Get in touch
 

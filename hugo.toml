@@ -18,6 +18,10 @@ disableKinds = ["taxonomy", "term"]
   startLevel = 2
   endLevel = 2
 
+# Always refetch the bylaws and policies from GitHub on each build.
+[caches.getresource]
+  maxAge = 0
+
 [outputs]
   home = ["HTML", "RSS"]
   section = ["HTML", "RSS"]
@@ -44,6 +48,10 @@ disableKinds = ["taxonomy", "term"]
   givebutterWidgetId = "j9Mr6K"          # the id from the <givebutter-widget id="..."> tag; its form offers one-time, monthly and yearly gifts
   discord = "https://discord.gg/yjpeBrAjuR"
   wiki = "https://wiki.comogadget.casa/"
+  # Official bylaws and policies. /policies/ is built from this GitHub repository at build time
+  # (content/policies/_content.gotmpl). If the repository moves, change it here.
+  governanceRepo = "ColumbiaGadgetWorks/bylaws"
+  governanceRef = "main"
   facebook = "https://www.facebook.com/columbiagadgetworks/"
   bluesky = "https://bsky.app/profile/comogadgetworks.bsky.social"
   instagram = "https://www.instagram.com/columbiagadgetworks/"
@@ -105,5 +113,9 @@ disableKinds = ["taxonomy", "term"]
     weight = 30
   [[menus.footer]]
     name = "Code of Conduct"
-    pageRef = "/code-of-conduct"
+    pageRef = "/policies/conduct-and-safety"
     weight = 40
+  [[menus.footer]]
+    name = "Bylaws & Policies"
+    pageRef = "/policies"
+    weight = 50
