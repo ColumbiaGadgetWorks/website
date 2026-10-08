@@ -57,8 +57,9 @@ sitemap and search results. It is one standalone template,
 `layouts/kiosk.html`, with two panels the visitor swaps between: the shop fund
 and a month calendar.
 
-* **Fund figures** come from the fundbot Discord bot. `/api/fund/campaigns`
-  (`src/fund.js`) passes through `FUNDBOT_API_URL`, set in `wrangler.jsonc`.
+* **Fund figures** come from the `fundraiser` D1 database through
+  `/api/fund/campaigns` (`src/fund.js`): gifts entered with `/fund add` plus
+  Givebutter gifts counted by the sync below.
 * **Calendar** is the same `/api/calendar` the calendar page uses.
 * **QR codes** are drawn by Hugo at build time from `hugo.toml`:
   `givebutterDonate` (credit card), `venmoDonate`, `discord` and the
@@ -93,8 +94,63 @@ Setup, once:
    Discord tests the address before accepting it. From then on every `/fund`
    command comes here instead of to a running bot.
 
-The commands the old bot registered keep working. If they ever go missing, run
+After changing the commands, or if they ever go missing, run
 `scripts/register-fund-commands.mjs` (usage at the top of the file).
+
+### Givebutter gifts counted automatically
+
+`src/fund-givebutter.js` reads the Givebutter API every five minutes (second
+cron in `wrangler.jsonc`) and counts each successful gift toward the `/fund`
+campaign it is tied to. Each counted gift stores its Givebutter transaction id,
+so a gift is never counted twice; a gift later refunded or failed is taken back
+out. Gifts entered with `/fund add` (Venmo, cash) are left alone.
+
+Donors pick a goal with Givebutter **Funds** (Settings > Account > Funds): one
+fund per goal, each with a short code, shown as a "designate to" dropdown on
+the donation form. No separate donation link per goal is needed. Funds are
+account-wide, so hide them on the membership dues campaign (Campaign > Settings
+> Funds) or tie each goal to both the fund and the donation campaign.
+
+Setup, once:
+
+1. Givebutter: create a fund per goal and give it a code (`LASER`, `ROOF`).
+   Then Settings > Integrations > API > create a key.
+2. Worker secret `GIVEBUTTER_API_KEY` = that key. Optional variable
+   `FUND_LOG_CHANNEL_ID` = a Discord channel id where the sync reports what it
+   counted (the bot needs Send Messages there).
+3. Register the new subcommands: `DISCORD_BOT_TOKEN=... node
+   scripts/register-fund-commands.mjs <application id> <server id>`.
+4. In Discord, tie each goal: `/fund map name:Laser cutter fund:LASER
+   campaign:v7RxV6 keywords:laser, glowforge`. `campaign` is optional (the code
+   at the end of the givebutter.com link). `keywords` sends untagged gifts that
+   mention one to the review list instead of counting them.
+5. `/fund sync full:True` previews what would be counted, including gifts made
+   before the mapping. Nothing is saved while `GIVEBUTTER_SYNC` is unset.
+6. When the preview matches the Givebutter dashboard, set the variable
+   `GIVEBUTTER_SYNC` = `on` and run `/fund sync full:True` once more to import
+   the history. From then on the cron keeps it current.
+
+The database gets its new columns and tables on the first `/fund` command or
+sync after deploy; nothing has to be run by hand.
+
+| Command | Does |
+|---|---|
+| `/fund map <name> [fund] [campaign] [keywords]` | tie a goal to Givebutter; no options unties it |
+| `/fund sync [full]` | check Givebutter now (a preview until `GIVEBUTTER_SYNC=on`) |
+| `/fund review` | Givebutter gifts that mention a goal but carry no fund |
+| `/fund assign <transaction> <name>` | count one Givebutter gift, from the review list or any transaction id |
+| `/fund dismiss <transaction>` | skip a gift in the review list for good |
+| `/fund history <name>` | latest 20 entries with numbers and where each came from |
+| `/fund remove <name> <entry>` | take one entry out; a Givebutter gift stays out |
+
+All of these need Manage Server. `/fund undo` now only removes hand-entered
+gifts, since a Givebutter gift would come back on the next sync.
+
+If gifts entered by hand earlier were also paid through Givebutter, they will
+be counted twice once the history is imported: find them with `/fund history`
+and take the hand-entered copy out with `/fund remove`. From now on, record
+cash and checks in Givebutter as offline donations with the fund set, and keep
+`/fund add` for gifts that never touch Givebutter.
 
 Query the data: `npx wrangler d1 execute fundraiser --remote --command "SELECT * FROM donation ORDER BY id DESC LIMIT 10"`.
 
