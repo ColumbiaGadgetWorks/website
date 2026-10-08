@@ -65,10 +65,27 @@ const fund = {
   ],
 };
 
+// Zone bosses ask for a new tool on the Givebutter training form. Keep the zones
+// and fees in step with the form and the Dolibarr onboarding settings.
+const ZONES = ['Digital Fab', 'Electronics', 'Woodworking', 'Machining', 'Metalworking', 'Crafting'];
+const FEES = [5, 10, 15, 20];
+const training = {
+  name: 'training',
+  description: 'Shop training',
+  options: [
+    { type: SUB, name: 'request', description: 'Ask for a tool to be added to the training payment form', options: [
+      { type: STRING, name: 'tool', description: 'Tool or equipment, as trainees should see it', required: true, max_length: 150 },
+      { type: STRING, name: 'zone', description: 'Zone', required: true, choices: ZONES.map((z) => ({ name: z, value: z })) },
+      { type: INTEGER, name: 'fee', description: 'Training fee', required: true, choices: FEES.map((f) => ({ name: `$${f}`, value: f })) },
+      { type: STRING, name: 'note', description: 'Anything the form editor should know', max_length: 300 },
+    ] },
+  ],
+};
+
 const res = await fetch(`https://discord.com/api/v10/applications/${appId}/guilds/${guildId}/commands`, {
   method: 'PUT',
   headers: { authorization: `Bot ${token}`, 'content-type': 'application/json' },
-  body: JSON.stringify([fund]),
+  body: JSON.stringify([fund, training]),
 });
-console.log(res.status, res.ok ? 'registered /fund' : await res.text());
+console.log(res.status, res.ok ? 'registered /fund and /training' : await res.text());
 process.exit(res.ok ? 0 : 1);

@@ -1,6 +1,9 @@
-// "What am I trained on?" lookup, mounted by src/index.js:
-//   POST /api/training/lookup  {email, cf-turnstile-response}
+// Training records live in Dolibarr (the onboarding module). This file has:
 //
+//   POST /api/training/lookup  "What am I trained on?", mounted by src/index.js
+//   /training request          Discord command, routed here by src/fund-discord.js
+//
+// The lookup:
 // Training records live in Dolibarr (the onboarding module records them from
 // the Givebutter training campaign). This asks Dolibarr for one address and
 // passes back tool, zone and date only. Anyone can type any address, so it is
@@ -36,6 +39,42 @@ export async function handleTrainingLookup(request, env) {
     date: String(t.date || ''),
   }));
   return json({ ok: true, trainings });
+}
+
+// /training request tool:<name> zone:<zone> fee:<5|10|15|20> [note]
+// Files a request in Dolibarr to add a tool to the Givebutter training form;
+// whoever edits the form is emailed and marks it done there.
+export async function trainingCommand(interaction, env) {
+  const sub = interaction.data.options?.[0];
+  const opts = Object.fromEntries((sub?.options || []).map((o) => [o.name, o.value]));
+  if (sub?.name !== 'request') return say('Unknown command.');
+  if (!joinConfigured(env)) return say('Training requests are not connected to Dolibarr yet.');
+  const user = interaction.member?.user || interaction.user || {};
+  const r = await dolibarr(env, 'toolrequest', {
+    tool: String(opts.tool ?? ''),
+    zone: String(opts.zone ?? ''),
+    price: Number(opts.fee),
+    note: String(opts.note ?? ''),
+    requested_by: user.username || '',
+  });
+  const d = r.data || {};
+  if (d.ok) {
+    return say(
+      `Asked for **${opts.tool}** (${opts.zone}, $${opts.fee}) to be added to the training form. ` +
+        (d.notify ? 'You will get an email when it is on.' : 'Your Discord name is not on a member card, so watch the form or ask in the server.'),
+    );
+  }
+  const why = {
+    exists: d.status === 'active' ? 'That tool is already on the training form.' : 'That tool has already been requested.',
+    zone: 'Pick one of the zones offered.',
+    price: 'Pick one of the fees offered.',
+    tool: 'Give the tool or equipment a name.',
+  };
+  return say(why[d.error] || "That didn't go through. Try again later.");
+}
+
+function say(content) {
+  return { type: 4, data: { content, flags: 64 } };
 }
 
 async function isRateLimited(env, ip) {

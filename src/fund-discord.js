@@ -16,6 +16,7 @@
 //                        counted and what needs review there
 
 import { getCampaign, totals, recentDonations } from './fund.js';
+import { trainingCommand } from './training.js';
 import {
   ensureGivebutterSchema,
   givebutterConfigured,
@@ -56,6 +57,14 @@ export async function handleDiscord(request, env, ctx) {
   // Discord checks the endpoint with a PING before saving it; answer that even
   // before the database is bound.
   if (interaction.type === 1) return reply({ type: 1 });
+  if (interaction.type === 2 && interaction.data?.name === 'training') {
+    try {
+      return reply(await trainingCommand(interaction, env));
+    } catch (err) {
+      console.error('training command failed:', err);
+      return reply(message("That didn't go through. Check the website Worker's logs for details.", true));
+    }
+  }
   if (!env.FUND_DB) return reply(message('The fund database is not connected yet.', true));
   if (interaction.type === 4) return reply({ type: 8, data: { choices: await autocomplete(interaction, env) } });
   if (interaction.type !== 2 || interaction.data?.name !== 'fund') {

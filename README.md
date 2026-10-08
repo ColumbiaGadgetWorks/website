@@ -163,6 +163,12 @@ tool, zone and date only. It is behind Turnstile (action `training`) and 20
 lookups per IP per hour. Trainings are recorded in Dolibarr from the Givebutter
 training campaign; see the onboarding module's README.
 
+`/training request tool:<name> zone:<zone> fee:<5|10|15|20>` in Discord asks for
+a tool to be added to the Givebutter training form. The Worker passes it to
+Dolibarr (`action=toolrequest`), which emails whoever edits the form and lists
+it under Members, Onboarding, Training tools. The zones and fees offered are in
+`scripts/register-fund-commands.mjs`; re-run that script after changing them.
+
 ## Video
 
 Drop an MP4 in `static/video/` and a poster still in `assets/img/`, then:
