@@ -25,7 +25,7 @@ Open Hack Night is skipped only on major holidays. If a Thursday falls on one, a
 
 {{< map >}}
 
-**Parking:** pull into the gravel lot beside the building. **Entrance:** the door on the side of the building with the gear logo. If it's closed, ring the bell next to it. Visitors sometimes miss the bell, so don't be shy about knocking.
+**Parking:** pull into the gravel lot beside the building. **Entrance:** the front door, the one with the gear logo. If it's closed, ring the doorbell. Visitors sometimes miss the bell, so don't be shy about knocking.
 
 ## What to expect
 

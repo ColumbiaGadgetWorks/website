@@ -14,7 +14,7 @@ wide: true
 
 **Open to the public:** every Thursday, 6–8 pm (Open Hack Night)<br>**Members:** 24/7
 
-Park in the gravel lot and ring the bell by the side entrance. First time? [What to expect on a visit](/visit/).
+Park in the gravel lot and ring the doorbell at the front door, the one with the gear logo. First time? [What to expect on a visit](/visit/).
 
 ## Reach us
 
@@ -22,7 +22,7 @@ Park in the gravel lot and ring the bell by the side entrance. First time? [What
 - Phone: [573-326-9868](tel:+15733269868) (voicemail; a volunteer will call back)
 - Discord: [join the server](https://discord.gg/yjpeBrAjuR) for the fastest answers
 - Member wiki: [wiki.comogadget.casa](https://wiki.comogadget.casa/) for policies, tool guides, and meeting minutes
-- Social: [Facebook](https://www.facebook.com/columbiagadgetworks/) · [Bluesky](https://bsky.app/profile/comogadgetworks.bsky.social)
+- Social: [Facebook](https://www.facebook.com/columbiagadgetworks/) · [Bluesky](https://bsky.app/profile/comogadgetworks.bsky.social) · [Instagram](https://www.instagram.com/columbiagadgetworks/) · [TikTok](https://www.tiktok.com/@columbia.gadget.w)
 
 We're volunteers, so email replies can take a few days. If it's urgent and it's a Thursday evening, just come by.
 
