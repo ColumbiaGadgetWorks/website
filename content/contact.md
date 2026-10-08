@@ -23,6 +23,7 @@ Park in the gravel lot and ring the doorbell at the front door, the one with the
 - Discord: [join the server](https://discord.gg/yjpeBrAjuR) for the fastest answers
 - Member wiki: [wiki.comogadget.casa](https://wiki.comogadget.casa/) for policies, tool guides, and meeting minutes
 - Social: [Facebook](https://www.facebook.com/columbiagadgetworks/) · [Bluesky](https://bsky.app/profile/comogadgetworks.bsky.social) · [Instagram](https://www.instagram.com/columbiagadgetworks/) · [TikTok](https://www.tiktok.com/@columbia.gadget.w) · [LinkedIn](https://www.linkedin.com/company/111805202/)
+- Everything in one place: [columbiagadgetworks.org/links](/links/)
 
 We're volunteers, so email replies can take a few days. If it's urgent and it's a Thursday evening, just come by.
 

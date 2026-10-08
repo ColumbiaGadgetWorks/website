@@ -16,6 +16,7 @@ Everything a volunteer normally touches is a Markdown or YAML file:
 | Video | `static/video/` (MP4 muxed with `-movflags +faststart`; embed with the `video` shortcode) |
 | Contact info, links, EIN, Givebutter IDs | `hugo.toml` under `[params]` |
 | Menu | `hugo.toml` under `[menus]` |
+| Links page (/links/, for business cards and social bios) | `data/links.yaml` (addresses come from `hugo.toml`) |
 
 Images referenced from front matter (`image: foo.jpg`) or with the shortcode `{{</* img src="foo.jpg" alt="…" */>}}` are automatically resized and served as WebP with `srcset`.
 

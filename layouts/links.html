@@ -1,0 +1,40 @@
+{{- /* /links/: one page with every place to find CGW, for business cards,
+       flyers and social media bios. Links come from data/links.yaml. */ -}}
+{{ define "main" }}
+{{- $p := site.Params -}}
+{{- $icon := dict -}}
+{{- range resources.Match "icons/*.svg" -}}
+  {{- $icon = merge $icon (dict (path.BaseName .Name) .Content) -}}
+{{- end -}}
+{{- $d := hugo.Data.links -}}
+<div class="wrap page links-page">
+  <header class="links-head">
+    <img src="/img/cgw-gear.png" width="72" height="72" alt="">
+    <h1>Columbia Gadget Works</h1>
+    <p class="muted">Community makerspace in Columbia, MO</p>
+    <p class="links-hack"><strong>Free Open Hack Night</strong> · {{ $p.openHackNight }} · {{ $p.addressStreet }}</p>
+  </header>
+
+  {{ with $d.primary }}
+  <a class="link-row link-primary" href="{{ index $p .param }}" rel="noopener">
+    <span class="link-ico" aria-hidden="true">{{ index $icon .icon | safeHTML }}</span>
+    <span class="link-text"><b>{{ .name }}</b><span>{{ .note }}</span></span>
+  </a>
+  {{ end }}
+
+  {{ range slice (dict "title" "Follow us" "items" $d.social) (dict "title" "At the shop" "items" $d.shop) }}
+  <h2 class="links-h">{{ .title }}</h2>
+  <ul class="links-list">
+    {{ range .items }}
+    {{ $it := . }}
+    {{ with cond (isset $it "param") (index $p $it.param) $it.url }}
+    <li><a class="link-row" href="{{ . }}"{{ if hasPrefix . "http" }} rel="noopener"{{ end }}>
+      <span class="link-ico" aria-hidden="true">{{ index $icon $it.icon | safeHTML }}</span>
+      <span class="link-text"><b>{{ $it.name }}</b><span>{{ $it.handle }}</span></span>
+    </a></li>
+    {{ end }}
+    {{ end }}
+  </ul>
+  {{ end }}
+</div>
+{{ end }}
