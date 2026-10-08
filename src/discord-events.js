@@ -13,13 +13,14 @@
 //                      "Create Events" permission (or "Manage Events").
 //   DISCORD_GUILD_ID   (var, optional) the server. When unset, the server is
 //                      found automatically if the bot is in exactly one.
-//   DISCORD_EVENTS_DAYS (var, optional) how far ahead to post, default 14.
+//   DISCORD_EVENTS_DAYS (var, optional) how far ahead to post, default 35 (always
+//                      at least one monthly class).
 //   CALENDAR_ICS_URL   (secret) the calendar, see src/calendar.js.
 
 import { occurrences } from './calendar.js';
 
 const API = 'https://discord.com/api/v10';
-const DEFAULT_DAYS = 14;
+const DEFAULT_DAYS = 35;
 const MAX_WRITES = 25; // per run, well inside Discord's rate limits and the Worker's subrequest budget
 const DEFAULT_LOCATION = 'Columbia Gadget Works, 1404 Grand Ave, Columbia, MO 65203';
 const MORE = 'https://columbiagadgetworks.org/calendar/';

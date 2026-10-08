@@ -110,7 +110,7 @@ layout box. Re-mux phone footage with `ffmpeg -i in.mp4 -c copy -movflags +fasts
 
 ## Discord events
 
-Every hour (cron trigger in `wrangler.jsonc`) the Worker copies the next two weeks of calendar
+Every hour (cron trigger in `wrangler.jsonc`) the Worker copies the next 35 days of calendar
 events into the Discord server's **Events** list (`src/discord-events.js`). Changes and
 deletions on the calendar follow within the hour. Only events the bot created are touched;
 events people add in Discord by hand are left alone. All-day entries are not sent.
@@ -122,7 +122,8 @@ Setup, once:
 2. Optional: set `DISCORD_GUILD_ID` (the server ID: Developer Mode on, right-click the server,
    Copy Server ID) as a variable on the Worker. Without it the server is found automatically
    as long as the bot is only in one.
-3. Optional: `DISCORD_EVENTS_DAYS` changes how far ahead events are posted (default 14).
+3. Optional: `DISCORD_EVENTS_DAYS` changes how far ahead events are posted (default 35, so the next
+   monthly class is always listed).
 
 It uses the `DISCORD_BOT_TOKEN` and `CALENDAR_ICS_URL` secrets that are already set.
 `/api/health` shows `DISCORD_EVENTS_SYNC` as true when both are present. Each run logs a line
