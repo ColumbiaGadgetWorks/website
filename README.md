@@ -154,6 +154,15 @@ cash and checks in Givebutter as offline donations with the fund set, and keep
 
 Query the data: `npx wrangler d1 execute fundraiser --remote --command "SELECT * FROM donation ORDER BY id DESC LIMIT 10"`.
 
+## Training lookup (/training/)
+
+`/training/` lets anyone check which tools an email address is trained on.
+`src/training.js` asks the Dolibarr onboarding module (`action=trainings`, with
+the same `DOLIBARR_URL` and `DOLIBARR_API_KEY` as the join page) and returns
+tool, zone and date only. It is behind Turnstile (action `training`) and 20
+lookups per IP per hour. Trainings are recorded in Dolibarr from the Givebutter
+training campaign; see the onboarding module's README.
+
 ## Video
 
 Drop an MP4 in `static/video/` and a poster still in `assets/img/`, then:

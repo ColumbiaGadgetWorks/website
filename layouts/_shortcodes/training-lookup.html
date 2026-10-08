@@ -1,0 +1,66 @@
+{{- /* Training lookup. Asks the Worker (src/training.js), which asks Dolibarr. */ -}}
+{{- $p := site.Params -}}
+<form class="contact-form" id="training-lookup">
+  <div class="field"><label for="tl-email">Email</label><input id="tl-email" name="email" type="email" required autocomplete="email" maxlength="200"></div>
+  {{ with $p.turnstileSiteKey }}<div class="cf-turnstile" data-sitekey="{{ . }}" data-action="training"></div><script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>{{ end }}
+  <button class="btn btn-primary" type="submit">Look up</button>
+</form>
+<div class="callout warn" id="training-error" role="alert" hidden></div>
+<div id="training-result" aria-live="polite" hidden>
+  <p id="training-none" hidden>No trainings are recorded for that email yet.</p>
+  <table class="training-table" id="training-table" hidden>
+    <thead><tr><th scope="col">Tool</th><th scope="col">Zone</th><th scope="col">Trained</th></tr></thead>
+    <tbody></tbody>
+  </table>
+</div>
+<style>
+.training-table{border-collapse:collapse;width:100%;margin:1em 0}
+.training-table th,.training-table td{text-align:left;padding:.5em .6em;border-bottom:1px solid var(--line)}
+.training-table td:last-child{font-variant-numeric:tabular-nums;white-space:nowrap}
+</style>
+<script>
+(function () {
+  var f = document.getElementById('training-lookup');
+  var err = document.getElementById('training-error');
+  var out = document.getElementById('training-result');
+  var table = document.getElementById('training-table');
+  var none = document.getElementById('training-none');
+  var why = {
+    invalid: 'That does not look like an email address.',
+    captcha: 'The spam check did not pass. Try again.',
+    slow: 'Too many lookups from here. Try again in an hour.',
+    config: 'The lookup is not set up yet.'
+  };
+  f.addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    var btn = f.querySelector('button[type=submit]');
+    var ts = f.querySelector('[name="cf-turnstile-response"]');
+    btn.disabled = true;
+    err.hidden = true;
+    fetch('/api/training/lookup', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ email: f.email.value, 'cf-turnstile-response': ts ? ts.value : '' })
+    }).then(function (r) { return r.json(); }).catch(function () { return { ok: false }; }).then(function (j) {
+      btn.disabled = false;
+      if (window.turnstile) { try { window.turnstile.reset(); } catch (e) {} }
+      if (!j.ok) {
+        err.textContent = why[j.error] || 'The lookup did not work. Try again later.';
+        err.hidden = false;
+        out.hidden = true;
+        return;
+      }
+      var body = table.querySelector('tbody');
+      body.textContent = '';
+      j.trainings.forEach(function (t) {
+        var tr = document.createElement('tr');
+        [t.tool, t.zone, t.date].forEach(function (v) { var td = document.createElement('td'); td.textContent = v; tr.appendChild(td); });
+        body.appendChild(tr);
+      });
+      table.hidden = !j.trainings.length;
+      none.hidden = !!j.trainings.length;
+      out.hidden = false;
+    });
+  });
+})();
+</script>

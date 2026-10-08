@@ -7,6 +7,7 @@ import { handleFund } from './fund.js';
 import { handleDiscord, discordPublicKey, runSync } from './fund-discord.js';
 import { givebutterConfigured, givebutterLive } from './fund-givebutter.js';
 import { handleJoin, handleGivebutterWebhook, joinConfigured } from './join.js';
+import { handleTrainingLookup } from './training.js';
 import { syncDiscordEvents, discordEventsConfigured } from './discord-events.js';
 
 export default {
@@ -41,6 +42,10 @@ export default {
       return handleExport(request, env);
     }
     if (pathname.startsWith('/api/join/')) return handleJoin(request, env, pathname);
+    if (pathname === '/api/training/lookup') {
+      if (request.method !== 'POST') return new Response('POST only', { status: 405 });
+      return handleTrainingLookup(request, env);
+    }
     if (pathname === '/api/givebutter-webhook') {
       if (request.method !== 'POST') return new Response('POST only', { status: 405 });
       return handleGivebutterWebhook(request, env);
