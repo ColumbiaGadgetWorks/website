@@ -1,0 +1,20 @@
+{{ define "main" }}
+<section class="wrap page">
+  <header class="page-head">
+    <h1>{{ .Title }}</h1>
+    {{ with .Params.subtitle }}<p class="lead">{{ . }}</p>{{ end }}
+  </header>
+  <div class="prose">
+    {{ with index (sort .Pages "Params.order") 0 }}{{ if eq .Params.governanceStatus "draft" }}
+    <div class="callout warn"><strong>Draft.</strong> These documents are proposed and have not yet been adopted by the members.</div>
+    {{ end }}{{ end }}
+    {{ .Content }}
+    <ul>
+      {{ range sort .Pages "Params.order" }}
+      <li><a href="{{ .RelPermalink }}">{{ .Title }}</a></li>
+      {{ end }}
+    </ul>
+    <p class="muted">Source and full change history: <a href="https://github.com/{{ site.Params.governanceRepo }}">github.com/{{ site.Params.governanceRepo }}</a></p>
+  </div>
+</section>
+{{ end }}
