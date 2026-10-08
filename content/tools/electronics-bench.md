@@ -20,7 +20,7 @@ The electronics bench is the most beginner-friendly corner of the shop and the o
 
 ## Classes
 
-Soldering is our most-requested class. We teach hand soldering and reflow/surface-mount techniques a few times a year, with kits to take home. Members with backgrounds in electrical engineering, RF, and hardware security run sessions on topics like Meshtastic radios, RFID, and microcontrollers. See [classes](/classes/).
+Soldering is our most-requested class. We teach hand soldering and reflow/surface-mount techniques a few times a year, with kits to take home. Members with backgrounds in electrical engineering, RF, and hardware security run sessions on topics like Meshtastic radios, RFID, and microcontrollers. See [classes](/calendar/#classes).
 
 ## Using the bench
 

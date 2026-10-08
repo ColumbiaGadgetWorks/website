@@ -29,7 +29,7 @@ Every machine in the metal shop requires training before solo use. The mill and 
 - **Lathe:** chucking, tool setup and height, facing, turning, drilling, parting, and threading.
 - **Welding:** machine setup, safety gear, ventilation, fire watch, and a supervised session on scrap.
 
-Our metalworking instructor runs periodic classes on the mill and lathe (see [classes](/classes/)), and a Thursday-night demo is always available.
+Our metalworking instructor runs periodic classes on the mill and lathe (see [classes](/calendar/#classes)), and a Thursday-night demo is always available.
 
 Setup notes and tooling inventories live on the [member wiki](https://wiki.comogadget.casa/).
 

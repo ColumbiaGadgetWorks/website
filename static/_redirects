@@ -14,3 +14,5 @@
 /wp-admin/*                                    /                                         301
 /wp-content/*                                  /                                         301
 /events/                                       /calendar/                                301
+/classes/                                      /calendar/#classes                        301
+/classes                                       /calendar/#classes                        301

@@ -141,6 +141,8 @@ ul.plain li{margin:0 0 .35em}
 /* Pages that lay out in columns opt out of the reading measure, so a two-column
    block fills the 1120px wrap instead of being squeezed into 72ch. */
 .prose-wide{max-width:none}
+/* Running text on a wide page still keeps a reading measure. */
+.prose-wide>p{max-width:80ch}
 .prose-wide>.two-col>div>:first-child{margin-top:0}
 .prose h2{margin-top:1.6em;padding-top:.2em}
 .prose h3{margin-top:1.3em}

@@ -46,7 +46,7 @@ All board members are unpaid volunteers. Terms run through the next annual meeti
 
 ### Who teaches
 
-Classes are taught by members who volunteer their time. Our instructors include a manufacturing engineer, a machinist who happens to be a retired physician, a retired electrical engineer, a senior software engineer and former math instructor, a hardware security specialist who has taught at DEF CON, and a founding member who has written several books on CAD and CAM. If you have something to teach, [we'd love to hear from you](/classes/#teach).
+Classes are taught by members who volunteer their time. Our instructors include a manufacturing engineer, a machinist who happens to be a retired physician, a retired electrical engineer, a senior software engineer and former math instructor, a hardware security specialist who has taught at DEF CON, and a founding member who has written several books on CAD and CAM.
 
 ## Nonprofit status and transparency
 
