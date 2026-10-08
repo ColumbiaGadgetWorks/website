@@ -14,7 +14,7 @@ This calendar is the schedule of record for Columbia Gadget Works. It updates as
 
 Members teach hands-on classes in every part of the shop: soldering, metal casting, machining, laser cutting, 3D printing, electronics and more. Classes are **free unless otherwise stated**; the paid ones are the trainings required before using certain equipment, which are discounted for [members](/membership/). Each class is on the calendar above. New classes are announced on [Discord](https://discord.gg/yjpeBrAjuR), [Facebook](https://www.facebook.com/columbiagadgetworks/) and [Bluesky](https://bsky.app/profile/comogadgetworks.bsky.social); put your email in the box at the bottom of the page to hear about them too.
 
-**City of Columbia grant classes, November 2026 to October 2027.** Thanks to a grant from the City of Columbia Office of Cultural Affairs, there is a free public class on the first Thursday of every month for a year, starting November 5, 2026. Topics rotate through every zone in the shop. No membership is needed. Some classes have limited seats, so check the event for a sign-up link. Financial assistance for this program has been provided by the City of Columbia Office of Cultural Affairs.
+**City of Columbia grant classes, November 2026 to October 2027.** Thanks to a grant from the City of Columbia Office of Cultural Affairs, there is a free public class on the first Thursday of every month for a year, starting November 5, 2026. Topics rotate through every zone in the shop. No membership is needed. Financial assistance for this program has been provided by the City of Columbia Office of Cultural Affairs.
 
 {{< calendar-subscribe >}}
 

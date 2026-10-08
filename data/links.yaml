@@ -1,0 +1,29 @@
+# The /links/ page (content/links.md, layouts/links.html): every place to find
+# Columbia Gadget Works, for business cards, flyers and social media bios.
+#
+# Each link takes either `param` (a key under [params] in hugo.toml, so the
+# address lives in one place) or `url` (a page on this site). `icon` is a file
+# in assets/icons/ without the .svg.
+
+primary:
+  name: Join our Discord
+  note: Announcements, project help, and who's coming in on Thursday
+  param: discord
+  icon: discord
+
+social:
+  - { name: Instagram, handle: "@columbiagadgetworks", param: instagram, icon: instagram }
+  - { name: TikTok, handle: "@columbia.gadget.w", param: tiktok, icon: tiktok }
+  - { name: Facebook, handle: "/columbiagadgetworks", param: facebook, icon: facebook }
+  - { name: Bluesky, handle: "@comogadgetworks.bsky.social", param: bluesky, icon: bluesky }
+  - { name: LinkedIn, handle: "Columbia Gadget Works", param: linkedin, icon: linkedin }
+  - { name: GitHub, handle: "ColumbiaGadgetWorks", param: github, icon: github }
+
+shop:
+  - { name: Plan a visit, handle: "Open Hack Night, Thursdays 6 to 8 pm", url: /visit/, icon: visit }
+  - { name: Events calendar, handle: "Classes, hack nights, and events", url: /calendar/, icon: calendar }
+  - { name: Free classes, handle: "First Thursday of every month", url: /calendar/#classes, icon: classes }
+  - { name: Membership, handle: "24/7 access to the shop", url: /membership/, icon: membership }
+  - { name: Donate, handle: "Tax-deductible, 501(c)(3)", url: /donate/, icon: donate }
+  - { name: Member wiki, handle: "Tool guides and shop policies", param: wiki, icon: wiki }
+  - { name: Contact us, handle: "mail@columbiagadgetworks.org", url: /contact/, icon: contact }
