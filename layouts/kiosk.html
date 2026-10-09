@@ -307,6 +307,26 @@
     z-index: 10;
     padding: .4375rem .75rem;
   }
+  /* ---------- burn-in guard (?kiosk only) ----------
+     The page, the corner buttons and the grid ground all wander together by
+     whole pixels (see the script), never more than 6px from home, so no edge
+     or line of text sits on the same pixels for hours. Whole-pixel steps keep
+     text crisp; the 6px bound is why the corner buttons sit 12px in. */
+  :root { --drift-x: 0px; --drift-y: 0px; }
+  :root[data-kiosk] .stage,
+  :root[data-kiosk] .panel-switch,
+  :root[data-kiosk] .kiosk-min,
+  :root[data-kiosk] body::before {
+    translate: var(--drift-x) var(--drift-y);
+  }
+  :root[data-kiosk] body {
+    background-position: calc(var(--drift-x) - 1px) calc(var(--drift-y) - 1px);
+  }
+  /* Overhang the ground so a shift never uncovers its edge. */
+  :root[data-kiosk] body::before { inset: -1rem; }
+  :root[data-kiosk] .panel-switch { top: .75rem; left: .75rem; }
+  :root[data-kiosk] .kiosk-min { top: .75rem; right: .75rem; }
+
   .kiosk-min-bar {
     display: inline-block;
     width: .75rem;
@@ -954,6 +974,34 @@ panelSwitch.addEventListener("click", () => showPanel(panelSwitch.dataset.show))
 
 // On the kiosk, an information panel nobody is touching returns to the fund
 // sheet, so the screen is never left on a month someone browsed to.
+/* ---------- burn-in guard ---------- */
+
+// On the kiosk, nudge everything by at most one pixel per axis every 45 s: a
+// random walk that stays within 6 px of home and drifts back when it reaches
+// the edge. Too slow and small to notice, enough that static edges and text
+// do not burn into the panel. The CSS applies --drift-x / --drift-y.
+if (kiosk) {
+  const DRIFT_MAX = 6;
+  const DRIFT_MS = 45000;
+  const rootStyle = document.documentElement.style;
+  let dx = 0;
+  let dy = 0;
+  const step = () => Math.floor(Math.random() * 3) - 1;   // -1, 0 or +1
+  setInterval(() => {
+    const nx = dx + step();
+    const ny = dy + step();
+    if (Math.hypot(nx, ny) <= DRIFT_MAX) {
+      dx = nx;
+      dy = ny;
+    } else {
+      dx -= Math.sign(dx);
+      dy -= Math.sign(dy);
+    }
+    rootStyle.setProperty("--drift-x", dx + "px");
+    rootStyle.setProperty("--drift-y", dy + "px");
+  }, DRIFT_MS);
+}
+
 const IDLE_MS = 120000;
 let idleTimer = 0;
 function armIdle() {
