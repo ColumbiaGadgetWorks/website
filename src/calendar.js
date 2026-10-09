@@ -231,5 +231,11 @@ export async function occurrences(env, windowStart, windowEnd) {
     cf: { cacheTtl: CACHE_SECONDS, cacheEverything: true },
   });
   if (!res.ok) throw new Error(`calendar feed answered ${res.status}`);
-  return expand(parseICS(await res.text(), SITE_TZ), windowStart, windowEnd, SITE_TZ).slice(0, MAX_EVENTS);
+  const text = await res.text();
+  // A 200 that is not a whole calendar (an error page, an empty or cut-off
+  // body) must not read as "every event was removed".
+  if (!/BEGIN:VCALENDAR/.test(text) || !/END:VCALENDAR\s*$/.test(text) || !/BEGIN:VEVENT/.test(text)) {
+    throw new Error('calendar feed answered with an incomplete calendar');
+  }
+  return expand(parseICS(text, SITE_TZ), windowStart, windowEnd, SITE_TZ).slice(0, MAX_EVENTS);
 }
