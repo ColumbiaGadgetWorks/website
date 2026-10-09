@@ -62,30 +62,52 @@ export async function syncDiscordEvents(env) {
   if (!listed.ok) throw new Error(`listing events answered ${listed.status}`);
   const ours = listed.data.filter((e) => e.creator_id === botId && e.status === SCHEDULED);
 
+  // A calendar with nothing ahead while Discord still holds our events is far
+  // more likely a bad read than a cleared calendar. Deleting now would bring
+  // every event back as "new" on the next good read, so leave Discord alone.
+  if (!wanted.size && ours.length) return `calendar had no upcoming events; left ${ours.length} Discord events alone`;
+
   let writes = 0, created = 0, updated = 0, removed = 0, failed = 0;
-  const write = async (method, path, body) => {
+  const write = async (method, path, body, what) => {
     if (writes >= MAX_WRITES) return null;
     writes++;
     const r = await api(env, method, path, body);
-    if (!r.ok) {
+    if (r.ok) console.log('discord events:', method, what);
+    else {
       failed++;
-      console.error('discord events:', method, path, r.status, JSON.stringify(r.data).slice(0, 300));
+      console.error('discord events:', method, what, r.status, JSON.stringify(r.data).slice(0, 300));
     }
     return r.ok;
   };
+  const label = (e) => `"${e.name}" ${iso(e.scheduled_start_time)}`;
 
+  // Same title and start: keep the event, edit it only if its details changed.
+  const unmatched = [];
   for (const e of ours) {
     const key = keyOf(e.name, e.scheduled_start_time);
     const want = wanted.get(key);
-    if (!want) {
-      if (await write('DELETE', `/guilds/${guildId}/scheduled-events/${e.id}`)) removed++;
+    if (!want) { unmatched.push(e); continue; }
+    wanted.delete(key);
+    if (differs(e, want) && (await write('PATCH', `/guilds/${guildId}/scheduled-events/${e.id}`, want, label(want)))) updated++;
+  }
+  // Same start, new title (a week renamed "Cancelled: ..."): edit it in place
+  // rather than delete and recreate, which Discord would show as a new event.
+  const byStart = new Map();
+  for (const [key, want] of wanted) if (!byStart.has(want.scheduled_start_time)) byStart.set(want.scheduled_start_time, key);
+  for (const e of unmatched) {
+    const key = byStart.get(iso(e.scheduled_start_time));
+    if (key && wanted.has(key)) {
+      const want = wanted.get(key);
+      wanted.delete(key);
+      if (await write('PATCH', `/guilds/${guildId}/scheduled-events/${e.id}`, want, `${label(e)} -> "${want.name}"`)) updated++;
       continue;
     }
-    wanted.delete(key);
-    if (differs(e, want) && (await write('PATCH', `/guilds/${guildId}/scheduled-events/${e.id}`, want))) updated++;
+    // Starting or already started: leave it to finish on its own.
+    if (new Date(e.scheduled_start_time) < from) continue;
+    if (await write('DELETE', `/guilds/${guildId}/scheduled-events/${e.id}`, null, label(e))) removed++;
   }
   for (const want of wanted.values()) {
-    if (await write('POST', `/guilds/${guildId}/scheduled-events`, want)) created++;
+    if (await write('POST', `/guilds/${guildId}/scheduled-events`, want, label(want))) created++;
   }
   const left = writes >= MAX_WRITES ? ' (more next run)' : '';
   return `${created} created, ${updated} updated, ${removed} removed, ${failed} failed${left}`;
@@ -110,10 +132,16 @@ function toDiscord(o) {
 
 function differs(e, want) {
   return (
+    e.name !== want.name ||
     iso(e.scheduled_end_time) !== want.scheduled_end_time ||
-    (e.description || '') !== want.description ||
+    tidy(e.description) !== tidy(want.description) ||
     ((e.entity_metadata && e.entity_metadata.location) || '') !== want.entity_metadata.location
   );
+}
+
+// Discord may trim or re-wrap what it stores; compare the text, not the spacing.
+function tidy(s) {
+  return String(s || '').replace(/\r\n/g, '\n').replace(/[ \t]+$/gm, '').trim();
 }
 
 function keyOf(name, start) {
