@@ -79,7 +79,7 @@ Search the repo for `TODO` (`grep -rn TODO content hugo.toml`). As of launch:
 - `content/classes.md`: confirm the planned-class list and the exact name of the City of Columbia grant program.
 - `content/tools/metal-shop.md`, `woodshop.md`: real machine makes and models.
 - `content/tools/cnc-router.md`, `electronics-bench.md`, `woodshop.md`: need a photo each (drop a JPG in `assets/img/`, set `image:` in the front matter).
-- `content/code-of-conduct.md`: draft for the transition committee to adopt.
+- Code of conduct: now `/policies/conduct-and-safety/`, built from the bylaws repository (`governanceRepo` in `hugo.toml`).
 - `content/about.md`: confirm the board list is current and everyone is fine being named.
 
 ## 9. Google for Nonprofits
