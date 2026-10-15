@@ -23,8 +23,8 @@
   <div class="field"><label for="bg-zone">Which zone is it for?</label>
     <select id="bg-zone" name="zone" required><option value="">Choose…</option></select></div>
   <fieldset class="field bg-kind"><legend>What kind of request?</legend>
-    <label><input type="radio" name="kind" value="reimburse" checked> Reimburse me (I already bought it)</label>
-    <label><input type="radio" name="kind" value="purchase"> Request for purchase (the treasurer buys it)</label>
+    <label class="bg-check"><input type="radio" name="kind" value="reimburse" checked><span>Reimburse me (I already bought it)</span></label>
+    <label class="bg-check"><input type="radio" name="kind" value="purchase"><span>Request for purchase (the treasurer buys it)</span></label>
   </fieldset>
   <div class="field"><label for="bg-amount" id="bg-amount-label">Amount you paid, in dollars</label><input id="bg-amount" name="amount" required inputmode="decimal" autocomplete="off" maxlength="10" placeholder="40.00"></div>
   <div class="field" data-kind="purchase" hidden><label for="bg-link">Web link to the item</label><input id="bg-link" name="link" type="url" maxlength="500" placeholder="https://"></div>
@@ -33,9 +33,9 @@
   <div class="field"><label for="bg-description">What is it and why does the zone need it? (1 to 3 sentences)</label><textarea id="bg-description" name="description" required rows="3" maxlength="600"></textarea></div>
   <div class="field" data-kind="reimburse"><label for="bg-files">Receipt (PDF, JPG, PNG or HEIC; up to 5 files)</label><input id="bg-files" name="files" type="file" multiple accept=".pdf,.jpg,.jpeg,.png,.webp,.heic,.heif,application/pdf,image/*"></div>
   <div class="field" data-kind="reimburse"><label for="bg-method">How should we pay you back?</label>
-    <select id="bg-method" name="pay_method"><option value="venmo">Venmo</option><option value="paypal">PayPal</option><option value="check">Check</option></select></div>
+    <select id="bg-method" name="pay_method"><option value="venmo">Venmo</option><option value="check">Check</option></select></div>
   <div class="field" data-kind="reimburse" id="bg-handle-field"><label for="bg-handle" id="bg-handle-label">Your Venmo handle</label><input id="bg-handle" name="pay_handle" maxlength="200" placeholder="@name"></div>
-  <div class="field" data-kind="reimburse"><label><input type="checkbox" name="ack_tax"> I used CGW's sales tax exemption, or I understand sales tax may not be reimbursed.</label></div>
+  <div class="field" data-kind="reimburse"><label class="bg-check"><input type="checkbox" name="ack_tax"><span>I used CGW's sales tax exemption, or I understand sales tax may not be reimbursed.</span></label></div>
   <div class="bg-trap" aria-hidden="true"><label>Leave this empty<input name="website" tabindex="-1" autocomplete="off"></label></div>
   {{ with $p.turnstileSiteKey }}<div class="cf-turnstile" data-sitekey="{{ . }}" data-action="purchase"></div><script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>{{ end }}
   <button class="btn btn-primary" type="submit">Send the request</button>
@@ -51,7 +51,9 @@
 .budget-table td:not(:first-child){text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
 @media (max-width:560px){.budget-table{font-size:.85rem}.budget-table th,.budget-table td{padding:.45em .3em}}
 .budget-table .low{color:#9b2226;font-weight:600}
-.bg-kind{border:0;padding:0}.bg-kind legend{font-weight:600;margin-bottom:.3em}.bg-kind label{display:block;margin:.2em 0}
+.bg-kind{border:0;padding:0}.bg-kind legend{font-weight:600;margin-bottom:.3em}
+.contact-form .bg-check{display:flex;align-items:flex-start;gap:10px;margin:.3em 0;font-weight:400}
+.contact-form .bg-check input{width:auto;flex:none;margin-top:.3em}
 .bg-trap{position:absolute;left:-9999px;height:0;overflow:hidden}
 </style>
 <script>
@@ -95,7 +97,6 @@
     Array.prototype.forEach.call(f.querySelectorAll('[data-kind]'), function (el) { el.hidden = el.getAttribute('data-kind') !== k; });
     $('bg-amount-label').textContent = k === 'purchase' ? 'Total price, in dollars' : 'Amount you paid, in dollars';
     $('bg-handle-field').hidden = k !== 'reimburse' || f.pay_method.value === 'check';
-    $('bg-handle-label').textContent = f.pay_method.value === 'paypal' ? 'Your PayPal email' : 'Your Venmo handle';
   }
   Array.prototype.forEach.call(f.querySelectorAll('input[name=kind]'), function (r) { r.addEventListener('change', sync); });
   f.pay_method.addEventListener('change', sync);
@@ -117,7 +118,7 @@
   var fields = {
     zone: 'Choose a zone.', amount: 'Enter an amount above $0 (up to $5,000).', description: 'Say what it is and why the zone needs it.',
     link: 'A request for purchase needs a web link that starts with https://.', vendor: 'Say where you bought it.',
-    purchase_date: 'Enter the date you bought it (not in the future).', pay_method: 'Say how to pay you back (and your Venmo handle or PayPal email).',
+    purchase_date: 'Enter the date you bought it (not in the future).', pay_method: 'Say how to pay you back (and your Venmo handle).',
     ack_tax: 'Tick the sales tax box.', email: 'Enter the email on your member card.', files: 'Attach the receipt (up to 5 files).', kind: 'Pick a kind of request.'
   };
   function fail(msg) { $('bg-error').textContent = msg; $('bg-error').hidden = false; $('bg-error').scrollIntoView({ block: 'nearest' }); }
