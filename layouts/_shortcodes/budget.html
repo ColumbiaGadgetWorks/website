@@ -13,12 +13,13 @@
 </div>
 <p class="muted small" id="bg-updated" hidden></p>
 
-<h2 id="ask">Ask to spend</h2>
-<p>Zone bosses can ask to spend from their own zone's budget. The president and the treasurer can ask for any zone or the General fund. You prove who you are with the email on your member card and the <strong>last two digits of your member code</strong> (for example 05).</p>
+<p class="bg-open-row" id="ask"><button type="button" class="btn btn-primary btn-lg" id="bg-open" aria-expanded="false" aria-controls="bg-panel">Submit request for purchase</button></p>
+<div id="bg-panel" hidden>
+<p>Zone bosses can ask to spend from their own zone's budget. The president and the treasurer can ask for any zone or the General fund. You prove who you are with the email address you gave Columbia Gadget Works and the <strong>last two digits of your member code</strong> (for example 05).</p>
 <p><strong>Reimburse me</strong> is for something you already bought: attach the receipt, and file it within {{ $p.receiptDays | default 60 }} days. <strong>Request for purchase</strong> is for something you want the treasurer to buy: give the web link and the total price. The zone boss approves up to $100 if the zone has the money; anything bigger, any General fund request, and a boss's own request need the treasurer and one other director. Nobody approves their own.</p>
 
 <form class="contact-form" id="bg-form" novalidate>
-  <div class="field"><label for="bg-email">Email on your member card</label><input id="bg-email" name="email" type="email" required autocomplete="email" maxlength="200"></div>
+  <div class="field"><label for="bg-email">Email address you gave CGW</label><input id="bg-email" name="email" type="email" required autocomplete="email" maxlength="200"></div>
   <div class="field"><label for="bg-pin">Member code, last two digits</label><input id="bg-pin" name="pin" required inputmode="numeric" autocomplete="off" maxlength="12" placeholder="05"></div>
   <div class="field"><label for="bg-zone">Which zone is it for?</label>
     <select id="bg-zone" name="zone" required><option value="">Choose…</option></select></div>
@@ -37,15 +38,17 @@
   <div class="field" data-kind="reimburse" id="bg-handle-field"><label for="bg-handle" id="bg-handle-label">Your Venmo handle</label><input id="bg-handle" name="pay_handle" maxlength="200" placeholder="@name"></div>
   <div class="field" data-kind="reimburse"><label class="bg-check"><input type="checkbox" name="ack_tax"><span>I used CGW's sales tax exemption, or I understand sales tax may not be reimbursed.</span></label></div>
   <div class="bg-trap" aria-hidden="true"><label>Leave this empty<input name="website" tabindex="-1" autocomplete="off"></label></div>
-  {{ with $p.turnstileSiteKey }}<div class="cf-turnstile" data-sitekey="{{ . }}" data-action="purchase"></div><script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>{{ end }}
+  {{ with $p.turnstileSiteKey }}<div class="cf-turnstile" data-sitekey="{{ . }}" data-action="purchase"></div><script>(function(){var t=document.currentScript.previousElementSibling;if(t&&window.innerWidth<420){t.setAttribute("data-size","compact");}})();</script><script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>{{ end }}
   <button class="btn btn-primary" type="submit">Send the request</button>
 </form>
 <div class="callout warn" id="bg-error" role="alert" hidden></div>
 <div class="callout" id="bg-done" role="status" hidden></div>
+</div>
 
 <style>
 .budget-table{border-collapse:collapse;width:100%;margin:1em 0}
 .budget-table th,.budget-table td{text-align:left;padding:.5em .6em;border-bottom:1px solid var(--line)}
+.bg-open-row{margin:1.2em 0}
 .budget-scroll{overflow-x:auto}
 .budget-table th:not(:first-child){text-align:right;line-height:1.2}
 .budget-table td:not(:first-child){text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
@@ -60,6 +63,10 @@
 (function () {
   var $ = function (id) { return document.getElementById(id); };
   var f = $('bg-form');
+  var panel = $('bg-panel'), openBtn = $('bg-open');
+  function setOpen(o) { panel.hidden = !o; openBtn.setAttribute('aria-expanded', o ? 'true' : 'false'); }
+  openBtn.addEventListener('click', function () { setOpen(panel.hidden); if (!panel.hidden) { panel.scrollIntoView({ block: 'start' }); } });
+  if (location.hash === '#ask') { setOpen(true); }
   var GENERAL = 'General fund';
   var RECEIPT_DAYS = {{ $p.receiptDays | default 60 }};
   var MAX_FILES = 5, MAX_BYTES = 5 * 1024 * 1024, SHRINK_OVER = 1.5 * 1024 * 1024;
@@ -119,7 +126,7 @@
     zone: 'Choose a zone.', amount: 'Enter an amount above $0 (up to $5,000).', description: 'Say what it is and why the zone needs it.',
     link: 'A request for purchase needs a web link that starts with https://.', vendor: 'Say where you bought it.',
     purchase_date: 'Enter the date you bought it (not in the future).', pay_method: 'Say how to pay you back (and your Venmo handle).',
-    ack_tax: 'Tick the sales tax box.', email: 'Enter the email on your member card.', files: 'Attach the receipt (up to 5 files).', kind: 'Pick a kind of request.'
+    ack_tax: 'Tick the sales tax box.', email: 'Enter the email address you gave CGW.', files: 'Attach the receipt (up to 5 files).', kind: 'Pick a kind of request.'
   };
   function fail(msg) { $('bg-error').textContent = msg; $('bg-error').hidden = false; $('bg-error').scrollIntoView({ block: 'nearest' }); }
 
