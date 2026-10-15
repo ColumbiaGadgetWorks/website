@@ -100,6 +100,7 @@ disableKinds = ["taxonomy", "term"]
     weight = 70
     [menus.main.params]
       button = true
+      large = true
 
   [[menus.footer]]
     name = "Membership"
