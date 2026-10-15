@@ -1,0 +1,10 @@
+---
+title: Zone budgets
+subtitle: What each zone has to spend, and how members ask to spend it.
+description: What each Columbia Gadget Works zone has available to spend, and how zone bosses ask to spend it.
+url: /budget/
+---
+
+Every zone has a budget for supplies and upkeep. The totals below are public: each zone's money put in, spent, held (requests approved or waiting that are not paid yet), and what is left to ask for. They show no names and no transactions.
+
+{{< budget >}}

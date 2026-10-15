@@ -1,0 +1,195 @@
+{{- /* Zone budgets and purchase requests. Reads /api/budget and files requests
+       through /api/purchase (src/budget.js), which asks Dolibarr. The zone list
+       comes from Dolibarr, so a new zone appears here by itself; the General fund
+       is added here because it is not a zone. Who may file for what is decided
+       in Dolibarr after the member code is checked, never on this page. */ -}}
+{{- $p := site.Params -}}
+<div class="callout warn" id="bg-load-error" role="alert" hidden></div>
+<div class="budget-scroll">
+<table class="budget-table" id="bg-table" hidden>
+  <thead><tr><th scope="col">Zone</th><th scope="col">Put in</th><th scope="col">Spent</th><th scope="col" title="Requests approved or waiting that are not paid yet">Held</th><th scope="col">Available</th></tr></thead>
+  <tbody id="bg-body"></tbody>
+</table>
+</div>
+<p class="muted small" id="bg-updated" hidden></p>
+
+<h2 id="ask">Ask to spend</h2>
+<p>Zone bosses can ask to spend from their own zone's budget. The president and the treasurer can ask for any zone or the General fund. You prove who you are with the email on your member card and the <strong>last two digits of your member code</strong> (for example 05).</p>
+<p><strong>Reimburse me</strong> is for something you already bought: attach the receipt, and file it within {{ $p.receiptDays | default 60 }} days. <strong>Request for purchase</strong> is for something you want the treasurer to buy: give the web link and the total price. The zone boss approves up to $100 if the zone has the money; anything bigger, any General fund request, and a boss's own request need the treasurer and one other director. Nobody approves their own.</p>
+
+<form class="contact-form" id="bg-form" novalidate>
+  <div class="field"><label for="bg-email">Email on your member card</label><input id="bg-email" name="email" type="email" required autocomplete="email" maxlength="200"></div>
+  <div class="field"><label for="bg-pin">Member code, last two digits</label><input id="bg-pin" name="pin" required inputmode="numeric" autocomplete="off" maxlength="12" placeholder="05"></div>
+  <div class="field"><label for="bg-zone">Which zone is it for?</label>
+    <select id="bg-zone" name="zone" required><option value="">Choose…</option></select></div>
+  <fieldset class="field bg-kind"><legend>What kind of request?</legend>
+    <label><input type="radio" name="kind" value="reimburse" checked> Reimburse me (I already bought it)</label>
+    <label><input type="radio" name="kind" value="purchase"> Request for purchase (the treasurer buys it)</label>
+  </fieldset>
+  <div class="field"><label for="bg-amount" id="bg-amount-label">Amount you paid, in dollars</label><input id="bg-amount" name="amount" required inputmode="decimal" autocomplete="off" maxlength="10" placeholder="40.00"></div>
+  <div class="field" data-kind="purchase" hidden><label for="bg-link">Web link to the item</label><input id="bg-link" name="link" type="url" maxlength="500" placeholder="https://"></div>
+  <div class="field" data-kind="reimburse"><label for="bg-vendor">Where you bought it</label><input id="bg-vendor" name="vendor" maxlength="200"></div>
+  <div class="field" data-kind="reimburse"><label for="bg-date">Date you bought it</label><input id="bg-date" name="purchase_date" type="date"></div>
+  <div class="field"><label for="bg-description">What is it and why does the zone need it? (1 to 3 sentences)</label><textarea id="bg-description" name="description" required rows="3" maxlength="600"></textarea></div>
+  <div class="field" data-kind="reimburse"><label for="bg-files">Receipt (PDF, JPG, PNG or HEIC; up to 5 files)</label><input id="bg-files" name="files" type="file" multiple accept=".pdf,.jpg,.jpeg,.png,.webp,.heic,.heif,application/pdf,image/*"></div>
+  <div class="field" data-kind="reimburse"><label for="bg-method">How should we pay you back?</label>
+    <select id="bg-method" name="pay_method"><option value="venmo">Venmo</option><option value="paypal">PayPal</option><option value="check">Check</option></select></div>
+  <div class="field" data-kind="reimburse" id="bg-handle-field"><label for="bg-handle" id="bg-handle-label">Your Venmo handle</label><input id="bg-handle" name="pay_handle" maxlength="200" placeholder="@name"></div>
+  <div class="field" data-kind="reimburse"><label><input type="checkbox" name="ack_tax"> I used CGW's sales tax exemption, or I understand sales tax may not be reimbursed.</label></div>
+  <div class="bg-trap" aria-hidden="true"><label>Leave this empty<input name="website" tabindex="-1" autocomplete="off"></label></div>
+  {{ with $p.turnstileSiteKey }}<div class="cf-turnstile" data-sitekey="{{ . }}" data-action="purchase"></div><script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>{{ end }}
+  <button class="btn btn-primary" type="submit">Send the request</button>
+</form>
+<div class="callout warn" id="bg-error" role="alert" hidden></div>
+<div class="callout" id="bg-done" role="status" hidden></div>
+
+<style>
+.budget-table{border-collapse:collapse;width:100%;margin:1em 0}
+.budget-table th,.budget-table td{text-align:left;padding:.5em .6em;border-bottom:1px solid var(--line)}
+.budget-scroll{overflow-x:auto}
+.budget-table th:not(:first-child){text-align:right;line-height:1.2}
+.budget-table td:not(:first-child){text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+@media (max-width:560px){.budget-table{font-size:.85rem}.budget-table th,.budget-table td{padding:.45em .3em}}
+.budget-table .low{color:#9b2226;font-weight:600}
+.bg-kind{border:0;padding:0}.bg-kind legend{font-weight:600;margin-bottom:.3em}.bg-kind label{display:block;margin:.2em 0}
+.bg-trap{position:absolute;left:-9999px;height:0;overflow:hidden}
+</style>
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var f = $('bg-form');
+  var GENERAL = 'General fund';
+  var RECEIPT_DAYS = {{ $p.receiptDays | default 60 }};
+  var MAX_FILES = 5, MAX_BYTES = 5 * 1024 * 1024, SHRINK_OVER = 1.5 * 1024 * 1024;
+  // Whole dollars drop the cents, which keeps the table inside a phone screen.
+  var money = function (n) { var a = Math.abs(n); return (n < 0 ? '-$' : '$') + (a % 1 === 0 ? a.toFixed(0) : a.toFixed(2)); };
+
+  // The totals, and the zones for the form.
+  fetch('/api/budget').then(function (r) { return r.json(); }).catch(function () { return { ok: false }; }).then(function (j) {
+    if (!j.ok) {
+      $('bg-load-error').textContent = 'The zone totals are not available right now. You can still file a request for the General fund.';
+      $('bg-load-error').hidden = false;
+    } else {
+      var body = $('bg-body');
+      j.zones.forEach(function (z) {
+        var tr = document.createElement('tr');
+        [z.zone, money(z.allocated), money(z.spent), money(z.committed), money(z.available)].forEach(function (v, i) {
+          var td = document.createElement('td');
+          td.textContent = v;
+          if (i === 4 && z.available < 0) td.className = 'low';
+          tr.appendChild(td);
+        });
+        body.appendChild(tr);
+        $('bg-zone').add(new Option(z.zone, z.zone));
+      });
+      $('bg-table').hidden = !j.zones.length;
+      if (j.updated) { $('bg-updated').textContent = 'Totals as of ' + new Date(j.updated).toLocaleString() + '. They refresh every few minutes.'; $('bg-updated').hidden = false; }
+    }
+    $('bg-zone').add(new Option(GENERAL, GENERAL));
+  });
+
+  // The two kinds of request show different fields.
+  function kind() { return f.kind.value; }
+  function sync() {
+    var k = kind();
+    Array.prototype.forEach.call(f.querySelectorAll('[data-kind]'), function (el) { el.hidden = el.getAttribute('data-kind') !== k; });
+    $('bg-amount-label').textContent = k === 'purchase' ? 'Total price, in dollars' : 'Amount you paid, in dollars';
+    $('bg-handle-field').hidden = k !== 'reimburse' || f.pay_method.value === 'check';
+    $('bg-handle-label').textContent = f.pay_method.value === 'paypal' ? 'Your PayPal email' : 'Your Venmo handle';
+  }
+  Array.prototype.forEach.call(f.querySelectorAll('input[name=kind]'), function (r) { r.addEventListener('change', sync); });
+  f.pay_method.addEventListener('change', sync);
+  sync();
+  var today = new Date(); today.setMinutes(today.getMinutes() - today.getTimezoneOffset());
+  $('bg-date').max = today.toISOString().slice(0, 10);
+
+  var why = {
+    member: 'That email and member code do not match an active, paid-up member. Check both and try again.',
+    slow: 'Too many tries from here, or too many wrong codes for that email. Try again later; after several wrong codes an email is locked for a day.',
+    captcha: 'The spam check did not pass. Try again.',
+    config: 'Requests are not available right now. Please contact us.',
+    type: 'One of the files is not a PDF or a picture we can read.',
+    size: 'One of the files is too big (5 MB each).',
+    file: 'The receipt did not upload. Try again.',
+    receipt: 'Attach the receipt.',
+    unavailable: 'That did not go through. Try again later.'
+  };
+  var fields = {
+    zone: 'Choose a zone.', amount: 'Enter an amount above $0 (up to $5,000).', description: 'Say what it is and why the zone needs it.',
+    link: 'A request for purchase needs a web link that starts with https://.', vendor: 'Say where you bought it.',
+    purchase_date: 'Enter the date you bought it (not in the future).', pay_method: 'Say how to pay you back (and your Venmo handle or PayPal email).',
+    ack_tax: 'Tick the sales tax box.', email: 'Enter the email on your member card.', files: 'Attach the receipt (up to 5 files).', kind: 'Pick a kind of request.'
+  };
+  function fail(msg) { $('bg-error').textContent = msg; $('bg-error').hidden = false; $('bg-error').scrollIntoView({ block: 'nearest' }); }
+
+  // Pictures are shrunk before sending; a PDF is sent as it is.
+  function toBase64(blob) {
+    return new Promise(function (resolve, reject) {
+      var r = new FileReader();
+      r.onload = function () { resolve(String(r.result).split(',')[1] || ''); };
+      r.onerror = reject;
+      r.readAsDataURL(blob);
+    });
+  }
+  function shrink(file) {
+    if (!/^image\/(jpeg|png|webp)$/.test(file.type) || file.size <= SHRINK_OVER) return Promise.resolve(file);
+    return new Promise(function (resolve) {
+      var img = new Image(), url = URL.createObjectURL(file);
+      img.onload = function () {
+        var s = Math.min(1, 2200 / Math.max(img.width, img.height)), c = document.createElement('canvas');
+        c.width = Math.round(img.width * s); c.height = Math.round(img.height * s);
+        c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+        URL.revokeObjectURL(url);
+        c.toBlob(function (b) { resolve(b || file); }, 'image/jpeg', 0.85);
+      };
+      img.onerror = function () { URL.revokeObjectURL(url); resolve(file); };
+      img.src = url;
+    });
+  }
+
+  f.addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    $('bg-error').hidden = true;
+    var k = kind(), list = Array.prototype.slice.call(f.files.files || []);
+    if (!f.zone.value) return fail(fields.zone);
+    if (k === 'reimburse' && !list.length) return fail(fields.files);
+    if (list.length > MAX_FILES) return fail(fields.files);
+    if (k === 'purchase' && !/^https?:\/\//i.test(f.link.value.trim())) return fail(fields.link);
+    var btn = f.querySelector('button[type=submit]');
+    var ts = f.querySelector('[name="cf-turnstile-response"]');
+    btn.disabled = true;
+    Promise.all(list.map(function (file) { return shrink(file).then(function (b) { return b.size > MAX_BYTES ? Promise.reject('size') : toBase64(b); }); }))
+      .then(function (data) {
+        var body = {
+          email: f.email.value, pin: f.pin.value, zone: f.zone.value, kind: k, amount: f.amount.value, description: f.description.value,
+          website: f.website.value, 'cf-turnstile-response': ts ? ts.value : '',
+          files: k === 'reimburse' ? data.map(function (d) { return { data: d }; }) : []
+        };
+        if (k === 'purchase') { body.link = f.link.value; }
+        else { body.vendor = f.vendor.value; body.purchase_date = f.purchase_date.value; body.pay_method = f.pay_method.value; body.pay_handle = f.pay_handle.value; body.ack_tax = f.ack_tax.checked; }
+        return fetch('/api/purchase', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) }).then(function (r) { return r.json(); });
+      })
+      .catch(function (e) { return { ok: false, error: e === 'size' ? 'size' : 'unavailable' }; })
+      .then(function (j) {
+        btn.disabled = false;
+        if (window.turnstile) { try { window.turnstile.reset(); } catch (e) {} }
+        if (!j.ok) {
+          if (j.error === 'notallowed') {
+            return fail(j.allowed && j.allowed.length
+              ? 'You can ask for ' + j.allowed.join(' and ') + ' only. Pick that zone.'
+              : 'Only zone bosses, the president and the treasurer can ask to spend. Talk to your zone boss.');
+          }
+          if (j.error === 'late') return fail('A receipt has to be filed within ' + (j.days || RECEIPT_DAYS) + ' days of buying.');
+          if (j.error === 'invalid') return fail(fields[j.field] || 'Check the form and try again.');
+          return fail(why[j.error] || why.unavailable);
+        }
+        f.hidden = true;
+        $('bg-done').textContent = 'Request ' + j.ref + ' sent. ' + (j.needs === 'board'
+          ? 'The treasurer and one other director will look at it.'
+          : 'Your zone boss will look at it.') + ' You will get an email when it is decided. Keep the number.';
+        $('bg-done').hidden = false;
+        $('bg-done').scrollIntoView({ block: 'start' });
+      });
+  });
+})();
+</script>
