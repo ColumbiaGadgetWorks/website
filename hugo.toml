@@ -106,6 +106,10 @@ disableKinds = ["taxonomy", "term"]
     pageRef = "/membership"
     weight = 10
   [[menus.footer]]
+    name = "Zone budgets"
+    pageRef = "/budget"
+    weight = 15
+  [[menus.footer]]
     name = "Contact"
     pageRef = "/contact"
     weight = 20
