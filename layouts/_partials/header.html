@@ -11,7 +11,7 @@
       {{ $cur := . }}
       {{ range site.Menus.main }}
         {{ $active := or ($cur.IsMenuCurrent "main" .) ($cur.HasMenuCurrent "main" .) }}
-        <a href="{{ .URL }}" class="{{ if .Params.button }}btn btn-primary{{ else }}nav-link{{ end }}{{ if $active }} active{{ end }}"{{ if $active }} aria-current="page"{{ end }}>{{ .Name }}</a>
+        <a href="{{ .URL }}" class="{{ if .Params.button }}btn btn-primary{{ if .Params.large }} btn-lg{{ end }}{{ else }}nav-link{{ end }}{{ if $active }} active{{ end }}"{{ if $active }} aria-current="page"{{ end }}>{{ .Name }}</a>
       {{ end }}
     </nav>
   </div>

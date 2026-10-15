@@ -4,6 +4,10 @@ subtitle: Your gift keeps a community workshop open to everyone in mid-Missouri.
 description: Support Columbia Gadget Works, a 501(c)(3) nonprofit makerspace in Columbia, MO. Donations are tax-deductible (EIN 27-3926809) and fund rent, tools, and free public classes.
 ---
 
+Want to use the shop yourself, not just support it? Members get 24/7 access, a project locker and a vote.
+
+<p class="cta-row"><a class="btn btn-outline" href="/membership/">Become a member</a></p>
+
 ## What your donation does
 
 Columbia Gadget Works is run entirely by volunteers, so every dollar goes into the shop and its programs:

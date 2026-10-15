@@ -87,6 +87,14 @@ disableKinds = ["taxonomy", "term"]
     pageRef = "/about"
     weight = 60
   [[menus.main]]
+    name = "Membership"
+    pageRef = "/membership"
+    weight = 65
+    [menus.main.params]
+      button = true
+      large = true
+
+  [[menus.main]]
     name = "Donate"
     pageRef = "/donate"
     weight = 70
