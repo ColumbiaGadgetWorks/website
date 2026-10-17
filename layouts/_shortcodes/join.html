@@ -2,6 +2,11 @@
        through the Worker (src/join.js). The browser only holds a token. */ -}}
 {{- $p := site.Params -}}
 <div class="join" id="join" data-fallback="{{ $p.givebutterMembership }}">
+  {{- /* Members whose dues lapsed or who want a new plan skip the signup entirely. */}}
+  <div class="join-member">
+    <p><strong>Already a member?</strong> If you need to start a new monthly payment plan, go straight to Givebutter. Use the email address you are a member under, so we can match the payment to you.</p>
+    <a class="btn btn-outline" href="{{ $p.givebutterMembership }}" target="_blank" rel="noopener">Start a new payment plan</a>
+  </div>
   <ol class="join-steps" id="join-steps" aria-label="Signup progress">
     <li data-step="1">Your details</li>
     <li data-step="2">Paperwork</li>
