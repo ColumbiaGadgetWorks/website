@@ -79,7 +79,6 @@ export default {
           GIVEBUTTER_API_KEY: givebutterConfigured(env),
           GIVEBUTTER_SYNC_ON: givebutterLive(env),
           FUND_LOG_CHANNEL_ID: Boolean(env.FUND_LOG_CHANNEL_ID),
-          ALERTS: Boolean(env.ALERTS && env.ALERT_EMAIL_TO && env.ALERT_EMAIL_FROM),
         },
       });
     }
