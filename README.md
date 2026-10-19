@@ -204,18 +204,15 @@ stored).
 
 **When Dolibarr is down**: tool pages, the catalog and the lookup keep working;
 booking says it is paused and offers "Email me when it's back" (kept in KV for
-48 hours; Dolibarr emails them when the cron sees it answer again). After ten
-minutes down, the Worker emails the alerts address, once an hour at most, and
-again when it is back.
+48 hours). Alert emails come from Dolibarr: it emails the alerts address when the
+website has not fetched the catalog for 30 minutes (Dolibarr up but unreachable,
+or the Worker misconfigured), and once the Worker reaches it again the Worker
+reports how long it was out (`action=websitereport`) and Dolibarr emails that
+too, along with the people who asked to hear.
 
 **Closed days**: every hour the Worker sends Dolibarr the days whose calendar
 has an event titled like "Open Hack Night cancelled"; nobody can book them, and
 anyone already booked is asked to pick a new date.
-
-**Alert emails** need Cloudflare Email Routing on the domain: verify the
-destination address, uncomment `send_email` in `wrangler.jsonc`, and set the
-variables `ALERT_EMAIL_FROM` and `ALERT_EMAIL_TO`. Without them alerts only go
-to the Worker log. `/api/health` reports `ALERTS`.
 
 Set in `hugo.toml`: `givebutterTraining` (the training campaign's link; empty
 turns booking off) and `givebutterTrainingWidgetId` (its widget id; empty sends

@@ -46,13 +46,6 @@
     //   GIVEBUTTER_SYNC      "on" to record Givebutter gifts; anything else is a dry run
     //   FUND_LOG_CHANNEL_ID  Discord channel the Givebutter sync reports to (optional)
   },
-  // Alert emails about training sync (src/training.js): when Dolibarr has not
-  // answered for ten minutes, and when it answers again. Needs Email Routing on the
-  // domain with ALERT_EMAIL_TO verified as a destination; then uncomment, deploy, and
-  // set the variables ALERT_EMAIL_FROM (an address on the domain, e.g.
-  // website@columbiagadgetworks.org) and ALERT_EMAIL_TO (e.g. the secretary).
-  // Without it, alerts only go to the Worker's log.
-  // "send_email": [{ "name": "ALERTS" }],
   // Hourly: copy upcoming calendar events to the Discord server (src/discord-events.js).
   // Every five minutes: count new Givebutter gifts toward /fund goals (src/fund-givebutter.js),
   // and the training catalog sync with Dolibarr (src/training.js).

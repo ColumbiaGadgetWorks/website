@@ -38,7 +38,6 @@ const SESSION_SECONDS = 2 * 3600;
 const CATALOG_KEY = 'training:catalog';
 const DOWN_KEY = 'training:down-since';
 const NOTIFY_PREFIX = 'tn:';
-const ALERT_PREFIX = 'training:alert:';
 
 const json = (body, status = 200, cache = 'no-store') => Response.json(body, { status, headers: { 'cache-control': cache } });
 const fail = (error, status) => json({ ok: false, error }, status);
@@ -274,10 +273,10 @@ async function catalog(env) {
 // ---------------------------------------------------------------- scheduled
 
 // Every five minutes (src/index.js): every 15 minutes pull the catalog from
-// Dolibarr, telling it which version the website held; note when Dolibarr stops
-// answering and email the alerts address after ten minutes; once it answers again,
-// tell the people who asked to hear. Hourly, send Dolibarr the closed days found on
-// the shop calendar.
+// Dolibarr (which is how Dolibarr knows the website can reach it); note when
+// Dolibarr stops answering, and once it answers again tell it how long it was
+// out and email the people who asked to hear. Hourly, send Dolibarr the closed
+// days found on the shop calendar.
 export async function runTrainingSync(env, now = new Date()) {
   if (!joinConfigured(env) || !env.SUBSCRIBERS) return 'not configured';
   const minute = now.getUTCMinutes();
@@ -287,7 +286,7 @@ export async function runTrainingSync(env, now = new Date()) {
     const r = await dolibarr(env, 'catalog', { have });
     if (r.data?.ok && r.data.catalog) {
       await env.SUBSCRIBERS.put(CATALOG_KEY, JSON.stringify(r.data.catalog));
-      await up(env, out);
+      await up(env, now, out);
     } else {
       await down(env, now, r, out);
     }
@@ -302,28 +301,22 @@ export async function runTrainingSync(env, now = new Date()) {
   return out.join('; ') || 'nothing due';
 }
 
+// Dolibarr does the emailing: it notices on its own when the website stops
+// checking in, and is told about the outage here once it answers again.
 async function down(env, now, r, out) {
   const since = Number(await env.SUBSCRIBERS.get(DOWN_KEY)) || 0;
   if (!since) await env.SUBSCRIBERS.put(DOWN_KEY, String(now.getTime()));
   const minutes = since ? Math.round((now.getTime() - since) / 60000) : 0;
   out.push(`Dolibarr not answering (${r.status} ${r.data?.error || ''}) for ${minutes} min`);
-  if (since && minutes >= 10) {
-    await alert(env, 'dolibarr-down', 'The website cannot reach Dolibarr',
-      `The website has not been able to reach Dolibarr for ${minutes} minutes (last answer: HTTP ${r.status} ${r.data?.error || ''}).\n\n` +
-      'While it is down, tool pages and "What am I trained on?" still work from the website\'s copy, but booking a training and signing up are paused. ' +
-      'People can leave their email to hear when booking is back.\n\nCheck that Dolibarr is running and reachable at DOLIBARR_URL, and that DOLIBARR_API_KEY matches the module\'s "Key for the website".');
-  }
+  console.error(`training sync: Dolibarr not answering for ${minutes} min (HTTP ${r.status} ${r.data?.error || ''})`);
 }
 
-async function up(env, out) {
+async function up(env, now, out) {
   const since = Number(await env.SUBSCRIBERS.get(DOWN_KEY)) || 0;
   if (!since) return;
   await env.SUBSCRIBERS.delete(DOWN_KEY);
-  out.push('Dolibarr answering again');
-  if (await env.SUBSCRIBERS.get(ALERT_PREFIX + 'dolibarr-down')) {
-    await env.SUBSCRIBERS.delete(ALERT_PREFIX + 'dolibarr-down');
-    await sendAlert(env, '[Fixed] The website reaches Dolibarr again', 'The website reaches Dolibarr again. Booking and signup work.');
-  }
+  const minutes = Math.round((now.getTime() - since) / 60000);
+  out.push(`Dolibarr answering again after ${minutes} min`);
   const emails = [];
   let cursor;
   do {
@@ -331,6 +324,7 @@ async function up(env, out) {
     for (const k of page.keys) emails.push(k.name.slice(NOTIFY_PREFIX.length));
     cursor = page.list_complete ? undefined : page.cursor;
   } while (cursor && emails.length < 200);
+  await dolibarr(env, 'websitereport', { down_since: new Date(since).toISOString(), back: now.toISOString(), minutes, waiting: emails.length });
   if (emails.length) {
     const r = await dolibarr(env, 'notifyback', { emails });
     if (r.data?.ok) for (const e of emails) await env.SUBSCRIBERS.delete(NOTIFY_PREFIX + e);
@@ -348,38 +342,4 @@ async function syncClosures(env, now) {
   }
   const r = await dolibarr(env, 'closeddays', { days });
   return r.data?.ok ? `closures: ${days.length} closed day(s), ${r.data.moved || 0} booking(s) moved` : `closures: Dolibarr answered ${r.status}`;
-}
-
-// At most one email an hour per problem. Needs the ALERTS send_email binding
-// (Cloudflare Email Routing, see wrangler.jsonc) and ALERT_EMAIL_FROM / ALERT_EMAIL_TO;
-// without them the alert only goes to the Worker's log.
-async function alert(env, key, subject, body) {
-  console.error(`training alert ${key}: ${subject}`);
-  const last = Number(await env.SUBSCRIBERS.get(ALERT_PREFIX + key)) || 0;
-  if (Date.now() - last < 3600e3) return;
-  await env.SUBSCRIBERS.put(ALERT_PREFIX + key, String(Date.now()), { expirationTtl: 7 * 86400 });
-  await sendAlert(env, `[Alert] ${subject}`, `${body}\n\nYou get at most one email an hour about this, and one more when it is fixed.`);
-}
-
-async function sendAlert(env, subject, body) {
-  if (!env.ALERTS || !env.ALERT_EMAIL_TO || !env.ALERT_EMAIL_FROM) return false;
-  try {
-    const { EmailMessage } = await import('cloudflare:email');
-    const raw = [
-      `From: Columbia Gadget Works website <${env.ALERT_EMAIL_FROM}>`,
-      `To: ${env.ALERT_EMAIL_TO}`,
-      `Subject: ${subject}`,
-      `Date: ${new Date().toUTCString()}`,
-      `Message-ID: <${crypto.randomUUID()}@${env.ALERT_EMAIL_FROM.split('@')[1] || 'localhost'}>`,
-      'MIME-Version: 1.0',
-      'Content-Type: text/plain; charset=utf-8',
-      '',
-      body,
-    ].join('\r\n');
-    await env.ALERTS.send(new EmailMessage(env.ALERT_EMAIL_FROM, env.ALERT_EMAIL_TO, raw));
-    return true;
-  } catch (e) {
-    console.error('alert email failed:', e.message);
-    return false;
-  }
 }
