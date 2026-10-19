@@ -1,0 +1,31 @@
+{{- /* The page behind the buttons in member-vote emails: a ballot, running for a
+       seat, or the Secretary's and President's panel. The Worker (src/voting.js)
+       fills in the title and the body Dolibarr returns; opened without a link,
+       it says so. */ -}}
+<div class="vl-page" id="vl-page">VOTING_LINK_BODY</div>
+<script>
+(function () {
+  var el = document.getElementById('vl-page');
+  if (el && el.textContent.trim() === 'VOTING_LINK_BODY') {
+    el.innerHTML = '<p>Open this page from the button in your voting email. Lost it? <a href="/voting/">Ask for your ballot again</a>.</p>';
+    document.title = 'Member vote';
+    var h = document.querySelector('h1'); if (h) h.textContent = 'Member vote';
+  }
+})();
+</script>
+<style>
+.vl-page .facts{background:#fff;border:1px solid var(--line);border-radius:8px;padding:12px 16px;margin:0 0 1em}
+.vl-page .meta{color:var(--muted)}
+.vl-page form{margin:.6em 0 1.2em}
+.vl-page button{font:inherit;font-weight:700;padding:.65em 1.2em;border-radius:999px;border:2px solid var(--rust);background:var(--rust);color:#fff;cursor:pointer;margin:.2em 0}
+.vl-page button.alt{background:#fff;color:var(--rust)}
+.vl-page button.warn{background:#9b2c2c;border-color:#9b2c2c}
+.vl-page input[type=text],.vl-page input[type=email],.vl-page input[type=url],.vl-page select{font:inherit;padding:.4rem;max-width:100%;box-sizing:border-box;border:1px solid var(--line);border-radius:6px}
+.vl-page textarea{width:100%;min-height:4rem;font:inherit;padding:.5rem;box-sizing:border-box;border:1px solid var(--line);border-radius:6px}
+.vl-page label{display:block;margin:.4em 0}
+.vl-page fieldset{border:1px solid var(--line);border-radius:8px;margin:1em 0;padding:.6em 1em}
+.vl-page legend{font-weight:700;padding:0 .3em}
+.vl-page pre{white-space:pre-wrap;background:#fff;border:1px solid var(--line);border-radius:8px;padding:.8em}
+.vl-page .ok{color:var(--ok);font-weight:700}
+.vl-page .err{color:#9b2c2c;font-weight:700}
+</style>
