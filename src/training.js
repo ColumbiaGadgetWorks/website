@@ -232,10 +232,18 @@ async function handleLookup(request, env, data, ip) {
 // signed query and any form fields go to Dolibarr's public/booking.php with the
 // website key; Dolibarr answers with a title and the page body, shown here inside
 // the site's own page (content/training-link.md). Dolibarr's address never shows.
-export async function handleTrainingLink(request, env) {
+export function handleTrainingLink(request, env) {
+  return proxyLinkPage(request, env, { file: 'booking.php', shell: '/training/link/', marker: 'TRAINING_LINK', title: 'Training booking' });
+}
+
+// Shared by the training and member-vote email buttons: send the signed query
+// and any form fields to Dolibarr's public FILE with the website key, and put
+// the title and body it answers with into the site's page at SHELL, in place
+// of MARKER_TITLE and MARKER_BODY.
+export async function proxyLinkPage(request, env, { file, shell, marker, title: fallback }) {
   if (request.method !== 'GET' && request.method !== 'POST') return new Response('Method not allowed', { status: 405 });
   const url = new URL(request.url);
-  let title = 'Training booking';
+  let title = fallback;
   let html = '<p>Our records system is not answering right now, so this link cannot be opened. Nothing has changed. Please try the link again in a few minutes.</p>';
   let status = 503;
   if (joinConfigured(env)) {
@@ -246,7 +254,7 @@ export async function handleTrainingLink(request, env) {
       init.body = body;
     }
     try {
-      const r = await fetch(`${env.DOLIBARR_URL.replace(/\/+$/, '')}/custom/onboarding/public/booking.php${url.search}`, init);
+      const r = await fetch(`${env.DOLIBARR_URL.replace(/\/+$/, '')}/custom/onboarding/public/${file}${url.search}`, init);
       const j = await r.json();
       if (j && j.ok) {
         title = String(j.title || title);
@@ -257,11 +265,11 @@ export async function handleTrainingLink(request, env) {
       // Dolibarr down or answering with something else: the message above.
     }
   }
-  const shell = await env.ASSETS.fetch(new Request(new URL('/training/link/', url.origin)));
-  let page = await shell.text();
+  const page = await env.ASSETS.fetch(new Request(new URL(shell, url.origin)));
+  let text = await page.text();
   const esc = (t) => t.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-  page = page.split('TRAINING_LINK_TITLE').join(esc(title)).replace('TRAINING_LINK_BODY', () => html);
-  return new Response(page, {
+  text = text.split(`${marker}_TITLE`).join(esc(title)).replace(`${marker}_BODY`, () => html);
+  return new Response(text, {
     status,
     headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store', 'x-robots-tag': 'noindex', 'referrer-policy': 'no-referrer' },
   });
