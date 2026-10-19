@@ -7,7 +7,7 @@ import { handleFund } from './fund.js';
 import { handleDiscord, discordPublicKey, runSync } from './fund-discord.js';
 import { givebutterConfigured, givebutterLive } from './fund-givebutter.js';
 import { handleJoin, handleGivebutterWebhook, joinConfigured } from './join.js';
-import { handleTraining, runTrainingSync } from './training.js';
+import { handleTraining, handleTrainingLink, runTrainingSync } from './training.js';
 import { handleBudget, handlePurchase } from './budget.js';
 import { syncDiscordEvents, discordEventsConfigured } from './discord-events.js';
 
@@ -44,6 +44,12 @@ export default {
     }
     if (pathname.startsWith('/api/join/')) return handleJoin(request, env, pathname);
     if (pathname.startsWith('/api/training/')) return handleTraining(request, env, ctx, pathname);
+    // The buttons in training emails (run_worker_first in wrangler.jsonc). The
+    // page's own shell is fetched from the assets by the handler.
+    if (pathname === '/training/link/' || pathname === '/training/link') {
+      if (new URL(request.url).search === '' && request.method === 'GET') return env.ASSETS.fetch(request);
+      return handleTrainingLink(request, env);
+    }
     if (pathname === '/api/budget') {
       if (request.method !== 'GET') return new Response('GET only', { status: 405 });
       return handleBudget(request, env, ctx);

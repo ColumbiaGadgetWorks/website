@@ -193,6 +193,12 @@ The page then shows the price, the trainers' times and a Book training button.
 
 `/training/pay/` forwards here.
 
+**`/training/link/`** is where the buttons in training emails go (trainer
+confirms, trainee cancels, and so on). The Worker passes the signed query and
+any form to Dolibarr's `public/booking.php` with `DOLIBARR_API_KEY` and shows
+the answer inside `content/training-link.md` (`run_worker_first` in
+`wrangler.jsonc` includes `/training/link*`). Dolibarr's address never shows.
+
 **`/training/class/`** (`training-class.html`) is the group class sign-in: the
 code from the class's QR code or typed, name and email, the waiver on the spot
 if needed (`/api/training/class`).

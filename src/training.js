@@ -25,6 +25,7 @@
 //   GET  /api/training/class?c=CODE   what a group class code is for
 //   POST /api/training/class          {code, email, firstname, lastname, session | cf-turnstile-response}
 //   POST /api/training/sync           Dolibarr's push, header X-Onboarding-Key = DOLIBARR_API_KEY
+//   GET/POST /training/link/?…        the buttons in training emails, shown inside the site
 //
 // Anyone can type any email, so the first call of each flow is behind Turnstile and a
 // per-IP limit, and the answer about a person is only what the page needs.
@@ -223,6 +224,47 @@ async function handleLookup(request, env, data, ip) {
     return json({ ...pick(saved || {}), offline: true });
   }
   return fail('unavailable', 503);
+}
+
+// ---------------------------------------------------------------- email buttons
+
+// GET/POST /training/link/?b=…&w=…&k=…  The buttons in training emails. The
+// signed query and any form fields go to Dolibarr's public/booking.php with the
+// website key; Dolibarr answers with a title and the page body, shown here inside
+// the site's own page (content/training-link.md). Dolibarr's address never shows.
+export async function handleTrainingLink(request, env) {
+  if (request.method !== 'GET' && request.method !== 'POST') return new Response('Method not allowed', { status: 405 });
+  const url = new URL(request.url);
+  let title = 'Training booking';
+  let html = '<p>Our records system is not answering right now, so this link cannot be opened. Nothing has changed. Please try the link again in a few minutes.</p>';
+  let status = 503;
+  if (joinConfigured(env)) {
+    const init = { method: request.method, headers: { 'X-Onboarding-Key': env.DOLIBARR_API_KEY } };
+    if (request.method === 'POST') {
+      const body = (await request.text()).slice(0, 20000);
+      init.headers['content-type'] = 'application/x-www-form-urlencoded';
+      init.body = body;
+    }
+    try {
+      const r = await fetch(`${env.DOLIBARR_URL.replace(/\/+$/, '')}/custom/onboarding/public/booking.php${url.search}`, init);
+      const j = await r.json();
+      if (j && j.ok) {
+        title = String(j.title || title);
+        html = String(j.html || '');
+        status = Number(j.status) || 200;
+      }
+    } catch {
+      // Dolibarr down or answering with something else: the message above.
+    }
+  }
+  const shell = await env.ASSETS.fetch(new Request(new URL('/training/link/', url.origin)));
+  let page = await shell.text();
+  const esc = (t) => t.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  page = page.split('TRAINING_LINK_TITLE').join(esc(title)).replace('TRAINING_LINK_BODY', () => html);
+  return new Response(page, {
+    status,
+    headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store', 'x-robots-tag': 'noindex', 'referrer-policy': 'no-referrer' },
+  });
 }
 
 // ---------------------------------------------------------------- Dolibarr's push
