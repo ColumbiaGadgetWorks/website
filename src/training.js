@@ -31,7 +31,7 @@
 // per-IP limit, and the answer about a person is only what the page needs.
 
 import { verifyTurnstile } from './turnstile.js';
-import { dolibarr, joinConfigured } from './join.js';
+import { dolibarr, joinConfigured, USER_AGENT } from './join.js';
 import { occurrences } from './calendar.js';
 
 const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
@@ -239,7 +239,7 @@ export async function handleTrainingLink(request, env) {
   let html = '<p>Our records system is not answering right now, so this link cannot be opened. Nothing has changed. Please try the link again in a few minutes.</p>';
   let status = 503;
   if (joinConfigured(env)) {
-    const init = { method: request.method, headers: { 'X-Onboarding-Key': env.DOLIBARR_API_KEY } };
+    const init = { method: request.method, headers: { 'X-Onboarding-Key': env.DOLIBARR_API_KEY, 'user-agent': USER_AGENT } };
     if (request.method === 'POST') {
       const body = (await request.text()).slice(0, 20000);
       init.headers['content-type'] = 'application/x-www-form-urlencoded';
