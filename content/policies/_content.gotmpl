@@ -1,0 +1,50 @@
+{{/* Builds /policies/<slug>/ from the official bylaws repository on GitHub, so the
+     site never holds its own copy. The repository's site.yaml lists the files to
+     publish, in order. Repository and branch are set in hugo.toml
+     (governanceRepo, governanceRef). If GitHub cannot be reached the build fails
+     on purpose, and the live site keeps the last good version. */}}
+{{ $repo := site.Params.governanceRepo }}
+{{ $ref := site.Params.governanceRef | default "main" }}
+{{ $raw := printf "https://raw.githubusercontent.com/%s/%s/" $repo $ref }}
+
+{{ $manifest := dict }}
+{{ with try (resources.GetRemote (print $raw "site.yaml")) }}
+  {{ with .Err }}{{ errorf "policies: cannot fetch site.yaml from %s@%s: %s" $repo $ref . }}{{ end }}
+  {{ with .Value }}{{ $manifest = resources.FromString "governance-site.yaml" .Content | transform.Unmarshal }}{{ end }}
+{{ end }}
+
+{{/* First pass: fetch every file and read its title from the first "# " heading. */}}
+{{ $docs := slice }}
+{{ range $i, $p := $manifest.pages }}
+  {{ with try (resources.GetRemote (print $raw $p.file)) }}
+    {{ with .Err }}{{ errorf "policies: cannot fetch %s from %s@%s: %s" $p.file $repo $ref . }}{{ end }}
+    {{ with .Value }}
+      {{ $md := .Content }}
+      {{ $title := $p.slug | humanize }}
+      {{ with findRESubmatch `(?m)^#[ \t]+(.+?)[ \t]*$` $md 1 }}{{ $title = index (index . 0) 1 }}{{ end }}
+      {{ $body := replaceRE `(?m)^#[ \t]+.+\n` "" $md 1 }}
+      {{ $docs = $docs | append (dict "order" $i "file" $p.file "slug" $p.slug "title" $title "body" $body) }}
+    {{ end }}
+  {{ end }}
+{{ end }}
+
+{{/* Second pass: turn file references like `policies/money.md` into links, then add the pages. */}}
+{{ range $docs }}
+  {{ $body := .body }}
+  {{ range $docs }}
+    {{ $link := printf "[%s](/policies/%s/)" .title .slug }}
+    {{ $body = replace $body (printf "`%s`" .file) $link }}
+    {{ $body = replace $body (printf "`%s`" (path.Base .file)) $link }}
+  {{ end }}
+  {{ $.AddPage (dict
+    "path" .slug
+    "title" .title
+    "content" (dict "mediaType" "text/markdown" "value" $body)
+    "params" (dict
+      "order" .order
+      "governanceStatus" ($manifest.status | default "draft")
+      "sourceUrl" (printf "https://github.com/%s/blob/%s/%s" $repo $ref .file)
+      "historyUrl" (printf "https://github.com/%s/commits/%s/%s" $repo $ref .file)
+    )
+  ) }}
+{{ end }}
