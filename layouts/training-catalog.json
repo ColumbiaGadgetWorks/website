@@ -1,4 +1,4 @@
-{{- $c := partial "training-catalog.html" . -}}
-{{- $trainers := slice -}}
-{{- range $c.trainers }}{{ $trainers = $trainers | append . }}{{ end -}}
-{{- dict "zones" $c.zones "fees" $c.fees "trainers" (sort $trainers "name") "tools" $c.tools | jsonify (dict "indent" "  ") -}}
+{{- /* The training catalog as the site was built: data/training.json, a copy of
+       Dolibarr's that the nightly workflow refreshes. The Worker falls back to it
+       when it has no copy of its own (src/training.js). */ -}}
+{{- hugo.Data.training | default dict | jsonify (dict "indent" "  ") -}}

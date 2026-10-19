@@ -180,6 +180,8 @@ ul.plain li{margin:0 0 .35em}
 .tool-aside{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:18px;position:sticky;top:84px}
 .tool-aside figure{margin:0 0 14px}
 .tool-aside img{border-radius:8px}
+.tool-training{border-top:1px solid var(--line);margin:14px 0;padding-top:12px}
+.tool-training h2{font-size:1.1rem;margin:0 0 .4em}
 .specs{margin:0 0 14px;font-size:.95rem}
 .specs div{display:grid;grid-template-columns:110px 1fr;gap:8px;padding:.35em 0;border-bottom:1px solid var(--line)}
 .specs dt{color:var(--muted);font-weight:600}

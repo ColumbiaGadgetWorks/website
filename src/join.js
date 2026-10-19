@@ -132,6 +132,12 @@ export async function handleJoin(request, env, pathname) {
       name: str(data.name, 200),
       version: str(data.version, 64),
       signature: str(data.signature, 380000),
+      // Asked by the training pages: a date of birth, and for someone under 18
+      // the parent or guardian who signs for them.
+      birthdate: str(data.birthdate, 10),
+      guardian_name: str(data.guardian_name, 200),
+      guardian_relation: str(data.guardian_relation, 50),
+      guardian_email: str(data.guardian_email, 200),
       ip,
     });
     return json(r.data, r.status);

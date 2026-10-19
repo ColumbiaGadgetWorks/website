@@ -1,0 +1,5 @@
+{{- /* One tool from the training catalog (data/training.json) by its id, or nil.
+       Usage: partial "training-tool.html" "3d-printers" */ -}}
+{{- $found := false -}}
+{{- range (hugo.Data.training | default dict).tools -}}{{- if eq .id $ -}}{{- $found = . -}}{{- end -}}{{- end -}}
+{{- return $found -}}
