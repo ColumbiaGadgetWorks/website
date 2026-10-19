@@ -26,6 +26,7 @@ import { verifyTurnstile } from './turnstile.js';
 const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 const TOKEN_RE = /^[a-f0-9]{48}$/;
 const STARTS_PER_HOUR = 5;
+export const USER_AGENT = 'ColumbiaGadgetWorks-Website/1.0 (+https://columbiagadgetworks.org)';
 const MAX_ID_BYTES = 6 * 1024 * 1024;
 
 const json = (body, status = 200) => Response.json(body, { status, headers: { 'cache-control': 'no-store' } });
@@ -42,7 +43,8 @@ export async function dolibarr(env, action, body) {
   try {
     r = await fetch(url, {
       method: 'POST',
-      headers: { 'content-type': 'application/json', 'X-Onboarding-Key': env.DOLIBARR_API_KEY },
+      // Named, so firewalls in front of Dolibarr can tell it from an anonymous bot.
+      headers: { 'content-type': 'application/json', 'X-Onboarding-Key': env.DOLIBARR_API_KEY, 'user-agent': USER_AGENT },
       body: JSON.stringify(body || {}),
     });
   } catch {
