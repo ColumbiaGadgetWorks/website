@@ -14,4 +14,4 @@ Some tools need a short training before you use them on your own. Book it here: 
 
 Half of every training fee goes to the zone that keeps the tool running, for supplies and repairs; the other half is credited to your trainer toward their dues.
 
-Can't afford the fee? [Contact us](/contact/) and ask the secretary about a free training. Already trained? [Check what you are trained on](/training/).
+Already trained? [Check what you are trained on](/training/).

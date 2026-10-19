@@ -58,7 +58,7 @@
     <p class="tb-facts" id="tb-facts"></p>
     <fieldset class="tb-slots"><legend>Date, time and trainer</legend><div id="tb-slots"><p class="muted">Loading the open times…</p></div></fieldset>
     <div class="tb-terms">
-      <p><strong>Before you book:</strong> you pay now to hold your seat. Cancel at least {{ $p.trainingCancelHours | default 2 }} hours before for a full refund or a new date (the link is in your confirmation email). If you miss your training, you can pick one new date at no charge; after a second miss the fee is kept. If your trainer cannot make it, you choose a new date or a refund.</p>
+      <p><strong>Before you book:</strong> you pay now to hold your seat, at exactly the price shown; do not change the amount at checkout. Cancel at least {{ $p.trainingCancelHours | default 2 }} hours before for a full refund or a new date (the link is in your confirmation email). If you miss your training, you can pick one new date at no charge; after a second miss the fee is kept. If your trainer cannot make it, you choose a new date or a refund.</p>
       <label class="join-check"><input type="checkbox" id="tb-agree" required> I agree</label>
     </div>
     <button class="btn btn-primary" type="submit" id="tb-book">Book and pay</button>
@@ -68,6 +68,7 @@
     <h2>Pay <span id="tb-amount"></span> to confirm</h2>
     <p class="tb-summary" id="tb-summary"></p>
     <p><strong>Use this email at checkout: <span id="tb-pay-email"></span></strong> That is how we match your payment to your booking. Your seat is held for 30 minutes.</p>
+    <div class="callout warn"><p><strong>Do not change the amount on the next page.</strong> Pay exactly <span id="tb-amount-again"></span>, once (not monthly). A different amount cannot be matched to your booking, so your payment might not go through and your seat would not be confirmed.</p></div>
     <div class="gb-embed" id="tb-widget"></div>
     <p id="tb-link" hidden><a class="btn btn-primary btn-lg" rel="noopener" target="_blank">Pay on Givebutter</a></p>
     <p class="muted small" id="tb-wait">Waiting for the payment. This page updates on its own; you will also get a confirmation email.</p>
@@ -238,6 +239,7 @@
   });
   function pay(b) {
     $('tb-amount').textContent = money(b.amount);
+    $('tb-amount-again').textContent = money(b.amount);
     $('tb-summary').textContent = b.tool + ' with ' + b.trainer + ', ' + b.when + ' (' + b.zone + '). Booking ' + b.ref + '.';
     $('tb-pay-email').textContent = b.email;
     var t = (catalog.tools || []).filter(function (x) { return x.name === b.tool; })[0];
