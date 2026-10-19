@@ -49,10 +49,14 @@ export async function dolibarr(env, action, body) {
     return { status: 502, data: { ok: false, error: 'unreachable' } };
   }
   let data;
+  const text = await r.text();
   try {
-    data = await r.json();
+    data = JSON.parse(text);
   } catch {
-    return { status: 502, data: { ok: false, error: 'bad-answer' } };
+    // Not the module's answer: a block page from a proxy or firewall in front of
+    // Dolibarr, or a PHP error page. Its status says which; the page goes to the log.
+    console.error(`dolibarr ${action}: HTTP ${r.status}, not JSON: ${text.slice(0, 300).replace(/\s+/g, ' ')}`);
+    return { status: 502, data: { ok: false, error: 'bad-answer', upstream: r.status } };
   }
   // A wrong key or a disabled module is our misconfiguration, not the visitor's.
   if (r.status === 401 || r.status === 503) return { status: 502, data: { ok: false, error: 'config' } };
