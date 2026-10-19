@@ -1,11 +1,12 @@
 ---
 title: 3D printers
 subtitle: Fast, reliable Bambu Lab printers with multi-color capability.
-description: 3D printing at Columbia Gadget Works, Columbia MO. Bambu Lab X1 Carbon and A1 printers with AMS for PLA, PETG, TPU, ABS, and ASA. Orientation required; open to members.
+description: 3D printing at Columbia Gadget Works, Columbia MO. Bambu Lab X1 Carbon and A1 printers with AMS for PLA, PETG, TPU, ABS, and ASA. Training required ($10, $5 for members).
 weight: 30
 image: 3d-printers.webp
 imageAlt: "An open-frame Bambu Lab A1 and an enclosed X1 Carbon side by side on a bench, with an AMS filament changer on top and spools between them"
-training: false
+training: true
+trainingTool: 3d-printers
 openHackNight: true
 wiki: https://wiki.comogadget.casa/index.php/3D_printers
 specs:
@@ -29,6 +30,17 @@ specs:
 
 Prints are sliced and sent from **Bambu Studio on the shop's main PC**, on the local network only, so the printers stay configured and members' files stay private. Bring an STL, STEP, or 3MF file on a USB stick or download it at the PC. Shop filament (PLA in a few colors) is provided for reasonable use; bring your own for big jobs or special materials.
 
-## Orientation
+## Training required
 
-No formal training is required, but a short walkthrough from a member is: how to select the right build plate, sync the AMS, clean the plate with isopropyl alcohol, and stay for the first two layers. After that you're on your own. Report jams or failed prints on Discord so the next person doesn't inherit them.
+You need a short training before using the printers on your own. It is one session for both printers and covers:
+
+- choosing and preparing the right build plate, and cleaning it with isopropyl alcohol,
+- loading filament and syncing the AMS,
+- slicing and sending a print from Bambu Studio on the shop PC,
+- watching the first two layers, and what to do when a print fails or jams.
+
+**Read the [3D printer guide on the wiki](https://wiki.comogadget.casa/index.php/3D_printers) before you come.**
+
+Trainings are on **Thursdays at 5:00 PM**, just before Open Hack Night. The fee is **$10, or $5 for members**; half goes to the Digital Fab zone for filament and parts, half to your trainer. [Book a training](/training/book/?tool=3d-printers) to pick a date and pay online. Once you are trained you can [check it here](/training/).
+
+After training, report jams or failed prints on Discord so the next person doesn't inherit them.

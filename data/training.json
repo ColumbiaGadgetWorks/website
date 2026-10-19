@@ -1,0 +1,25 @@
+{
+  "version": 0,
+  "generated": "2026-10-19T00:00:00Z",
+  "timezone": "America/Chicago",
+  "zones": ["Digital Fab"],
+  "tools": [
+    {
+      "id": "3d-printers",
+      "name": "3D printers",
+      "zone": "Digital Fab",
+      "fee": 10,
+      "member_fee": 5,
+      "seats": 1,
+      "minutes": 60,
+      "covers": "Bambu Lab X1 Carbon, Bambu Lab A1",
+      "wiki": "https://wiki.comogadget.casa/index.php/3D_printers",
+      "page": "/tools/3d-printers/",
+      "bookable": true,
+      "slots": [
+        { "id": 0, "trainer": "Adam", "weekday": 4, "day": "Thursday", "time": "17:00", "label": "Thursdays at 5:00 PM", "minutes": 60, "seats": 1 }
+      ]
+    }
+  ],
+  "closed": []
+}

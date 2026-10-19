@@ -7,7 +7,7 @@ import { handleFund } from './fund.js';
 import { handleDiscord, discordPublicKey, runSync } from './fund-discord.js';
 import { givebutterConfigured, givebutterLive } from './fund-givebutter.js';
 import { handleJoin, handleGivebutterWebhook, joinConfigured } from './join.js';
-import { handleTrainingLookup, handleTrainingStart } from './training.js';
+import { handleTraining, runTrainingSync } from './training.js';
 import { handleBudget, handlePurchase } from './budget.js';
 import { syncDiscordEvents, discordEventsConfigured } from './discord-events.js';
 
@@ -43,14 +43,7 @@ export default {
       return handleExport(request, env);
     }
     if (pathname.startsWith('/api/join/')) return handleJoin(request, env, pathname);
-    if (pathname === '/api/training/lookup') {
-      if (request.method !== 'POST') return new Response('POST only', { status: 405 });
-      return handleTrainingLookup(request, env);
-    }
-    if (pathname === '/api/training/start') {
-      if (request.method !== 'POST') return new Response('POST only', { status: 405 });
-      return handleTrainingStart(request, env);
-    }
+    if (pathname.startsWith('/api/training/')) return handleTraining(request, env, ctx, pathname);
     if (pathname === '/api/budget') {
       if (request.method !== 'GET') return new Response('GET only', { status: 405 });
       return handleBudget(request, env, ctx);
@@ -86,6 +79,7 @@ export default {
           GIVEBUTTER_API_KEY: givebutterConfigured(env),
           GIVEBUTTER_SYNC_ON: givebutterLive(env),
           FUND_LOG_CHANNEL_ID: Boolean(env.FUND_LOG_CHANNEL_ID),
+          ALERTS: Boolean(env.ALERTS && env.ALERT_EMAIL_TO && env.ALERT_EMAIL_FROM),
         },
       });
     }
@@ -94,12 +88,17 @@ export default {
   },
 
   // Cron triggers (wrangler.jsonc): every five minutes, count new Givebutter
-  // gifts toward the shop fund; hourly, copy upcoming calendar events to Discord.
+  // gifts toward the shop fund and keep the training catalog in step with
+  // Dolibarr; hourly, copy upcoming calendar events to Discord.
   async scheduled(event, env, ctx) {
     if (event.cron === '*/5 * * * *') {
       if (env.FUND_DB && givebutterConfigured(env) && givebutterLive(env)) {
         ctx.waitUntil(runSync(env).catch((e) => console.error('givebutter sync failed:', e.message)));
       }
+      ctx.waitUntil(runTrainingSync(env, new Date(event.scheduledTime)).then(
+        (r) => console.log('training sync:', r),
+        (e) => console.error('training sync failed:', e.message),
+      ));
       return;
     }
     ctx.waitUntil(

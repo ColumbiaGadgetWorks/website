@@ -16,8 +16,17 @@
       <dl class="specs">
         {{ range .Params.specs }}<div><dt>{{ .label }}</dt><dd>{{ .value }}</dd></div>{{ end }}
       </dl>
-      {{ with .Params.wiki }}<p><a class="btn btn-outline" href="{{ . }}" rel="noopener">Operating guide on the wiki</a></p>{{ end }}
-      <p class="muted small">Want to use this? <a href="/visit/">Come by on a Thursday</a> and ask for a demo.</p>
+      {{- $t := false }}{{ with .Params.trainingTool }}{{ $t = partial "training-tool.html" . }}{{ end }}
+      {{- if $t }}
+      <div class="tool-training">
+        <h2>Training</h2>
+        <p><strong>${{ $t.fee }}</strong>, or <strong>${{ $t.member_fee }}</strong> for <a href="/membership/">members</a>. About {{ $t.minutes }} minutes{{ with $t.covers }}, covers {{ . }}{{ end }}.</p>
+        {{ with $t.slots }}<p class="muted small">{{ range $i, $s := . }}{{ if $i }}; {{ end }}{{ $s.label }} with {{ $s.trainer }}{{ end }}.</p>{{ end }}
+        {{ if $t.bookable }}<p><a class="btn btn-primary" href="/training/book/?tool={{ $t.id }}">Book training</a></p>{{ else }}<p class="muted small">Booking opens once a trainer is set. <a href="/contact/">Ask us</a>.</p>{{ end }}
+      </div>
+      {{- end }}
+      {{ with .Params.wiki }}<p><a class="btn btn-outline" href="{{ . }}" rel="noopener">{{ if $t }}Training guide on the wiki{{ else }}Operating guide on the wiki{{ end }}</a></p>{{ end }}
+      {{ if $t }}<p class="muted small">Read the guide before your session. Already trained? <a href="/training/">Check what you are trained on</a>.</p>{{ else }}<p class="muted small">Want to use this? <a href="/visit/">Come by on a Thursday</a> and ask for a demo.</p>{{ end }}
     </aside>
   </div>
 </article>

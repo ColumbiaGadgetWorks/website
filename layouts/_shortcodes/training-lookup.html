@@ -1,4 +1,6 @@
-{{- /* Training lookup. Asks the Worker (src/training.js), which asks Dolibarr. */ -}}
+{{- /* Training lookup. Asks the Worker (src/training.js), which asks Dolibarr, or
+       uses its masked copy while Dolibarr is down. Shows the email and name masked
+       (a******4@gmail.com, A*** B***), then the tools. */ -}}
 {{- $p := site.Params -}}
 <form class="contact-form" id="training-lookup">
   <div class="field"><label for="tl-email">Email</label><input id="tl-email" name="email" type="email" required autocomplete="email" maxlength="200"></div>
@@ -7,7 +9,8 @@
 </form>
 <div class="callout warn" id="training-error" role="alert" hidden></div>
 <div id="training-result" aria-live="polite" hidden>
-  <p id="training-none" hidden>No trainings are recorded for that email yet.</p>
+  <p id="training-none" hidden>No trainings are recorded for that email.</p>
+  <p id="training-who" hidden><span id="training-email"></span><br><span id="training-name"></span></p>
   <table class="training-table" id="training-table" hidden>
     <thead><tr><th scope="col">Tool</th><th scope="col">Zone</th><th scope="col">Trained</th></tr></thead>
     <tbody></tbody>
@@ -59,6 +62,9 @@
       });
       table.hidden = !j.trainings.length;
       none.hidden = !!j.trainings.length;
+      document.getElementById('training-who').hidden = !j.found;
+      document.getElementById('training-email').textContent = j.email || '';
+      document.getElementById('training-name').textContent = j.name || '';
       out.hidden = false;
     });
   });

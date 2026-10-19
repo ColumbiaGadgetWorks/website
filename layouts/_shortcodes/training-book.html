@@ -1,0 +1,292 @@
+{{- /* Book a tool training. All state lives in Dolibarr; the Worker (src/training.js)
+       passes calls through. Steps: email (Turnstile) -> name if new -> signing link
+       by email if the waiver (or, for members, the agreement) is missing -> tool,
+       trainer and time -> hold the seat and pay on Givebutter -> wait for the
+       payment. The signing link comes back here with #s=<token>. */ -}}
+{{- $p := site.Params -}}
+{{- $cat := hugo.Data.training | default dict -}}
+<div id="tb" class="tb">
+  <noscript><div class="callout warn"><p>Booking needs JavaScript. You can also <a href="/contact/">contact us</a> to book.</p></div></noscript>
+  <div class="callout warn" id="tb-error" role="alert" hidden></div>
+
+  {{- if not $p.givebutterTraining }}
+  <div class="callout warn"><p>Online booking is not set up yet. Ask on Discord or <a href="/contact/">contact us</a> to book a training.</p></div>
+  {{- else }}
+  <form class="contact-form tb-panel" id="tb-email">
+    <h2>Your email</h2>
+    <p>We check whether you are a member (members pay half) and what you still need to sign. Nobody else sees the answer.</p>
+    <div class="field"><label for="tb-mail">Email</label><input id="tb-mail" type="email" required autocomplete="email" maxlength="200"></div>
+    {{ with $p.turnstileSiteKey }}<div class="cf-turnstile" data-sitekey="{{ . }}" data-action="training-book"></div><script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>{{ end }}
+    <button class="btn btn-primary" type="submit">Continue</button>
+  </form>
+
+  <div class="tb-panel" id="tb-down" hidden>
+    <h2>Booking is paused</h2>
+    <p>Our records system is not answering right now, so bookings cannot be taken. Nothing has been charged. Try again in a few minutes, or leave your email and we will tell you when booking is back.</p>
+    <p><button class="btn btn-outline" type="button" id="tb-notify">Email me when it's back</button></p>
+    <p class="muted small" id="tb-notified" hidden>Thanks. We will email you.</p>
+  </div>
+
+  <form class="contact-form tb-panel" id="tb-new" hidden>
+    <h2>About you</h2>
+    <p>You are new to us. We keep your name and email for your training record, as a non-member. You can become a member any time.</p>
+    <div class="field"><label for="tb-first">First name</label><input id="tb-first" required autocomplete="given-name" maxlength="50"></div>
+    <div class="field"><label for="tb-last">Last name</label><input id="tb-last" required autocomplete="family-name" maxlength="50"></div>
+    <div class="field"><label for="tb-discord">Discord username (optional)</label><input id="tb-discord" maxlength="100"></div>
+    <label class="join-check"><input type="checkbox" id="tb-news"> Email me about classes and events</label>
+    <button class="btn btn-primary" type="submit">Continue</button>
+  </form>
+
+  <div class="tb-panel" id="tb-mailed" hidden>
+    <h2>Check your email</h2>
+    <p>Before booking, we need <span id="tb-needs"></span> on file. We emailed <strong id="tb-mailed-to"></strong> a link to sign it on your phone or computer; it brings you back here. If nothing arrives in a few minutes, check spam or <a href="/contact/">contact us</a>.</p>
+  </div>
+
+  <div class="tb-panel" id="tb-sign" hidden>
+    <h2>Sign before booking</h2>
+    <p>Read and sign below. Under 18? A parent or guardian signs the waiver for you.</p>
+    <div id="tb-sign-docs"></div>
+  </div>
+
+  <div class="tb-panel" id="tb-signed" hidden>
+    <div class="callout ok"><p><strong>Signed, thank you.</strong> Type your email again to pick a time.</p></div>
+  </div>
+
+  <form class="contact-form tb-panel" id="tb-pick" hidden>
+    <h2>Pick your training</h2>
+    <div class="field"><label for="tb-tool">Tool</label><select id="tb-tool" required></select></div>
+    <p class="tb-facts" id="tb-facts"></p>
+    <fieldset class="tb-slots"><legend>Date, time and trainer</legend><div id="tb-slots"><p class="muted">Loading the open times…</p></div></fieldset>
+    <div class="tb-terms">
+      <p><strong>Before you book:</strong> you pay now to hold your seat. Cancel at least {{ $p.trainingCancelHours | default 2 }} hours before for a full refund or a new date (the link is in your confirmation email). If you miss your training, you can pick one new date at no charge; after a second miss the fee is kept. If your trainer cannot make it, you choose a new date or a refund.</p>
+      <label class="join-check"><input type="checkbox" id="tb-agree" required> I agree</label>
+    </div>
+    <button class="btn btn-primary" type="submit" id="tb-book">Book and pay</button>
+  </form>
+
+  <div class="tb-panel" id="tb-pay" hidden>
+    <h2>Pay <span id="tb-amount"></span> to confirm</h2>
+    <p class="tb-summary" id="tb-summary"></p>
+    <p><strong>Use this email at checkout: <span id="tb-pay-email"></span></strong> That is how we match your payment to your booking. Your seat is held for 30 minutes.</p>
+    <div class="gb-embed" id="tb-widget"></div>
+    <p id="tb-link" hidden><a class="btn btn-primary btn-lg" rel="noopener" target="_blank">Pay on Givebutter</a></p>
+    <p class="muted small" id="tb-wait">Waiting for the payment. This page updates on its own; you will also get a confirmation email.</p>
+  </div>
+
+  <div class="callout ok tb-panel" id="tb-done" hidden>
+    <p><strong>You are booked.</strong> <span id="tb-done-text"></span> A confirmation is on its way to your inbox, with a link to cancel or change the date. Your trainer will confirm the session. Read the <a id="tb-wiki" rel="noopener">training guide</a> before you come.</p>
+  </div>
+  {{- end }}
+</div>
+{{ partial "sign-docs.html" . }}
+<style>
+.tb-facts{display:flex;flex-wrap:wrap;gap:1.2em;margin:-.25em 0 1em}
+.tb-facts strong{font-variant-numeric:tabular-nums}
+.tb-slots{border:1px solid var(--line);border-radius:8px;padding:10px 14px;margin:0 0 1em}
+.tb-slot{display:flex;gap:10px;align-items:baseline;padding:.35em 0;border-bottom:1px solid var(--line)}
+.tb-slot:last-child{border-bottom:0}
+.tb-slot small{color:var(--muted)}
+.tb-terms{background:#fff;border:1px solid var(--line);border-radius:8px;padding:12px 16px;margin:0 0 1em;font-size:.95rem}
+.tb-summary{font-size:1.05rem}
+</style>
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  if (!$('tb-email')) return;
+  var catalog = {{ $cat | jsonify | safeJS }};
+  var campaign = {{ $p.givebutterTraining | default "" }};
+  var widgetId = {{ $p.givebutterTrainingWidgetId | default "" }};
+  var account = {{ $p.givebutterAccount | default "" }};
+  var state = { email: '', session: '', kind: '', needs: [], tool: new URLSearchParams(location.search).get('tool') || '' };
+  var why = {
+    invalid: 'Check the email address and the fields.',
+    captcha: 'The spam check did not pass. Tick it again and press Continue.',
+    slow: 'Too many tries from here. Try again in an hour.',
+    session: 'This page sat too long. Type your email again.',
+    full: 'That time was just taken. Pick another.',
+    already: 'You already have a booking for this tool. Check your email for its links.',
+    paperwork: 'Something still needs signing. Type your email again.',
+    config: 'Online booking is not set up yet.'
+  };
+  function error(code) { var e = $('tb-error'); e.textContent = why[code] || 'That did not go through. Try again in a minute.'; e.hidden = false; e.scrollIntoView({ block: 'nearest' }); }
+  function clearError() { $('tb-error').hidden = true; }
+  function show(id) {
+    Array.prototype.forEach.call(document.querySelectorAll('#tb .tb-panel'), function (el) { el.hidden = el.id !== id; });
+  }
+  function call(path, body, method) {
+    return fetch('/api/training/' + path, method === 'GET' ? {} : { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body || {}) })
+      .then(function (r) { return r.json().catch(function () { return { ok: false, error: 'server' }; }).then(function (j) { j.http = r.status; return j; }); }, function () { return { ok: false, error: 'unavailable', http: 0 }; });
+  }
+  function resetTurnstile() { if (window.turnstile) { try { window.turnstile.reset(); } catch (e) {} } }
+  function tsToken() { var t = document.querySelector('#tb-email [name="cf-turnstile-response"]'); return t ? t.value : ''; }
+  function money(n) { return '$' + Number(n).toFixed(Number(n) % 1 ? 2 : 0); }
+  function needsText(needs) { return needs.length === 2 ? 'the liability waiver and the membership agreement' : (needs[0] === 'agreement' ? 'the membership agreement' : 'the liability waiver'); }
+
+  // Step 1: who is this?
+  $('tb-email').addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    clearError();
+    var btn = this.querySelector('button[type=submit]');
+    state.email = $('tb-mail').value.trim().toLowerCase();
+    btn.disabled = true;
+    call('trainee', { email: state.email, 'cf-turnstile-response': tsToken() }).then(function (j) {
+      btn.disabled = false;
+      resetTurnstile();
+      if (j.error === 'unavailable') return show('tb-down');
+      if (!j.ok) return error(j.error);
+      state.session = j.session; state.kind = j.kind; state.needs = j.needs || [];
+      next();
+    });
+  });
+  function next() {
+    if (state.kind === 'new') return show('tb-new');
+    if (state.needs.length) {
+      return call('signlink', { session: state.session }).then(function (j) {
+        if (j.error === 'unavailable') return show('tb-down');
+        if (!j.ok) return error(j.error);
+        if (!j.needs || !j.needs.length) { state.needs = []; return pick(); }
+        $('tb-needs').textContent = needsText(j.needs);
+        $('tb-mailed-to').textContent = state.email;
+        show('tb-mailed');
+      });
+    }
+    pick();
+  }
+  $('tb-new').addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    clearError();
+    var news = $('tb-news').checked;
+    call('new', { session: state.session, firstname: $('tb-first').value, lastname: $('tb-last').value, discord: $('tb-discord').value, notify_events: news, notify_news: news }).then(function (j) {
+      if (j.error === 'unavailable') return show('tb-down');
+      if (!j.ok) return error(j.error);
+      state.kind = j.kind; state.needs = j.needs || [];
+      next();
+    });
+  });
+  $('tb-notify').addEventListener('click', function () {
+    call('notify', { email: $('tb-mail').value.trim(), 'cf-turnstile-response': tsToken() }).then(function (j) {
+      resetTurnstile();
+      if (!j.ok) return error(j.error === 'captcha' ? 'captcha' : j.error);
+      $('tb-notified').hidden = false;
+    });
+  });
+
+  // Step 3: tool, trainer and time.
+  function pick() {
+    // The live catalog, in case a tool or trainer changed since the site was built.
+    call('catalog', null, 'GET').then(function (j) {
+      if (j.ok && j.tools && j.tools.length) catalog = j;
+      fillTools();
+    });
+  }
+  function fillTools() {
+    var sel = $('tb-tool');
+    sel.textContent = '';
+    var tools = (catalog.tools || []).filter(function (t) { return t.bookable; });
+    tools.forEach(function (t) { sel.add(new Option(t.name + ' (' + t.zone + ')', t.id, false, t.id === state.tool)); });
+    if (!tools.length) { $('tb-slots').innerHTML = '<p class="muted">No trainings can be booked online right now.</p>'; }
+    show('tb-pick');
+    toolChanged();
+  }
+  function toolChanged() {
+    var t = (catalog.tools || []).filter(function (x) { return x.id === $('tb-tool').value; })[0];
+    if (!t) return;
+    var member = state.kind === 'member';
+    $('tb-facts').innerHTML = '';
+    [['Your price', member ? money(t.member_fee) + ' (member)' : money(t.fee)], ['Zone', t.zone], ['Length', t.minutes + ' minutes']].forEach(function (f) {
+      var s = document.createElement('span'); s.textContent = f[0] + ' '; var b = document.createElement('strong'); b.textContent = f[1]; s.appendChild(b); $('tb-facts').appendChild(s);
+    });
+    if (!member) { var m = document.createElement('span'); m.className = 'muted'; m.textContent = 'Members pay ' + money(t.member_fee); $('tb-facts').appendChild(m); }
+    $('tb-book').textContent = 'Book and pay ' + money(member ? t.member_fee : t.fee);
+    $('tb-slots').innerHTML = '<p class="muted">Loading the open times…</p>';
+    call('slots?tool=' + encodeURIComponent(t.id), null, 'GET').then(function (j) {
+      if (j.error === 'unavailable') return show('tb-down');
+      var box = $('tb-slots');
+      box.textContent = '';
+      var slots = (j.slots || []);
+      if (!slots.length) { box.innerHTML = '<p class="muted">No open times in the next few weeks. Check back soon, or <a href="/contact/">contact us</a>.</p>'; return; }
+      slots.forEach(function (s, i) {
+        var l = document.createElement('label'); l.className = 'tb-slot';
+        var r = document.createElement('input'); r.type = 'radio'; r.name = 'slot'; r.value = i; r.required = true;
+        l.appendChild(r);
+        var span = document.createElement('span'); span.textContent = s.label + ' with ' + s.trainer + ' ';
+        var sm = document.createElement('small'); sm.textContent = s.seats > 1 ? '(' + s.seats_left + ' of ' + s.seats + ' seats left)' : '';
+        span.appendChild(sm); l.appendChild(span); box.appendChild(l);
+      });
+      box.slots = slots;
+    });
+  }
+  $('tb-tool').addEventListener('change', toolChanged);
+
+  // Step 4: hold the seat, then pay.
+  $('tb-pick').addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    clearError();
+    var chosen = document.querySelector('#tb-slots input[name=slot]:checked');
+    if (!chosen) return error('full');
+    var s = $('tb-slots').slots[Number(chosen.value)];
+    var btn = $('tb-book');
+    btn.disabled = true;
+    call('book', { session: state.session, tool: $('tb-tool').value, slot: s.slot, start: s.start }).then(function (j) {
+      btn.disabled = false;
+      if (j.error === 'unavailable') return show('tb-down');
+      if (j.error === 'paperwork') { state.needs = j.needs || []; return next(); }
+      if (j.error === 'session') return show('tb-email');
+      if (!j.ok) { error(j.error); if (j.error === 'full') toolChanged(); return; }
+      pay(j);
+    });
+  });
+  function pay(b) {
+    $('tb-amount').textContent = money(b.amount);
+    $('tb-summary').textContent = b.tool + ' with ' + b.trainer + ', ' + b.when + ' (' + b.zone + '). Booking ' + b.ref + '.';
+    $('tb-pay-email').textContent = b.email;
+    var t = (catalog.tools || []).filter(function (x) { return x.name === b.tool; })[0];
+    if (t && t.wiki) $('tb-wiki').href = t.wiki;
+    $('tb-done-text').textContent = b.tool + ' with ' + b.trainer + ', ' + b.when + '.';
+    show('tb-pay');
+    // Givebutter fills in the amount, name and email from the page address.
+    var q = 'amount=' + encodeURIComponent(b.amount) + '&gb_first_name=' + encodeURIComponent(b.firstname || '') + '&gb_last_name=' + encodeURIComponent(b.lastname || '') + '&gb_email=' + encodeURIComponent(b.email);
+    if (widgetId && account) {
+      history.replaceState(null, '', location.pathname + '?' + q);
+      var w = document.createElement('givebutter-widget');
+      w.setAttribute('id', widgetId);
+      $('tb-widget').appendChild(w);
+      var sc = document.createElement('script');
+      sc.async = true;
+      sc.src = 'https://widgets.givebutter.com/latest.umd.cjs?acct=' + encodeURIComponent(account) + '&p=other';
+      document.body.appendChild(sc);
+    } else {
+      var a = $('tb-link').querySelector('a');
+      a.href = campaign + (campaign.indexOf('?') < 0 ? '?' : '&') + q;
+      $('tb-link').hidden = false;
+    }
+    var tries = 0;
+    var timer = setInterval(function () {
+      if (++tries > 360) { clearInterval(timer); return; }
+      call('status', { ref: b.ref, key: b.key }).then(function (j) {
+        if (j.ok && j.paid) { clearInterval(timer); history.replaceState(null, '', location.pathname); show('tb-done'); }
+        if (j.ok && j.status === 'expired' && tries > 2) { $('tb-wait').textContent = 'The 30 minutes ran out. If you paid, your booking is still matched as long as the seat is free; otherwise we email you to pick a new date.'; }
+      });
+    }, 5000);
+  }
+
+  // The signing link from the email: #s=<token>.
+  var m = /[#&]s=([a-f0-9]{48})/.exec(location.hash);
+  if (m) {
+    var token = m[1];
+    history.replaceState(null, '', location.pathname + location.search);
+    fetch('/api/join/status', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ token: token }) })
+      .then(function (r) { return r.json(); }).catch(function () { return { ok: false }; })
+      .then(function (j) {
+        if (!j.ok) { error(j.error === 'token' ? 'session' : 'unavailable'); return show('tb-email'); }
+        $('tb-mail').value = j.email || '';
+        var needs = j.needs || [];
+        if (!needs.length) { show('tb-email'); $('tb-signed').hidden = false; return; }
+        show('tb-sign');
+        window.cgwSignDocs($('tb-sign-docs'), { token: token, needs: needs, onDone: function () { show('tb-email'); $('tb-signed').hidden = false; window.scrollTo(0, 0); } });
+      });
+  } else {
+    show('tb-email');
+  }
+})();
+</script>
