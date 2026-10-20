@@ -1,8 +1,10 @@
 {
-  "version": 0,
-  "generated": "2026-10-19T00:00:00Z",
+  "version": 3,
+  "generated": "2026-10-20T13:30:47Z",
   "timezone": "America/Chicago",
-  "zones": ["Digital Fab"],
+  "zones": [
+    "Digital Fab"
+  ],
   "tools": [
     {
       "id": "3d-printers",
@@ -17,9 +19,23 @@
       "page": "/tools/3d-printers/",
       "bookable": true,
       "slots": [
-        { "id": 0, "trainer": "Adam", "weekday": 4, "day": "Thursday", "time": "17:00", "label": "Thursdays at 5:00 PM", "minutes": 60, "seats": 1 }
+        {
+          "id": 1,
+          "trainer": "Adam",
+          "weekday": 4,
+          "day": "Thursday",
+          "time": "17:00",
+          "label": "Thursdays at 5:00 PM",
+          "minutes": 60,
+          "seats": 5
+        }
       ]
     }
   ],
-  "closed": []
+  "closed": [
+    {
+      "day": "2026-11-26",
+      "reason": "Cancelled: Open Hack Night (Thanksgiving)"
+    }
+  ]
 }
