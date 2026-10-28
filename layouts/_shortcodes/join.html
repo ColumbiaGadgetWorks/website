@@ -238,7 +238,11 @@
       if (window.turnstile) { try { window.turnstile.reset(); } catch (e) {} }
       if (j.http === 503 || j.error === 'config') return show('join-off', 0);
       if (j.ok && j.check_email) { error(''); return show('join-mail', 1); }
-      if (j.ok && j.token) { store(j.token); return render(j); }
+      if (j.ok && j.token) {
+        // A new signup (not a returning address, which gets an email instead).
+        if (window.cgwSignupConversion) window.cgwSignupConversion();
+        store(j.token); return render(j);
+      }
       error(j.error);
     });
   });

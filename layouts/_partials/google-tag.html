@@ -12,3 +12,13 @@
   gtag('config', '{{ . }}');
 </script>
 {{- end }}
+{{- /* Google Ads "Sign-up" conversion. Not tied to a page: the email updates
+       signup and the membership signup call cgwSignupConversion() at the
+       moment a signup actually succeeds. Without an ID it does nothing. */}}
+<script>
+  window.cgwSignupConversion = function () {
+    {{- with site.Params.googleAdsSignup }}
+    if (window.gtag) gtag('event', 'conversion', { 'send_to': '{{ . }}', 'value': 1.0, 'currency': 'USD' });
+    {{- end }}
+  };
+</script>

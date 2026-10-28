@@ -63,6 +63,7 @@ disableKinds = ["taxonomy", "term"]
                                    # subscribe visitors to the wrong one.
   contactEndpoint = "/api/contact" # handled by the Worker in src/index.js
   subscribeEndpoint = "/api/subscribe" # email updates signup, handled by the Worker in src/subscribe.js
+  googleAdsSignup = "AW-18542268392/jVQoCOaE66wdEOif0olF"  # Google Ads "Sign-up" conversion: fired when an email updates or membership signup succeeds. Empty turns it off.
   googleAdsId = "AW-18542268392"  # Google Ads (Ad Grants) tag, loaded on every page by layouts/_partials/google-tag.html. Empty removes it.
   turnstileSiteKey = "0x4AAAAAAE_62c1QS97IgYEj"  # Cloudflare Turnstile site key (public): protects the contact form and the email signup. Must be live BEFORE TURNSTILE_SECRET is added.
 
