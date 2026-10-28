@@ -20,7 +20,7 @@ Columbia Gadget Works ("CGW", "we") operates columbiagadgetworks.org. This page 
 
 **Email updates.** If you sign up for email updates, we store the address you give us, the date, and the page you signed up from. We use it for one purpose: emailing you about new classes and events, and the occasional update about the organization. We never sell, rent, or share it. The list is held in our own membership system, not with a marketing service, and is readable only by the volunteers who send the updates. To unsubscribe, use the unsubscribe link in any update, reply to it, or use the [contact form](/contact/), and you'll be removed.
 
-**Membership signup.** When you [join online](/membership/join/), we collect your name, email address, and (if you give it) your Discord username, along with whether you want to hear about events and news. You sign the liability waiver and the membership agreement by drawing your signature on screen; we keep the signed copy together with the date and the IP address it was signed from. You also upload a photo of a government-issued ID, which only the membership team can view. All of this is stored in our own membership system, not in Cloudflare and not with a marketing service, and is used only to run your membership. If you start a signup and do not finish it, it is deleted after about a month. To have your information removed, use the [contact form](/contact/).
+**Membership signup.** When you [join online](/membership/join/), we collect your name, email address, and (if you give it) your Discord username, along with whether you want to hear about events and news. You sign the liability waiver and the membership agreement by drawing your signature on screen; we keep the signed copy together with the date and the IP address it was signed from. You also upload a photo of a government-issued ID, which only the membership team can view, and which is deleted once it has been checked, within 90 days. All of this is stored in our own membership system, not in Cloudflare and not with a marketing service, and is used only to run your membership. If you start a signup and do not finish it, it is deleted after about a month. To have your information removed, use the [contact form](/contact/).
 
 **Email and phone.** If you email or call us, we keep the correspondence as long as needed to respond and for our records.
 
@@ -37,7 +37,11 @@ We don't share or sell personal information to anyone.
 
 ## Members
 
-Information about members (contact details, waiver, training records, dues status) is kept in our member records system and on the member wiki, and is available only to the officers and volunteers who need it to run the shop. Members can ask to see or correct their information at any time.
+Information about members (contact details, waiver, training records, dues status) is kept in our member records system and on the member wiki, and is available only to the officers and volunteers who need it to run the shop. It is kept while you are a member and for 7 years after your membership ends, then deleted. Members can ask to see or correct their information at any time.
+
+## Our own bank records
+
+Our bookkeeping system reads Columbia Gadget Works' own bank and card accounts through [Plaid](https://plaid.com/legal/#end-user-privacy-policy), so our books stay accurate. It does not connect to members' or donors' bank accounts, and we never see bank logins. Transactions are kept with our financial records for 7 years, then deleted, and a bank connection is removed as soon as it is no longer needed. How we protect and keep records is set out in our information security and records policy, available on request.
 
 ## Donor privacy
 
