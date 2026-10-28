@@ -3,8 +3,8 @@
 # Dates are YYYY-MM-DD. Keep this file current; it is the calendar of record for the site.
 recurring:
   - title: Open Hack Night
-    when: Every Thursday, 6–8 pm
-    description: Free and open to the public. Tours, demos, help with your project, and the basic tools. No sign-up needed.
+    when: Every Thursday, 6–8 pm, except the second Thursday of April
+    description: Free and open to the public. Tours, demos, help with your project, and the basic tools. No sign-up needed. No Open Hack Night on the night of the annual member meeting.
   - title: City of Columbia grant classes
     when: First Thursday of the month, Nov 2026 – Oct 2027
     description: A year of free public classes funded by a City of Columbia grant. Topics announced a month ahead.
@@ -12,8 +12,8 @@ recurring:
     when: Last Thursday of the quarter, 8 pm (after Open Hack Night)
     description: Open to members. Agenda and minutes are posted on the member wiki.
   - title: Annual member meeting
-    when: Last Saturday in April
-    description: Members elect officers and vote on any bylaw changes.
+    when: Second Thursday of April, 6–8 pm, in place of Open Hack Night
+    description: Members elect the board and vote on any bylaw changes. Voting is online and opens about a week before.
 
 upcoming:
   - date: 2026-10-29
@@ -42,6 +42,11 @@ upcoming:
     title: Free public class, City of Columbia series
     time: 6 pm
     where: The shop
+  - date: 2027-02-25
+    title: Special board meeting
+    time: 8 pm
+    where: The shop
+    description: The board approves the final bylaws, policies, waiver and member agreement for the April member vote. Members welcome.
   - date: 2027-03-04
     title: Free public class, City of Columbia series
     time: 6 pm
@@ -50,7 +55,8 @@ upcoming:
     title: Free public class, City of Columbia series
     time: 6 pm
     where: The shop
-  - date: 2027-04-24
+  - date: 2027-04-08
     title: Annual member meeting
+    time: 6–8 pm
     where: The shop
-    description: Officer elections and bylaw votes. Members in good standing may vote.
+    description: Members vote to ratify CGW's first bylaws and elect the board. Online voting runs from 31 March to 7 pm on the night. No Open Hack Night this evening.
