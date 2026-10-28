@@ -4,15 +4,17 @@ subtitle: Short, because we collect very little.
 description: Privacy policy for columbiagadgetworks.org.
 ---
 
-*Last updated: September 22, 2026*
+*Last updated: October 28, 2026*
 
 Columbia Gadget Works ("CGW", "we") operates columbiagadgetworks.org. This page explains what information the site collects and what we do with it.
 
 ## What this website collects
 
-**Nothing, by default.** The site is a set of static pages. It sets no cookies of its own, has no user accounts, and does not use advertising trackers.
+**Very little.** The site is a set of static pages. It has no user accounts and sets no cookies of its own. It does load Google's advertising tag, described below.
 
 **Hosting logs.** The site is served by Cloudflare, which processes standard request data (IP address, browser, pages requested) to deliver the site and defend against abuse. Cloudflare's handling of that data is described in its [privacy policy](https://www.cloudflare.com/privacypolicy/). We may use Cloudflare's aggregate, cookie-free analytics to see how many people visit and which pages are popular. That data does not identify individuals.
+
+**Google Ads.** We advertise through Google Ad Grants, Google's free advertising program for nonprofits. Every page loads Google's ad tag, which lets Google measure how people who reach the site from one of our ads use it. For that, Google may set cookies and receive your IP address, browser details and the pages you visit. We see only totals in our Google Ads account, never who you are. You can turn off ad personalization at [myadcenter.google.com](https://myadcenter.google.com/), and browser privacy settings or content blockers stop the tag entirely. See [Google's privacy policy](https://policies.google.com/privacy).
 
 **Contact form.** When you send a message through our [contact form](/contact/), we receive your name, email address, and message. It is delivered to a private channel on our volunteer Discord server so that the people who handle inquiries can respond. We use it only to reply to you, and we don't add you to any mailing list.
 
@@ -27,6 +29,7 @@ Columbia Gadget Works ("CGW", "we") operates columbiagadgetworks.org. This page 
 Some pages include content from other services. When you interact with them, those services may collect data under their own policies:
 
 - **Givebutter** processes donations and membership dues. We receive your name, email, and gift details so we can send a receipt and acknowledge your gift. We never see your full card number. See [Givebutter's privacy policy](https://givebutter.com/privacy).
+- **Google Ads** measures visits that come from our ads (see above). See [how Google uses information from sites that use its services](https://policies.google.com/technologies/partner-sites).
 - **Google Maps** provides the embedded map on the Visit and Contact pages. See [Google's privacy policy](https://policies.google.com/privacy).
 - **Cloudflare Turnstile** checks that submissions to the contact form and the email signup aren't automated. It sets no tracking cookies. See [Cloudflare's privacy policy](https://www.cloudflare.com/privacypolicy/).
 
