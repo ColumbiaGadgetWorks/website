@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="{{ site.Language.Locale }}">
 <head>
+{{ partial "google-tag.html" . }}
 {{ partial "head.html" . }}
 </head>
 <body class="{{ if .IsHome }}home{{ else }}kind-{{ .Kind }} sec-{{ .Section }}{{ end }}">
