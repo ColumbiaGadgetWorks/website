@@ -30,7 +30,7 @@
     <div class="field"><label for="tb-trainer-mail">Your email</label><input id="tb-trainer-mail" type="email" required autocomplete="email" maxlength="200"></div>
     {{ with $p.turnstileSiteKey }}<div class="cf-turnstile" data-sitekey="{{ . }}" data-action="training-trainer"></div>{{ end }}
     <button class="btn btn-primary" type="submit">Email me my link</button>
-    <p class="muted small"><a href="#" id="tb-trainer-back">Back to booking a training</a></p>
+    <p class="muted small"><a href="/training/book/" id="tb-trainer-back">Back to booking a training</a></p>
   </form>
 
   <div class="tb-panel" id="tb-trainer-sent" hidden>
