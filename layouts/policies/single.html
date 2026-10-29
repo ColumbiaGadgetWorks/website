@@ -1,0 +1,20 @@
+{{ define "main" }}
+<article class="wrap page">
+  <header class="page-head">
+    <h1>{{ .Title }}</h1>
+  </header>
+  <div class="prose">
+    {{ if eq .Params.governanceStatus "draft" }}
+    <div class="callout warn"><strong>Draft.</strong> This text is proposed and has not yet been adopted by the members.</div>
+    {{ end }}
+    {{ .Content }}
+    <hr>
+    <p class="muted">
+      Official text: <a href="{{ .Params.sourceUrl }}">view on GitHub</a> ·
+      <a href="{{ .Params.historyUrl }}">change history</a> ·
+      <a href="/policies/how-we-decide/">propose a change</a> ·
+      <a href="/policies/">all bylaws and policies</a>
+    </p>
+  </div>
+</article>
+{{ end }}
