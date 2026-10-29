@@ -2,7 +2,10 @@
        passes calls through. Steps: email (Turnstile) -> name if new -> signing link
        by email if the waiver (or, for members, the agreement) is missing -> tool,
        trainer and time -> hold the seat and pay on Givebutter -> wait for the
-       payment. The signing link comes back here with #s=<token>. */ -}}
+       payment. The signing link comes back here with #s=<token>.
+       On the spot: a trainer asks for their link here ("I'm a trainer"); the trainee
+       they send a request to says yes in an email and comes back here with
+       #spot=<ref>.<key> to give a name if new, sign, and pay. */ -}}
 {{- $p := site.Params -}}
 {{- $cat := hugo.Data.training | default dict -}}
 <div id="tb" class="tb">
@@ -18,7 +21,22 @@
     <div class="field"><label for="tb-mail">Email</label><input id="tb-mail" type="email" required autocomplete="email" maxlength="200"></div>
     {{ with $p.turnstileSiteKey }}<div class="cf-turnstile" data-sitekey="{{ . }}" data-action="training-book"></div><script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>{{ end }}
     <button class="btn btn-primary" type="submit">Continue</button>
+    <p class="muted small tb-trainer-open">Trainer, with someone ready to train right now? <button class="btn btn-outline" type="button" id="tb-trainer-open">I'm a trainer: train someone now</button></p>
   </form>
+
+  <form class="contact-form tb-panel" id="tb-trainer" hidden>
+    <h2>Train someone now</h2>
+    <p>Type your own email. If you are a trainer, we email you a link (it works for 2 hours) where you pick the tool and type the trainee's email. They get an email asking whether they asked for the training; if they say yes, they sign the waiver and pay online, at the member price if they are a member. You then record the training from your email. A request they have not paid within 4 hours expires.</p>
+    <div class="field"><label for="tb-trainer-mail">Your email</label><input id="tb-trainer-mail" type="email" required autocomplete="email" maxlength="200"></div>
+    {{ with $p.turnstileSiteKey }}<div class="cf-turnstile" data-sitekey="{{ . }}" data-action="training-trainer"></div>{{ end }}
+    <button class="btn btn-primary" type="submit">Email me my link</button>
+    <p class="muted small"><a href="/training/book/" id="tb-trainer-back">Back to booking a training</a></p>
+  </form>
+
+  <div class="tb-panel" id="tb-trainer-sent" hidden>
+    <h2>Check your email</h2>
+    <p>If <strong id="tb-trainer-to"></strong> belongs to a trainer, a link is on its way. It works for 2 hours. Open it, pick the tool and type the trainee's email. Nothing arriving? Only trainers with a training time on a tool, who are current members and trained on it themselves, get a link; ask the secretary.</p>
+  </div>
 
   <div class="tb-panel" id="tb-down" hidden>
     <h2>Booking is paused</h2>
@@ -67,7 +85,7 @@
   <div class="tb-panel" id="tb-pay" hidden>
     <h2>Pay <span id="tb-amount"></span> to confirm</h2>
     <p class="tb-summary" id="tb-summary"></p>
-    <p><strong>Use this email at checkout: <span id="tb-pay-email"></span></strong> That is how we match your payment to your booking. Your seat is held for 30 minutes.</p>
+    <p><strong>Use this email at checkout: <span id="tb-pay-email"></span></strong> That is how we match your payment to your booking. <span id="tb-hold">Your seat is held for 30 minutes.</span></p>
     <div class="callout warn"><p><strong>Do not change the amount on the next page.</strong> Pay exactly <span id="tb-amount-again"></span>, once (not monthly). A different amount cannot be matched to your booking, so your payment might not go through and your seat would not be confirmed.</p></div>
     <div class="gb-embed" id="tb-widget"></div>
     <p id="tb-link" hidden><a class="btn btn-primary btn-lg" rel="noopener" target="_blank">Pay on Givebutter</a></p>
@@ -119,7 +137,7 @@
       .then(function (r) { return r.json().catch(function () { return { ok: false, error: 'server' }; }).then(function (j) { j.http = r.status; return j; }); }, function () { return { ok: false, error: 'unavailable', http: 0 }; });
   }
   function resetTurnstile() { if (window.turnstile) { try { window.turnstile.reset(); } catch (e) {} } }
-  function tsToken() { var t = document.querySelector('#tb-email [name="cf-turnstile-response"]'); return t ? t.value : ''; }
+  function tsToken(form) { var t = document.querySelector('#' + (form || 'tb-email') + ' [name="cf-turnstile-response"]'); return t ? t.value : ''; }
   function money(n) { return '$' + Number(n).toFixed(Number(n) % 1 ? 2 : 0); }
   function needsText(needs) { return needs.length === 2 ? 'the liability waiver and the membership agreement' : (needs[0] === 'agreement' ? 'the membership agreement' : 'the liability waiver'); }
 
@@ -157,6 +175,9 @@
     ev.preventDefault();
     clearError();
     var news = $('tb-news').checked;
+    if (state.spot) {
+      return call('spotnew', { ref: state.spot.ref, key: state.spot.key, firstname: $('tb-first').value, lastname: $('tb-last').value, discord: $('tb-discord').value, notify_events: news, notify_news: news }).then(spotNext);
+    }
     call('new', { session: state.session, firstname: $('tb-first').value, lastname: $('tb-last').value, discord: $('tb-discord').value, notify_events: news, notify_news: news }).then(function (j) {
       if (j.error === 'unavailable') return show('tb-down');
       if (!j.ok) return error(j.error);
@@ -171,6 +192,56 @@
       $('tb-notified').hidden = false;
     });
   });
+
+  // A trainer asks for their on-the-spot link.
+  $('tb-trainer-open').addEventListener('click', function () { clearError(); $('tb-trainer-mail').value = $('tb-mail').value; show('tb-trainer'); });
+  $('tb-trainer-back').addEventListener('click', function (ev) { ev.preventDefault(); clearError(); show('tb-email'); });
+  $('tb-trainer').addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    clearError();
+    var btn = this.querySelector('button[type=submit]');
+    var email = $('tb-trainer-mail').value.trim().toLowerCase();
+    btn.disabled = true;
+    call('trainer', { email: email, 'cf-turnstile-response': tsToken('tb-trainer') }).then(function (j) {
+      btn.disabled = false;
+      resetTurnstile();
+      if (j.error === 'unavailable') return show('tb-down');
+      if (!j.ok) return error(j.error);
+      $('tb-trainer-to').textContent = email;
+      show('tb-trainer-sent');
+    });
+  });
+
+  // On the spot: the trainee said yes in the email and came back with #spot=<ref>.<key>.
+  function spotNext(j) {
+    if (j.error === 'unavailable') return show('tb-down');
+    if (!j.ok) {
+      var e = $('tb-error');
+      e.textContent = j.error === 'answer' ? 'Answer the email from your trainer first ("Yes, that\'s me").' : (j.error === 'expired' ? 'This training request has expired or was cancelled, and nothing was charged. Ask your trainer to send a new one.' : 'This link is not valid. Ask your trainer to send a new request.');
+      e.hidden = false;
+      return show('');
+    }
+    if (j.status === 'paid') return spotDone(j);
+    state.email = j.email; state.kind = j.kind; state.needs = j.needs || [];
+    $('tb-mail').value = j.email || '';
+    if (j.kind === 'new') return show('tb-new');
+    if (state.needs.length && j.sign) {
+      show('tb-sign');
+      return window.cgwSignDocs($('tb-sign-docs'), { token: j.sign, needs: state.needs, onDone: function () { window.scrollTo(0, 0); call('spot', state.spot).then(spotNext); } });
+    }
+    pay(Object.assign({}, j, { spot: true }));
+  }
+  function spotDone(j) {
+    var p = document.createElement('p');
+    var b = document.createElement('strong');
+    b.textContent = 'Paid, thank you. ';
+    p.appendChild(b);
+    p.appendChild(document.createTextNode('Your trainer records your ' + (j.tool || '') + ' training when it is done, and you get an email saying you are trained.'));
+    $('tb-done').textContent = '';
+    $('tb-done').appendChild(p);
+    history.replaceState(null, '', location.pathname);
+    show('tb-done');
+  }
 
   // Step 3: tool, trainer and time.
   function pick() {
@@ -245,6 +316,10 @@
     var t = (catalog.tools || []).filter(function (x) { return x.name === b.tool; })[0];
     if (t && t.wiki) $('tb-wiki').href = t.wiki;
     $('tb-done-text').textContent = b.tool + ' with ' + b.trainer + ', ' + b.when + '.';
+    if (b.spot) {
+      $('tb-summary').textContent = b.tool + ' training with ' + b.trainer + ' now (' + b.zone + '). Request ' + b.ref + '.';
+      $('tb-hold').textContent = 'This request expires at ' + b.expires_label + ', 4 hours after your trainer sent it.';
+    }
     show('tb-pay');
     // Givebutter fills in the amount, name and email from the page address.
     var q = 'amount=' + encodeURIComponent(b.amount) + '&gb_first_name=' + encodeURIComponent(b.firstname || '') + '&gb_last_name=' + encodeURIComponent(b.lastname || '') + '&gb_email=' + encodeURIComponent(b.email);
@@ -266,15 +341,20 @@
     var timer = setInterval(function () {
       if (++tries > 360) { clearInterval(timer); return; }
       call('status', { ref: b.ref, key: b.key }).then(function (j) {
-        if (j.ok && j.paid) { clearInterval(timer); history.replaceState(null, '', location.pathname); show('tb-done'); }
+        if (j.ok && j.paid) { clearInterval(timer); if (b.spot) return spotDone(b); history.replaceState(null, '', location.pathname); show('tb-done'); }
+        if (j.ok && j.status === 'expired' && b.spot) { $('tb-wait').textContent = 'This request expired before the payment arrived. If you paid, we will sort it out with your trainer.'; return; }
         if (j.ok && j.status === 'expired' && tries > 2) { $('tb-wait').textContent = 'The 30 minutes ran out. If you paid, your booking is still matched as long as the seat is free; otherwise we email you to pick a new date.'; }
       });
     }, 5000);
   }
 
-  // The signing link from the email: #s=<token>.
+  // The signing link from the email: #s=<token>. On the spot: #spot=<ref>.<key>.
+  var sp = /[#&]spot=([^.&]+)\.([a-f0-9]{48})/.exec(location.hash);
   var m = /[#&]s=([a-f0-9]{48})/.exec(location.hash);
-  if (m) {
+  if (sp) {
+    state.spot = { ref: decodeURIComponent(sp[1]), key: sp[2] };
+    call('spot', state.spot).then(spotNext);
+  } else if (m) {
     var token = m[1];
     history.replaceState(null, '', location.pathname + location.search);
     fetch('/api/join/status', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ token: token }) })

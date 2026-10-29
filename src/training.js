@@ -20,6 +20,11 @@
 //   POST /api/training/signlink       {session}  emails the signing link
 //   POST /api/training/book           {session, tool, slot, start} -> ref, key, amount
 //   POST /api/training/status         {ref, key}  has the payment arrived
+//   POST /api/training/trainer        {email, cf-turnstile-response}  "I'm a trainer: train someone
+//                                     now": Dolibarr emails a trainer their link (same answer for anyone)
+//   POST /api/training/spot           {ref, key}  an on-the-spot request the trainee said yes to:
+//                                     what is left to sign, and what to pay
+//   POST /api/training/spotnew        {ref, key, firstname, lastname, …}  its trainee is new to us
 //   POST /api/training/notify         {email, cf-turnstile-response}  "tell me when booking is back"
 //   POST /api/training/lookup         {email, cf-turnstile-response}  masked email and name, tools
 //   GET  /api/training/class?c=CODE   what a group class code is for
@@ -160,6 +165,22 @@ export async function handleTraining(request, env, ctx, pathname) {
     return relay(await dolibarr(env, 'book', { email, ip, tool: str(data.tool, 64), slot: Number(data.slot) || 0, start: str(data.start, 40) }));
   }
   if (route === 'status') return relay(await dolibarr(env, 'bookingstatus', { ref: str(data.ref, 20), key: str(data.key, 64) }));
+  if (route === 'trainer') {
+    const email = str(data.email, 200).toLowerCase();
+    if (!EMAIL_RE.test(email)) return fail('invalid', 400);
+    const ts = await verifyTurnstile(request, env, data['cf-turnstile-response'], 'training-trainer');
+    if (!ts.ok) return fail('captcha', 400);
+    if (await isRateLimited(env, ip, 'rlr', 10)) return fail('slow', 429);
+    return relay(await dolibarr(env, 'spotstart', { email }));
+  }
+  if (route === 'spot') return relay(await dolibarr(env, 'spotinfo', { ref: str(data.ref, 20), key: str(data.key, 64) }));
+  if (route === 'spotnew') {
+    return relay(await dolibarr(env, 'spotnew', {
+      ref: str(data.ref, 20), key: str(data.key, 64), ip,
+      firstname: str(data.firstname, 50), lastname: str(data.lastname, 50), discord: str(data.discord, 100),
+      notify_events: Boolean(data.notify_events), notify_news: Boolean(data.notify_news),
+    }));
+  }
   if (route === 'notify') {
     const email = str(data.email, 200).toLowerCase();
     if (!EMAIL_RE.test(email)) return fail('invalid', 400);
