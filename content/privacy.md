@@ -37,7 +37,11 @@ We don't share or sell personal information to anyone.
 
 ## Members
 
-Information about members (contact details, waiver, training records, dues status) is kept in our member records system and on the member wiki, and is available only to the officers and volunteers who need it to run the shop. Members can ask to see or correct their information at any time.
+Information about members (contact details, waiver, training records, dues status) is kept in our member records system and on the member wiki, and is available only to the officers and volunteers who need it to run the shop. It is kept while you are a member and for 7 years after your membership ends, then deleted. Members can ask to see or correct their information at any time.
+
+## Our own bank records
+
+Our bookkeeping system reads Columbia Gadget Works' own bank and card accounts through [Plaid](https://plaid.com/legal/#end-user-privacy-policy), so our books stay accurate. It does not connect to members' or donors' bank accounts, and we never see bank logins. Transactions are kept with our financial records for 7 years, then deleted, and a bank connection is removed as soon as it is no longer needed. How we protect and keep records is set out in our information security and records policy, available on request.
 
 ## Donor privacy
 
