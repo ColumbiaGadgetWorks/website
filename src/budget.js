@@ -1,5 +1,5 @@
 // Zone budgets and purchase requests, mounted by src/index.js:
-//   GET  /api/budget    totals per zone: added, spent, committed, available
+//   GET  /api/budget    totals per zone: added, from trainings, spent, committed, available
 //   POST /api/purchase  a member's request to spend from a zone's budget
 //
 // The page is /budget/ (layouts/_shortcodes/budget.html). Nothing is kept here.
@@ -20,6 +20,7 @@ import { dolibarr, joinConfigured } from './join.js';
 const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 const KINDS = ['reimburse', 'purchase'];
 const MAX_FILES = 5;
+const MAX_ITEMS = 10;
 const MAX_FILE_B64 = Math.ceil(5 * 1024 * 1024 * 1.4); // 5 MB of file, as base64
 const MAX_BODY = MAX_FILES * MAX_FILE_B64 + 20000;
 const SUBMITS_PER_HOUR = 10;
@@ -44,6 +45,7 @@ export async function handleBudget(request, env, ctx) {
   const zones = r.data.zones.map((z) => ({
     zone: str(z.zone, 100),
     allocated: Number(z.allocated) || 0,
+    training: Number(z.training) || 0,
     spent: Number(z.spent) || 0,
     committed: Number(z.committed) || 0,
     available: Number(z.available) || 0,
@@ -98,6 +100,12 @@ export async function handlePurchase(request, env) {
   for (const f of files) {
     if (typeof f?.data !== 'string' || f.data.length < 100 || f.data.length > MAX_FILE_B64) return json({ ok: false, error: 'invalid', field: 'files' }, 400);
   }
+  // A request for purchase lists its items, each a link and an estimated price.
+  let items;
+  if (kind === 'purchase' && Array.isArray(data.items)) {
+    if (!data.items.length || data.items.length > MAX_ITEMS) return json({ ok: false, error: 'invalid', field: 'link' }, 400);
+    items = data.items.map((it) => ({ link: str(it?.link, 500), price: str(it?.price, 20) }));
+  }
 
   const ts = await verifyTurnstile(request, env, data['cf-turnstile-response'], 'purchase');
   if (!ts.ok) return json({ ok: false, error: 'captcha' }, 400);
@@ -113,6 +121,7 @@ export async function handlePurchase(request, env) {
     vendor: str(data.vendor, 200),
     purchase_date: str(data.purchase_date, 10),
     link: str(data.link, 500),
+    ...(items ? { items } : {}),
     description: str(data.description, 600),
     pay_method: str(data.pay_method, 20),
     pay_handle: str(data.pay_handle, 200),

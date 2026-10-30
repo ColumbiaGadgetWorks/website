@@ -5,6 +5,6 @@ description: What each Columbia Gadget Works zone has available to spend, and ho
 url: /budget/
 ---
 
-Every zone has a budget for supplies and upkeep. The totals below are public: each zone's money put in, spent, held (requests approved or waiting that are not paid yet), and what is left to ask for. They show no names and no transactions.
+Every zone has a budget for supplies and upkeep. The totals below are public: each zone's money put in (and how much of it came from training fees), spent, held (requests approved or waiting that are not paid yet), and what is left to ask for. They show no names and no transactions.
 
 {{< budget >}}

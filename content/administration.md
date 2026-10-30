@@ -9,13 +9,13 @@ Most of what keeps the shop running happens on these pages. None of them needs a
 
 ## Zone budgets and purchase requests
 
-**[Zone budgets](/budget/)** shows what each zone has been given, has spent, has waiting, and has left. Anyone can look; it shows no names.
+**[Zone budgets](/budget/)** shows what each zone has been given (and how much of that came from training fees), has spent, has waiting, and has left. Anyone can look; it shows no names.
 
 Zone bosses and the board use the same page to spend it. Press **Submit request for purchase**, then:
 
 1. Type your email and the last two digits of your member code.
 2. Pick the zone the money is for. That zone's budget pays.
-3. Choose **Reimburse me** if you already bought it (attach the receipt, within 60 days) or **Request for purchase** if you want the treasurer to buy it (give the web link and the total price).
+3. Choose **Reimburse me** if you already bought it (attach the receipt, within 60 days) or **Request for purchase** if you want the treasurer to buy it: give the web link and price of each item, and press **+ Add another item** for more. Prices are an estimate: shipping, tax and other fees may be added, and the treasurer records the final amount from the order receipt. That final amount is what comes out of the zone's budget.
 4. Say what it is and why the zone needs it, and send it. You get a reference like PR-0012 and an email.
 
 Who approves, by email:
