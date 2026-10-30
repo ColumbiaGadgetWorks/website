@@ -15,8 +15,8 @@
 
 <p class="bg-open-row" id="ask"><button type="button" class="btn btn-primary btn-lg" id="bg-open" aria-expanded="false" aria-controls="bg-panel">Submit request for purchase</button></p>
 <div id="bg-panel" hidden>
-<p>Zone bosses can ask to spend from their own zone's budget. The president and the treasurer can ask for any zone or the General fund. You prove who you are with the email address you gave Columbia Gadget Works and the <strong>last two digits of your member code</strong> (for example 05).</p>
-<p><strong>Reimburse me</strong> is for something you already bought: attach the receipt, and file it within {{ $p.receiptDays | default 60 }} days. <strong>Request for purchase</strong> is for something you want the treasurer to buy: give the web link and the total price. The zone boss approves up to $100 if the zone has the money; anything bigger, any General fund request, and a boss's own request need the treasurer and one other director. Nobody approves their own.</p>
+<p>Zone bosses can ask to spend from any zone's budget; the board can ask for any zone or the General fund. You prove who you are with the email address you gave Columbia Gadget Works and the <strong>last two digits of your member code</strong> (for example 05).</p>
+<p><strong>Reimburse me</strong> is for something you already bought: attach the receipt, and file it within {{ $p.receiptDays | default 60 }} days. <strong>Request for purchase</strong> is for something you want the treasurer to buy: give the web link and the total price. Pick the zone the money is for: its budget pays, and a reimbursement goes to you. The treasurer approves every request; over $100, or over what the zone has left, the president too; for a zone you are not the boss of, that zone's boss too. Nobody approves their own. <a href="/administration/#zone-budgets-and-purchase-requests">More about requests</a>.</p>
 
 <form class="contact-form" id="bg-form" novalidate>
   <div class="field"><label for="bg-email">Email address you gave CGW</label><input id="bg-email" name="email" type="email" required autocomplete="email" maxlength="200"></div>
@@ -185,16 +185,16 @@
           if (j.error === 'notallowed') {
             return fail(j.allowed && j.allowed.length
               ? 'You can ask for ' + j.allowed.join(' and ') + ' only. Pick that zone.'
-              : 'Only zone bosses, the president and the treasurer can ask to spend. Talk to your zone boss.');
+              : 'Only zone bosses and the board can ask to spend. Talk to your zone boss.');
           }
           if (j.error === 'late') return fail('A receipt has to be filed within ' + (j.days || RECEIPT_DAYS) + ' days of buying.');
           if (j.error === 'invalid') return fail(fields[j.field] || 'Check the form and try again.');
           return fail(why[j.error] || why.unavailable);
         }
         f.hidden = true;
-        $('bg-done').textContent = 'Request ' + j.ref + ' sent. ' + (j.needs === 'board'
-          ? 'The treasurer and one other director will look at it.'
-          : 'Your zone boss will look at it.') + ' You will get an email when it is decided. Keep the number.';
+        $('bg-done').textContent = 'Request ' + j.ref + ' sent. ' + (j.who
+          ? j.who.charAt(0).toUpperCase() + j.who.slice(1) + ' will look at it.'
+          : 'The treasurer will look at it.') + ' You will get an email when it is decided. Keep the number.';
         $('bg-done').hidden = false;
         $('bg-done').scrollIntoView({ block: 'start' });
       });

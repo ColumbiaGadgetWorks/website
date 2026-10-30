@@ -87,10 +87,10 @@ const read = async (res) => ({ status: res.status, ...(await res.json()) });
   const calls = fakeDolibarr({
     purchase: { json: { ok: true, id: 7, token: 'tok', ref: 'PR-0007' } },
     purchasefile: { json: { ok: true, files: 1 } },
-    purchasefinish: { json: { ok: true, ref: 'PR-0007', needs: 'board' } },
+    purchasefinish: { json: { ok: true, ref: 'PR-0007', needs: 'board', who: 'the treasurer and the president' } },
   });
   const r = await read(await handlePurchase(post(good({ files: [{ data: FILE }, { data: FILE }] })), env()));
-  check('flow: ok with the ref and who decides', r.status === 200 && r.ok && r.ref === 'PR-0007' && r.needs === 'board');
+  check('flow: ok with the ref and who decides', r.status === 200 && r.ok && r.ref === 'PR-0007' && r.needs === 'board' && r.who === 'the treasurer and the president');
   check('flow: purchase, two receipts, finish, in that order', calls.map((c) => c.action).join() === 'purchase,purchasefile,purchasefile,purchasefinish');
   check('flow: the email is lower-cased and the IP is passed', calls[0].body.email === 'pres@example.test' && calls[0].body.ip === '203.0.113.5');
   check('flow: the code and the zone go to Dolibarr as typed', calls[0].body.pin === '05' && calls[0].body.zone === 'Woodworking');

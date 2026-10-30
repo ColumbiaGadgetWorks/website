@@ -86,7 +86,7 @@ export async function handlePurchase(request, env) {
   if (!joinConfigured(env)) return json({ ok: false, error: 'config' }, 503);
   const data = await readBody(request);
   if (!data) return json({ ok: false, error: 'invalid', field: 'files' }, 400);
-  if (str(data.website, 200)) return json({ ok: true, ref: 'PR-0000', needs: 'lead' }); // bot: pretend success
+  if (str(data.website, 200)) return json({ ok: true, ref: 'PR-0000', needs: 'lead', who: 'the treasurer' }); // bot: pretend success
 
   const kind = str(data.kind, 12);
   const email = str(data.email, 200).toLowerCase();
@@ -138,5 +138,5 @@ export async function handlePurchase(request, env) {
   }
   const done = await dolibarr(env, 'purchasefinish', { id, token });
   if (!done.data?.ok) return json({ ok: false, error: done.data?.error || 'unavailable' }, done.status >= 400 ? done.status : 502);
-  return json({ ok: true, ref: str(done.data.ref, 20), needs: done.data.needs === 'board' ? 'board' : 'lead' });
+  return json({ ok: true, ref: str(done.data.ref, 20), needs: done.data.needs === 'board' ? 'board' : 'lead', who: str(done.data.who, 200) });
 }

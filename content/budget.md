@@ -1,7 +1,7 @@
 ---
 title: Zone budgets
 subtitle: What each zone has to spend, and how members ask to spend it.
-description: What each Columbia Gadget Works zone has available to spend, and how zone bosses ask to spend it.
+description: What each Columbia Gadget Works zone has available to spend, and how zone bosses and the board ask to spend it.
 url: /budget/
 ---
 
