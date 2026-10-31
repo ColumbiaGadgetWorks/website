@@ -97,6 +97,10 @@ Setup, once:
 After changing the commands, or if they ever go missing, run
 `scripts/register-fund-commands.mjs` (usage at the top of the file).
 
+[`docs/fund-bot.md`](docs/fund-bot.md) has who may run each command, why the
+commands and the kiosk page are built the way they are, the known caveats, and
+how this replaced the old fundbot bot.
+
 ### Givebutter gifts counted automatically
 
 `src/fund-givebutter.js` reads the Givebutter API every five minutes (second
