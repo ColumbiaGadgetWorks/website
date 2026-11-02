@@ -55,9 +55,9 @@ Some tools require training before you use them alone: the laser cutter, CNC rou
 - Don't use a tool you haven't been trained on. Ask; someone will show you.
 - Damage happens. Report it right away so it gets fixed, and nobody will be upset.
 - Guests are welcome when you're present and responsible for them.
-- Treat people well. See the [code of conduct](/code-of-conduct/).
+- Treat people well. See the [code of conduct](/policies/conduct-and-safety/).
 
-Full policies live on the [member wiki](https://wiki.comogadget.casa/).
+Full rules: [bylaws and policies](/policies/). Tool guides live on the [member wiki](https://wiki.comogadget.casa/).
 
 ## Questions
 
