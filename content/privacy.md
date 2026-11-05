@@ -22,6 +22,8 @@ Columbia Gadget Works ("CGW", "we") operates columbiagadgetworks.org. This page 
 
 **Membership signup.** When you [join online](/membership/join/), we collect your name, email address, and (if you give it) your Discord username, along with whether you want to hear about events and news. You sign the liability waiver and the membership agreement by drawing your signature on screen; we keep the signed copy together with the date and the IP address it was signed from. You also upload a photo of a government-issued ID, which only the membership team can view. All of this is stored in our own membership system, not in Cloudflare and not with a marketing service, and is used only to run your membership. If you start a signup and do not finish it, it is deleted after about a month. To have your information removed, use the [contact form](/contact/).
 
+**Free class sign-ups.** When you [sign up for a free class](/classes/), we collect your name and email address and, if you tick the box, add you to email updates. We keep them in our own membership system, as a contact record (or on your member record if you are a member), to email you about that class: a confirmation, a reminder the day before, and any change or cancellation. The instructor gets the list of names and emails for their class. To have your information removed, use the [contact form](/contact/).
+
 **Email and phone.** If you email or call us, we keep the correspondence as long as needed to respond and for our records.
 
 ## Third-party services embedded on this site

@@ -26,6 +26,11 @@ Who approves, by email:
 
 Nobody approves their own request. You get an email when it is approved, or turned down with the reason, and again when the treasurer has paid you back or ordered it.
 
+## Free classes
+
+- **[Free classes](/classes/)**: anyone can save a seat at a free class with their name and email, and tick a box to hear about CGW events. They get a confirmation, a reminder the day before, and a link to give the seat back.
+- **Running a class?** The classes lead (or an officer) makes it in Dolibarr, under **Members, Free classes**: pick a date of the monthly City of Columbia series (first Tuesday, 6 to 8 PM) or set up an extra class at any time, then give it a name, a description and a class size. It goes onto the calendar, the website and Discord by itself, and sign-ups close when it is full. The instructor gets the list of who is coming the day before. Cancelling it takes it off the calendar and emails everyone signed up.
+
 ## Trainings
 
 - **[What am I trained on?](/training/)**: type your email to see the tools you are signed off on.

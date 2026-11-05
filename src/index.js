@@ -9,6 +9,7 @@ import { givebutterConfigured, givebutterLive } from './fund-givebutter.js';
 import { handleJoin, handleGivebutterWebhook, joinConfigured } from './join.js';
 import { handleTraining, handleTrainingLink, runTrainingSync } from './training.js';
 import { handleVoting, handleVotingLink } from './voting.js';
+import { handleClasses, handleClassLink } from './classes.js';
 import { handleBudget, handlePurchase } from './budget.js';
 import { syncDiscordEvents, discordEventsConfigured } from './discord-events.js';
 
@@ -56,6 +57,12 @@ export default {
     if (pathname === '/voting/link/' || pathname === '/voting/link') {
       if (new URL(request.url).search === '' && request.method === 'GET') return env.ASSETS.fetch(request);
       return handleVotingLink(request, env);
+    }
+    if (pathname.startsWith('/api/classes')) return handleClasses(request, env, ctx, pathname);
+    // The "I can't come" button in free class emails, the same way.
+    if (pathname === '/classes/link/' || pathname === '/classes/link') {
+      if (new URL(request.url).search === '' && request.method === 'GET') return env.ASSETS.fetch(request);
+      return handleClassLink(request, env);
     }
     if (pathname === '/api/budget') {
       if (request.method !== 'GET') return new Response('GET only', { status: 405 });
