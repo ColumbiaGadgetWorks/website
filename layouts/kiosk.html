@@ -1021,7 +1021,11 @@ const calBody = document.getElementById("cal-body");
 const calGrid = document.getElementById("cal-grid");
 const calTitle = document.getElementById("cal-title");
 const calNote = document.getElementById("cal-note");
-const calCache = {};
+// Months fetched from the feed, kept for CAL_TTL_MS. The kiosk runs for days
+// without a reload, so a copy kept forever would never show a new event or a
+// cancellation.
+const CAL_TTL_MS = 10 * 60 * 1000;
+const calCache = {};   // "YYYY-MM" -> { at, events }
 let calCursor = null;
 let calLive = null;    // null until the first answer, then true / false
 
@@ -1060,20 +1064,31 @@ function standingSchedule(y, m) {
 
 async function calendarEvents(y, m) {
   const k = monthKey(y, m);
-  if (calCache[k]) return calCache[k];
+  const hit = calCache[k];
+  if (hit && Date.now() - hit.at < CAL_TTL_MS) return hit.events;
   try {
     const res = await fetch(`/api/calendar?from=${k}&months=1`, { headers: { accept: "application/json" } });
     const data = await res.json();
     if (!data.ok) throw new Error(data.error);
     calLive = true;
-    return (calCache[k] = data.events.map(e => ({
+    const events = data.events.map(e => ({
       day: e.day, title: e.title, time: e.allDay ? "" : timeLabel(e.start),
-    })));
+    }));
+    calCache[k] = { at: Date.now(), events };
+    return events;
   } catch (e) {
-    calLive = false;
-    return standingSchedule(y, m);   // not cached: retry the feed next time
+    // A stale copy beats the standing schedule; either way, retry next time.
+    calLive = Boolean(hit);
+    return hit ? hit.events : standingSchedule(y, m);
   }
 }
+
+// A calendar left on screen redraws itself once its month's copy is stale.
+setInterval(() => {
+  if (current !== "info" || !calCursor) return;
+  const hit = calCache[monthKey(calCursor.y, calCursor.m)];
+  if (!hit || Date.now() - hit.at >= CAL_TTL_MS) calendarRender();
+}, 60 * 1000);
 
 async function calendarRender() {
   const { y, m } = calCursor;
