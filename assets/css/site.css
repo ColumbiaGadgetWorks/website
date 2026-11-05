@@ -359,6 +359,8 @@ li.cal-item{border-top:1px solid var(--line);padding:14px 0 14px 16px;border-lef
 @media (max-width:820px){.footer-grid{grid-template-columns:1fr 1fr}}
 @media (max-width:520px){.footer-grid{grid-template-columns:1fr}}
 .footer-brand{display:flex;align-items:center;gap:10px;color:#fff;font-size:1.05rem;margin-bottom:10px}
+.footer-admin{display:inline-block;margin-top:6px;padding:.3em .8em;border:1px solid #F3A98A;border-radius:3px;font-size:.85rem;text-decoration:none}
+.footer-admin:hover{background:rgba(243,169,138,.15)}
 .footer-h{font-size:.8rem;text-transform:uppercase;letter-spacing:.12em;color:#F3A98A;margin-bottom:10px}
 .site-footer address{font-style:normal;line-height:1.7}
 .hack-night{background:rgba(255,255,255,.06);border-radius:8px;padding:10px 12px;display:inline-block}

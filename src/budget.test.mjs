@@ -48,10 +48,10 @@ const read = async (res) => ({ status: res.status, ...(await res.json()) });
 
 // 2. The budget: totals per zone, coerced and trimmed, nothing else passed on.
 {
-  fakeDolibarr({ budget: { json: { ok: true, zones: [{ zone: 'Woodworking', allocated: '250', spent: 40, committed: 0, available: 210, secret: 'x', email: 'a@b.test' }] } } });
+  fakeDolibarr({ budget: { json: { ok: true, zones: [{ zone: 'Woodworking', allocated: '250', training: '35.5', spent: 40, committed: 0, available: 210, secret: 'x', email: 'a@b.test' }] } } });
   const r = await read(await handleBudget(new Request('https://x.test/api/budget'), env(), {}));
   check('budget: ok with zones', r.status === 200 && r.ok && r.zones.length === 1);
-  check('budget: numbers are numbers', r.zones[0].allocated === 250 && r.zones[0].available === 210);
+  check('budget: numbers are numbers', r.zones[0].allocated === 250 && r.zones[0].available === 210 && r.zones[0].training === 35.5);
   check('budget: unknown fields are dropped', !('secret' in r.zones[0]) && !('email' in r.zones[0]));
   fakeDolibarr({ budget: { status: 502, json: { ok: false, error: 'config' } } });
   const bad = await read(await handleBudget(new Request('https://x.test/api/budget'), env(), {}));
@@ -87,10 +87,10 @@ const read = async (res) => ({ status: res.status, ...(await res.json()) });
   const calls = fakeDolibarr({
     purchase: { json: { ok: true, id: 7, token: 'tok', ref: 'PR-0007' } },
     purchasefile: { json: { ok: true, files: 1 } },
-    purchasefinish: { json: { ok: true, ref: 'PR-0007', needs: 'board' } },
+    purchasefinish: { json: { ok: true, ref: 'PR-0007', needs: 'board', who: 'the treasurer and the president' } },
   });
   const r = await read(await handlePurchase(post(good({ files: [{ data: FILE }, { data: FILE }] })), env()));
-  check('flow: ok with the ref and who decides', r.status === 200 && r.ok && r.ref === 'PR-0007' && r.needs === 'board');
+  check('flow: ok with the ref and who decides', r.status === 200 && r.ok && r.ref === 'PR-0007' && r.needs === 'board' && r.who === 'the treasurer and the president');
   check('flow: purchase, two receipts, finish, in that order', calls.map((c) => c.action).join() === 'purchase,purchasefile,purchasefile,purchasefinish');
   check('flow: the email is lower-cased and the IP is passed', calls[0].body.email === 'pres@example.test' && calls[0].body.ip === '203.0.113.5');
   check('flow: the code and the zone go to Dolibarr as typed', calls[0].body.pin === '05' && calls[0].body.zone === 'Woodworking');
@@ -105,6 +105,17 @@ const read = async (res) => ({ status: res.status, ...(await res.json()) });
   const r = await read(await handlePurchase(post(good({ kind: 'purchase', link: 'https://example.test/x', files: [] })), env()));
   check('purchase kind: ok with no files', r.ok && r.needs === 'lead');
   check('purchase kind: link is passed on', calls[0].body.link === 'https://example.test/x');
+}
+
+// 6b. Line items: each a link and a price, trimmed, ten at most.
+{
+  const calls = fakeDolibarr({ purchase: { json: { ok: true, id: 8, token: 't', ref: 'PR-0008' } }, purchasefinish: { json: { ok: true, ref: 'PR-0008', needs: 'lead' } } });
+  const items = [{ link: ' https://example.test/a ', price: '12.50', extra: 'x' }, { link: 'https://example.test/b', price: '7.5' }];
+  const r = await read(await handlePurchase(post(good({ kind: 'purchase', items, files: [] })), env()));
+  check('items: ok', r.ok);
+  check('items: passed on trimmed, nothing else', JSON.stringify(calls[0].body.items) === JSON.stringify([{ link: 'https://example.test/a', price: '12.50' }, { link: 'https://example.test/b', price: '7.5' }]));
+  const many = await read(await handlePurchase(post(good({ kind: 'purchase', items: Array.from({ length: 11 }, () => ({ link: 'https://example.test/a', price: '1' })), files: [] })), env()));
+  check('items: more than ten refused', many.status === 400 && many.field === 'link');
 }
 
 // 7. What Dolibarr refuses is passed on, and no receipt is sent for a refused request.

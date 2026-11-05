@@ -7,7 +7,7 @@
 <div class="callout warn" id="bg-load-error" role="alert" hidden></div>
 <div class="budget-scroll">
 <table class="budget-table" id="bg-table" hidden>
-  <thead><tr><th scope="col">Zone</th><th scope="col">Put in</th><th scope="col">Spent</th><th scope="col" title="Requests approved or waiting that are not paid yet">Held</th><th scope="col">Available</th></tr></thead>
+  <thead><tr><th scope="col">Zone</th><th scope="col">Put in</th><th scope="col" title="The part of Put in that came from training fees">From trainings</th><th scope="col">Spent</th><th scope="col" title="Requests approved or waiting that are not paid yet">Held</th><th scope="col">Available</th></tr></thead>
   <tbody id="bg-body"></tbody>
 </table>
 </div>
@@ -15,8 +15,8 @@
 
 <p class="bg-open-row" id="ask"><button type="button" class="btn btn-primary btn-lg" id="bg-open" aria-expanded="false" aria-controls="bg-panel">Submit request for purchase</button></p>
 <div id="bg-panel" hidden>
-<p>Zone bosses can ask to spend from their own zone's budget. The president and the treasurer can ask for any zone or the General fund. You prove who you are with the email address you gave Columbia Gadget Works and the <strong>last two digits of your member code</strong> (for example 05).</p>
-<p><strong>Reimburse me</strong> is for something you already bought: attach the receipt, and file it within {{ $p.receiptDays | default 60 }} days. <strong>Request for purchase</strong> is for something you want the treasurer to buy: give the web link and the total price. The zone boss approves up to $100 if the zone has the money; anything bigger, any General fund request, and a boss's own request need the treasurer and one other director. Nobody approves their own.</p>
+<p>Zone bosses can ask to spend from any zone's budget; the board can ask for any zone or the General fund. You prove who you are with the email address you gave Columbia Gadget Works and the <strong>last two digits of your member code</strong> (for example 05).</p>
+<p><strong>Reimburse me</strong> is for something you already bought: attach the receipt, and file it within {{ $p.receiptDays | default 60 }} days. <strong>Request for purchase</strong> is for something you want the treasurer to buy: give the web link and price of each item (press <strong>+ Add another item</strong> for more). Prices are an estimate; shipping, tax and other fees may be added when it is ordered. Pick the zone the money is for: its budget pays, and a reimbursement goes to you. The treasurer approves every request; over $100, or over what the zone has left, the president too; for a zone you are not the boss of, that zone's boss too. Nobody approves their own. <a href="/administration/#zone-budgets-and-purchase-requests">More about requests</a>.</p>
 
 <form class="contact-form" id="bg-form" novalidate>
   <div class="field"><label for="bg-email">Email address you gave CGW</label><input id="bg-email" name="email" type="email" required autocomplete="email" maxlength="200"></div>
@@ -27,8 +27,13 @@
     <label class="bg-check"><input type="radio" name="kind" value="reimburse" checked><span>Reimburse me (I already bought it)</span></label>
     <label class="bg-check"><input type="radio" name="kind" value="purchase"><span>Request for purchase (the treasurer buys it)</span></label>
   </fieldset>
-  <div class="field"><label for="bg-amount" id="bg-amount-label">Amount you paid, in dollars</label><input id="bg-amount" name="amount" required inputmode="decimal" autocomplete="off" maxlength="10" placeholder="40.00"></div>
-  <div class="field" data-kind="purchase" hidden><label for="bg-link">Web link to the item</label><input id="bg-link" name="link" type="url" maxlength="500" placeholder="https://"></div>
+  <div class="field" data-kind="reimburse"><label for="bg-amount">Amount you paid, in dollars</label><input id="bg-amount" name="amount" inputmode="decimal" autocomplete="off" maxlength="10" placeholder="40.00"></div>
+  <fieldset class="field bg-items" data-kind="purchase" hidden><legend>Items to buy</legend>
+    <div id="bg-items"></div>
+    <button type="button" class="btn btn-outline bg-add" id="bg-add">+ Add another item</button>
+    <p class="bg-total">Estimated total: <strong id="bg-total">$0</strong></p>
+    <p class="muted small">Prices are an estimate. Shipping, tax and other fees may be added to the total: the treasurer records the final amount from the order receipt, and that is what comes out of the zone's budget.</p>
+  </fieldset>
   <div class="field" data-kind="reimburse"><label for="bg-vendor">Where you bought it</label><input id="bg-vendor" name="vendor" maxlength="200"></div>
   <div class="field" data-kind="reimburse"><label for="bg-date">Date you bought it</label><input id="bg-date" name="purchase_date" type="date"></div>
   <div class="field"><label for="bg-description">What is it and why does the zone need it? (1 to 3 sentences)</label><textarea id="bg-description" name="description" required rows="3" maxlength="600"></textarea></div>
@@ -58,6 +63,12 @@
 .contact-form .bg-check{display:flex;align-items:flex-start;gap:10px;margin:.3em 0;font-weight:400}
 .contact-form .bg-check input{width:auto;flex:none;margin-top:.3em}
 .bg-trap{position:absolute;left:-9999px;height:0;overflow:hidden}
+.bg-items{border:0;padding:0}.bg-items legend{font-weight:600;margin-bottom:.3em}
+.bg-item{display:flex;gap:8px;align-items:flex-end;margin-bottom:.5em}
+.bg-item .bg-item-link{flex:1 1 auto;min-width:0}.bg-item .bg-item-price{flex:0 0 7.5em}
+.bg-item label{display:block;font-weight:400;font-size:.9rem}
+.bg-item .bg-remove{flex:none;background:none;border:1px solid var(--line);border-radius:3px;cursor:pointer;padding:.45em .7em;font:inherit;line-height:1}
+.bg-add{font-size:.9rem;padding:.4em .9em}.bg-total{margin:.6em 0 .2em}
 </style>
 <script>
 (function () {
@@ -82,10 +93,10 @@
       var body = $('bg-body');
       j.zones.forEach(function (z) {
         var tr = document.createElement('tr');
-        [z.zone, money(z.allocated), money(z.spent), money(z.committed), money(z.available)].forEach(function (v, i) {
+        [z.zone, money(z.allocated), money(z.training || 0), money(z.spent), money(z.committed), money(z.available)].forEach(function (v, i) {
           var td = document.createElement('td');
           td.textContent = v;
-          if (i === 4 && z.available < 0) td.className = 'low';
+          if (i === 5 && z.available < 0) td.className = 'low';
           tr.appendChild(td);
         });
         body.appendChild(tr);
@@ -102,9 +113,38 @@
   function sync() {
     var k = kind();
     Array.prototype.forEach.call(f.querySelectorAll('[data-kind]'), function (el) { el.hidden = el.getAttribute('data-kind') !== k; });
-    $('bg-amount-label').textContent = k === 'purchase' ? 'Total price, in dollars' : 'Amount you paid, in dollars';
     $('bg-handle-field').hidden = k !== 'reimburse' || f.pay_method.value === 'check';
   }
+  // Items to buy: a link and a price each, up to ten, added with the + button.
+  var MAX_ITEMS = 10, itemN = 0, list = $('bg-items');
+  function items() {
+    return Array.prototype.map.call(list.querySelectorAll('.bg-item'), function (row) {
+      return { link: row.querySelector('[data-f=link]').value.trim(), price: row.querySelector('[data-f=price]').value.trim() };
+    });
+  }
+  function total() {
+    var t = items().reduce(function (s, it) { var n = parseFloat(it.price.replace(/[$,\s]/g, '')); return s + (n > 0 ? n : 0); }, 0);
+    $('bg-total').textContent = money(Math.round(t * 100) / 100);
+    $('bg-add').hidden = list.children.length >= MAX_ITEMS;
+    Array.prototype.forEach.call(list.querySelectorAll('.bg-remove'), function (b) { b.hidden = list.children.length < 2; });
+    return t;
+  }
+  function addItem() {
+    if (list.children.length >= MAX_ITEMS) return;
+    itemN++;
+    var row = document.createElement('div');
+    row.className = 'bg-item';
+    row.innerHTML = '<div class="bg-item-link"><label for="bg-link-' + itemN + '">Web link</label><input id="bg-link-' + itemN + '" data-f="link" type="url" maxlength="500" placeholder="https://"></div>'
+      + '<div class="bg-item-price"><label for="bg-price-' + itemN + '">Price, $</label><input id="bg-price-' + itemN + '" data-f="price" inputmode="decimal" autocomplete="off" maxlength="10" placeholder="12.50"></div>'
+      + '<button type="button" class="bg-remove" aria-label="Remove this item">&times;</button>';
+    row.querySelector('.bg-remove').addEventListener('click', function () { row.remove(); total(); });
+    row.querySelector('[data-f=price]').addEventListener('input', total);
+    list.appendChild(row);
+    total();
+    return row;
+  }
+  $('bg-add').addEventListener('click', function () { var row = addItem(); if (row) row.querySelector('input').focus(); });
+  addItem();
   Array.prototype.forEach.call(f.querySelectorAll('input[name=kind]'), function (r) { r.addEventListener('change', sync); });
   f.pay_method.addEventListener('change', sync);
   sync();
@@ -124,7 +164,7 @@
   };
   var fields = {
     zone: 'Choose a zone.', amount: 'Enter an amount above $0 (up to $5,000).', description: 'Say what it is and why the zone needs it.',
-    link: 'A request for purchase needs a web link that starts with https://.', vendor: 'Say where you bought it.',
+    link: 'Every item needs a web link that starts with https://.', price: 'Give every item its price.', vendor: 'Say where you bought it.',
     purchase_date: 'Enter the date you bought it (not in the future).', pay_method: 'Say how to pay you back (and your Venmo handle).',
     ack_tax: 'Tick the sales tax box.', email: 'Enter the email address you gave CGW.', files: 'Attach the receipt (up to 5 files).', kind: 'Pick a kind of request.'
   };
@@ -162,18 +202,23 @@
     if (!f.zone.value) return fail(fields.zone);
     if (k === 'reimburse' && !list.length) return fail(fields.files);
     if (list.length > MAX_FILES) return fail(fields.files);
-    if (k === 'purchase' && !/^https?:\/\//i.test(f.link.value.trim())) return fail(fields.link);
+    if (k === 'purchase') {
+      var its = items();
+      if (its.some(function (it) { return !/^https?:\/\//i.test(it.link); })) return fail(fields.link);
+      if (its.some(function (it) { return !(parseFloat(it.price.replace(/[$,\s]/g, '')) > 0); })) return fail(fields.price);
+      if (total() > 5000) return fail(fields.amount);
+    } else if (!(parseFloat(f.amount.value.replace(/[$,\s]/g, '')) > 0)) return fail(fields.amount);
     var btn = f.querySelector('button[type=submit]');
     var ts = f.querySelector('[name="cf-turnstile-response"]');
     btn.disabled = true;
     Promise.all(list.map(function (file) { return shrink(file).then(function (b) { return b.size > MAX_BYTES ? Promise.reject('size') : toBase64(b); }); }))
       .then(function (data) {
         var body = {
-          email: f.email.value, pin: f.pin.value, zone: f.zone.value, kind: k, amount: f.amount.value, description: f.description.value,
+          email: f.email.value, pin: f.pin.value, zone: f.zone.value, kind: k, amount: k === 'purchase' ? String(total()) : f.amount.value, description: f.description.value,
           website: f.website.value, 'cf-turnstile-response': ts ? ts.value : '',
           files: k === 'reimburse' ? data.map(function (d) { return { data: d }; }) : []
         };
-        if (k === 'purchase') { body.link = f.link.value; }
+        if (k === 'purchase') { body.items = items().map(function (it) { return { link: it.link, price: it.price.replace(/[$,\s]/g, '') }; }); }
         else { body.vendor = f.vendor.value; body.purchase_date = f.purchase_date.value; body.pay_method = f.pay_method.value; body.pay_handle = f.pay_handle.value; body.ack_tax = f.ack_tax.checked; }
         return fetch('/api/purchase', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) }).then(function (r) { return r.json(); });
       })
@@ -185,16 +230,16 @@
           if (j.error === 'notallowed') {
             return fail(j.allowed && j.allowed.length
               ? 'You can ask for ' + j.allowed.join(' and ') + ' only. Pick that zone.'
-              : 'Only zone bosses, the president and the treasurer can ask to spend. Talk to your zone boss.');
+              : 'Only zone bosses and the board can ask to spend. Talk to your zone boss.');
           }
           if (j.error === 'late') return fail('A receipt has to be filed within ' + (j.days || RECEIPT_DAYS) + ' days of buying.');
           if (j.error === 'invalid') return fail(fields[j.field] || 'Check the form and try again.');
           return fail(why[j.error] || why.unavailable);
         }
         f.hidden = true;
-        $('bg-done').textContent = 'Request ' + j.ref + ' sent. ' + (j.needs === 'board'
-          ? 'The treasurer and one other director will look at it.'
-          : 'Your zone boss will look at it.') + ' You will get an email when it is decided. Keep the number.';
+        $('bg-done').textContent = 'Request ' + j.ref + ' sent. ' + (j.who
+          ? j.who.charAt(0).toUpperCase() + j.who.slice(1) + ' will look at it.'
+          : 'The treasurer will look at it.') + ' You will get an email when it is decided. Keep the number.';
         $('bg-done').hidden = false;
         $('bg-done').scrollIntoView({ block: 'start' });
       });
