@@ -6,7 +6,7 @@ recurring:
     when: Every Thursday, 6–8 pm, except the second Thursday of April
     description: Free and open to the public. Tours, demos, help with your project, and the basic tools. No sign-up needed. No Open Hack Night on the night of the annual member meeting.
   - title: City of Columbia grant classes
-    when: First Thursday of the month, Nov 2026 – Oct 2027
+    when: First Tuesday of the month, 6–8 pm, Nov 2026 – Oct 2027
     description: A year of free public classes funded by a City of Columbia grant. Topics announced a month ahead.
   - title: Board meeting
     when: Last Thursday of the quarter, 8 pm (after Open Hack Night)
