@@ -1044,20 +1044,19 @@ function timeLabel(iso) {
 
 // Placeholder until the website's calendar feed is connected: the standing
 // schedule the site itself lists. Weekly Open Hack Night, plus the free City
-// of Columbia class on the first Thursday from Nov 2026 to Oct 2027.
+// of Columbia class on the first Tuesday from Nov 2026 to Oct 2027.
 function standingSchedule(y, m) {
   const out = [];
   const days = new Date(Date.UTC(y, m, 0)).getUTCDate();
-  let thursdays = 0;
+  const key = y * 100 + m;
+  let tuesdays = 0;
   for (let d = 1; d <= days; d++) {
-    if (new Date(Date.UTC(y, m - 1, d)).getUTCDay() !== 4) continue;
-    thursdays++;
+    const dow = new Date(Date.UTC(y, m - 1, d)).getUTCDay();
     const day = `${monthKey(y, m)}-${String(d).padStart(2, "0")}`;
-    const key = y * 100 + m;
-    if (thursdays === 1 && key >= 202611 && key <= 202710) {
+    if (dow === 2 && ++tuesdays === 1 && key >= 202611 && key <= 202710) {
       out.push({ day, time: "6pm", title: "Free public class" });
     }
-    out.push({ day, time: "6pm", title: "Open Hack Night" });
+    if (dow === 4) out.push({ day, time: "6pm", title: "Open Hack Night" });
   }
   return out;
 }
