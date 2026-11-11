@@ -1,0 +1,45 @@
+{{- /* Ask Dolibarr (through src/voting.js) to email a lost ballot link again.
+       The answer is the same whether or not the email is on the roll. */ -}}
+{{- $p := site.Params -}}
+<form class="contact-form" id="voting-resend">
+  <div class="field"><label for="vr-email">Email</label><input id="vr-email" name="email" type="email" required autocomplete="email" maxlength="200"></div>
+  <div class="field"><label for="vr-pin">Last two digits of your member number</label><input id="vr-pin" name="pin" inputmode="numeric" pattern="[0-9]{1,2}" maxlength="2" required autocomplete="off"></div>
+  {{ with $p.turnstileSiteKey }}<div class="cf-turnstile" data-sitekey="{{ . }}" data-action="voting"></div><script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>{{ end }}
+  <button class="btn btn-primary" type="submit">Email my ballot again</button>
+</form>
+<div class="callout" id="voting-done" role="status" hidden><p>If that email and number match a voter who has not voted yet, the ballot is on its way. Check your spam folder too. Still nothing? Write to the Secretary.</p></div>
+<div class="callout warn" id="voting-error" role="alert" hidden></div>
+<script>
+(function () {
+  var f = document.getElementById('voting-resend');
+  var done = document.getElementById('voting-done');
+  var err = document.getElementById('voting-error');
+  var why = {
+    invalid: 'Check the email address and the two digits.',
+    captcha: 'The spam check did not pass. Try again.',
+    slow: 'Too many tries from here. Try again in an hour.'
+  };
+  f.addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    var btn = f.querySelector('button[type=submit]');
+    var ts = f.querySelector('[name="cf-turnstile-response"]');
+    btn.disabled = true;
+    err.hidden = true;
+    done.hidden = true;
+    fetch('/api/voting/resend', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ email: f.email.value, pin: f.pin.value, 'cf-turnstile-response': ts ? ts.value : '' })
+    }).then(function (r) { return r.json(); }).catch(function () { return { ok: false }; }).then(function (j) {
+      btn.disabled = false;
+      if (window.turnstile) { try { window.turnstile.reset(); } catch (e) {} }
+      if (!j.ok) {
+        err.textContent = why[j.error] || 'Our records system is not answering right now. Try again in a few minutes.';
+        err.hidden = false;
+        return;
+      }
+      done.hidden = false;
+    });
+  });
+})();
+</script>

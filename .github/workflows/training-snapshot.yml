@@ -1,0 +1,30 @@
+name: Training catalog snapshot
+# Nightly: copy the live training catalog (tools, prices, trainers' first names,
+# weekly times) from the website Worker into data/training.json, so tool pages
+# are built with current prices even before the Worker answers, and git history
+# keeps a dated record of every change. The Worker's copy comes from Dolibarr.
+on:
+  schedule:
+    - cron: '23 8 * * *'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch the catalog
+        run: |
+          curl -fsS https://columbiagadgetworks.org/api/training/catalog -o /tmp/catalog.json
+          # Keep only what the site builds from; refuse anything that is not a catalog.
+          jq -e '.tools | type == "array"' /tmp/catalog.json > /dev/null
+          jq '{version, generated, timezone, zones, tools, closed}' /tmp/catalog.json > data/training.json
+      - name: Commit if it changed
+        run: |
+          if git diff --quiet -- data/training.json; then echo "No change."; exit 0; fi
+          git config user.name "training-catalog-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add data/training.json
+          git commit -m "Training catalog: snapshot of version $(jq -r .version data/training.json)"
+          git push

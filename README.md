@@ -10,7 +10,7 @@ Everything a volunteer normally touches is a Markdown or YAML file:
 |---|---|
 | Pages (Visit, About, Donate, …) | `content/<page>.md` |
 | News posts | `content/news/<slug>.md` (copy an existing one; set `date`, `title`, optional `image`) |
-| Tool pages | `content/tools/<tool>.md` (front matter holds specs, training flag, wiki link) |
+| Tool pages | `content/tools/<tool>.md` (front matter holds specs, training flag and `trainingTool` id, wiki link) |
 | Events calendar | `data/events.yaml` (`recurring` always shows; `upcoming` items disappear after their date) |
 | Photos | `assets/img/` (drop in a JPG/PNG, long edge 1600 px or less; reference by filename) |
 | Video | `static/video/` (MP4 muxed with `-movflags +faststart`; embed with the `video` shortcode) |
@@ -98,6 +98,10 @@ Setup, once:
 After changing the commands, or if they ever go missing, run
 `scripts/register-fund-commands.mjs` (usage at the top of the file).
 
+[`docs/fund-bot.md`](docs/fund-bot.md) has who may run each command, why the
+commands and the kiosk page are built the way they are, the known caveats, and
+how this replaced the old fundbot bot.
+
 ### Givebutter gifts counted automatically
 
 `src/fund-givebutter.js` reads the Givebutter API every five minutes (second
@@ -154,6 +158,83 @@ cash and checks in Givebutter as offline donations with the fund set, and keep
 `/fund add` for gifts that never touch Givebutter.
 
 Query the data: `npx wrangler d1 execute fundraiser --remote --command "SELECT * FROM donation ORDER BY id DESC LIMIT 10"`.
+
+## Training: booking, class sign-in and lookup
+
+Dolibarr is where tools, trainers, bookings and training records live (the
+onboarding module, Members, Onboarding, **Training tools**). The website shows
+and books them; the Worker (`src/training.js`) passes calls through and keeps
+its own copy of the public part so the site works while Dolibarr is down.
+
+**The catalog** (tools, prices, trainers' first names, weekly times, closed
+days) is edited in Dolibarr. Dolibarr pushes it to `POST /api/training/sync`
+on every change; the Worker also pulls it every 15 minutes (cron) and keeps it
+in KV (`training:catalog`), served at `GET /api/training/catalog`. A nightly
+workflow (`.github/workflows/training-snapshot.yml`) copies it into
+`data/training.json` and commits it when it changed, so tool pages are built
+with current prices and git keeps a dated history. Do not edit that file by hand.
+
+**Tool pages.** A tool that needs training has `training: true` and
+`trainingTool: <id>` (the id on the Dolibarr tool form) in its front matter.
+The page then shows the price, the trainers' times and a Book training button.
+
+**`/training/book/`** (`layouts/_shortcodes/training-book.html`):
+
+1. Email and Turnstile (`/api/training/trainee`). Dolibarr says member,
+   non-member or new, and what is left to sign; nothing else about the person.
+   The Worker returns a two-hour session for the next steps.
+2. Someone new gives a name (`/api/training/new`) and becomes a non-member.
+3. Missing paperwork (the waiver; members also the agreement): Dolibarr emails
+   a signing link (`/api/training/signlink`) that comes back to this page with
+   `#s=<token>`. Signing asks for a date of birth; under 18, a parent or
+   guardian signs (`layouts/_partials/sign-docs.html`, `/api/join/sign`).
+4. Tool, trainer and time from `/api/training/slots`, an "I agree" tick for the
+   cancel and refund rules, then `/api/training/book` holds the seat for 30
+   minutes and returns the price.
+5. Givebutter opens with the price, name and email filled in. The training
+   campaign has no checkout questions: Dolibarr matches the payment to the
+   booking by email and amount. The page polls `/api/training/status` until it
+   is paid.
+
+`/training/pay/` forwards here.
+
+**`/training/link/`** is where the buttons in training emails go (trainer
+confirms, trainee cancels, and so on). The Worker passes the signed query and
+any form to Dolibarr's `public/booking.php` with `DOLIBARR_API_KEY` and shows
+the answer inside `content/training-link.md` (`run_worker_first` in
+`wrangler.jsonc` includes `/training/link*`). Dolibarr's address never shows.
+
+**`/training/class/`** (`training-class.html`) is the group class sign-in: the
+code from the class's QR code or typed, name and email, the waiver on the spot
+if needed (`/api/training/class`).
+
+**`/training/`** shows the masked email and name (`a******4@gmail.com`,
+`A*** B***`) and the tools. While Dolibarr is down it answers from the masked
+copy Dolibarr pushed (`tl:<hmac of the email>` in KV; the email itself is never
+stored).
+
+**When Dolibarr is down**: tool pages, the catalog and the lookup keep working;
+booking says it is paused and offers "Email me when it's back" (kept in KV for
+48 hours). Alert emails come from Dolibarr: it emails the alerts address when the
+website has not fetched the catalog for 30 minutes (Dolibarr up but unreachable,
+or the Worker misconfigured), and once the Worker reaches it again the Worker
+reports how long it was out (`action=websitereport`) and Dolibarr emails that
+too, along with the people who asked to hear.
+
+**Closed days**: every hour the Worker sends Dolibarr the days whose calendar
+has an event titled like "Open Hack Night cancelled"; nobody can book them, and
+anyone already booked is asked to pick a new date.
+
+Set in `hugo.toml`: `givebutterTraining` (the training campaign's link; empty
+turns booking off) and `givebutterTrainingWidgetId` (its widget id; empty sends
+people to the link). The routes use `DOLIBARR_URL`, `DOLIBARR_API_KEY`,
+Turnstile and per-IP hourly limits.
+
+**The waiver and agreement** wording lives in `content/legal/waiver.md` and
+`content/legal/agreement.md` (also shown at /legal/). Change it by pull request.
+Dolibarr reads these files nightly (or on "Check GitHub now" on its setup
+page), keeps every version, and records which version each person signed; the
+signing pages show Dolibarr's current copy.
 
 ## Video
 

@@ -1,0 +1,116 @@
+{{- /* Free classes and signing up. Reads /api/classes and signs up through
+       /api/classes/signup (src/classes.js), which ask Dolibarr. The classes are
+       made in Dolibarr (Members, Free classes), which also puts them on the
+       calendar. One form is moved under whichever class is picked. */ -}}
+{{- $p := site.Params -}}
+<div class="callout warn" id="cl-load-error" role="alert" hidden></div>
+<p class="muted" id="cl-loading">Loading the classes…</p>
+<div class="cl-list" id="cl-list"></div>
+<p class="muted" id="cl-none" hidden>No classes are open for sign-up right now. New ones are announced on <a href="{{ $p.discord }}" rel="noopener">Discord</a> and on the <a href="/calendar/">calendar</a>; put your email in the box at the bottom of the page to hear about them.</p>
+
+<form class="contact-form cl-form" id="cl-form" novalidate hidden>
+  <input type="hidden" name="cls">
+  <div class="field"><label for="cl-name">Your name</label><input id="cl-name" name="fullname" required autocomplete="name" maxlength="100"></div>
+  <div class="field"><label for="cl-email">Email</label><input id="cl-email" name="email" type="email" required autocomplete="email" maxlength="200"></div>
+  <div class="field"><label class="cl-check"><input type="checkbox" name="updates"><span>Email me about Columbia Gadget Works classes and events</span></label></div>
+  <div class="cl-trap" aria-hidden="true"><label>Leave this empty<input name="website" tabindex="-1" autocomplete="off"></label></div>
+  {{ with $p.turnstileSiteKey }}<div class="cf-turnstile" data-sitekey="{{ . }}" data-action="class-signup"></div><script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>{{ end }}
+  <button class="btn btn-primary" type="submit">Save my seat</button>
+  <div class="callout warn" id="cl-error" role="alert" hidden></div>
+</form>
+
+<style>
+.cl-list{display:grid;gap:18px;margin:1.2em 0}
+.cl-card{background:#fff;border:1px solid var(--line);border-radius:var(--r,8px);padding:18px 20px}
+.cl-card h2{margin:.1em 0 .2em;font-size:1.3rem}
+.cl-when{font-weight:600;margin:0 0 .4em}
+.cl-meta{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:.3em 0 .6em}
+.cl-badge{display:inline-block;font-size:.8rem;font-weight:700;padding:.15em .6em;border-radius:999px;background:var(--rust-tint,#f7e6df);color:var(--rust-dark,#8a3518)}
+.cl-badge.full{background:#eee;color:#555}
+.cl-desc{white-space:pre-line;margin:.4em 0 .8em}
+.cl-sponsor{font-size:.85rem;color:var(--muted)}
+.cl-form{margin-top:1em}
+.contact-form .cl-check{display:flex;align-items:flex-start;gap:10px;font-weight:400}
+.contact-form .cl-check input{width:auto;flex:none;margin-top:.3em}
+.cl-trap{position:absolute;left:-9999px;height:0;overflow:hidden}
+.cl-done{margin-top:1em}
+</style>
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var f = $('cl-form'), list = $('cl-list');
+  var why = {
+    full: 'Sorry, this class just filled up.',
+    closed: 'Sign-ups for this class are closed.',
+    captcha: 'The spam check did not pass. Try again.',
+    slow: 'Too many sign-ups from here in the last hour. Try again later.',
+    config: 'Sign-ups are not available right now. Please contact us.',
+    unavailable: 'That did not go through. Try again in a few minutes.'
+  };
+  var fields = { name: 'Type your name.', email: 'Type a valid email address.' };
+  function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text !== undefined) e.textContent = text; return e; }
+
+  function open(card, c) {
+    card.appendChild(f);
+    f.hidden = false;
+    f.cls.value = c.id;
+    $('cl-error').hidden = true;
+    f.querySelector('button[type=submit]').disabled = false;
+    f.fullname.focus();
+  }
+
+  fetch('/api/classes').then(function (r) { return r.json(); }).catch(function () { return { ok: false }; }).then(function (j) {
+    $('cl-loading').hidden = true;
+    if (!j.ok) {
+      $('cl-load-error').textContent = 'The classes cannot be loaded right now. Try again in a few minutes, or see the calendar.';
+      $('cl-load-error').hidden = false;
+      return;
+    }
+    if (!j.classes.length) { $('cl-none').hidden = false; return; }
+    j.classes.forEach(function (c) {
+      var card = el('article', 'cl-card');
+      card.id = 'class-' + c.id;
+      card.appendChild(el('h2', '', c.title));
+      card.appendChild(el('p', 'cl-when', c.when));
+      var meta = el('div', 'cl-meta');
+      if (c.kind === 'oca') meta.appendChild(el('span', 'cl-badge', 'City of Columbia series'));
+      meta.appendChild(el('span', 'cl-badge' + (c.full ? ' full' : ''), c.full ? 'Full' : c.left + ' of ' + c.seats + ' seats left'));
+      card.appendChild(meta);
+      if (c.description) card.appendChild(el('p', 'cl-desc', c.description));
+      if (c.sponsor) card.appendChild(el('p', 'cl-sponsor', c.sponsor));
+      if (!c.full) {
+        var btn = el('button', 'btn btn-outline', 'Sign up');
+        btn.type = 'button';
+        btn.addEventListener('click', function () { btn.style.display = 'none'; open(card, c); });
+        card.appendChild(btn);
+        if (location.hash === '#class-' + c.id) setTimeout(function () { btn.style.display = 'none'; open(card, c); card.scrollIntoView({ block: 'start' }); }, 0);
+      }
+      list.appendChild(card);
+    });
+  });
+
+  function fail(msg) { $('cl-error').textContent = msg; $('cl-error').hidden = false; }
+  f.addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    $('cl-error').hidden = true;
+    if (f.fullname.value.trim().length < 2) return fail(fields.name);
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(f.email.value.trim())) return fail(fields.email);
+    var btn = f.querySelector('button[type=submit]'), ts = f.querySelector('[name="cf-turnstile-response"]');
+    btn.disabled = true;
+    fetch('/api/classes/signup', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({
+      id: Number(f.cls.value), name: f.fullname.value, email: f.email.value, updates: f.updates.checked, website: f.website.value, 'cf-turnstile-response': ts ? ts.value : ''
+    }) }).then(function (r) { return r.json(); }).catch(function () { return { ok: false, error: 'unavailable' }; }).then(function (j) {
+      btn.disabled = false;
+      if (window.turnstile) { try { window.turnstile.reset(); } catch (e) {} }
+      if (!j.ok) return fail(j.error === 'invalid' ? (fields[j.field] || fields.name) : (why[j.error] || why.unavailable));
+      var card = f.parentNode;
+      f.hidden = true;
+      document.body.appendChild(f);
+      var done = el('div', 'callout cl-done', 'You have a seat. Check your email for the details (and your spam folder if it does not arrive). If you cannot come, the email has a link to give the seat back.');
+      done.setAttribute('role', 'status');
+      card.appendChild(done);
+      f.reset();
+    });
+  });
+})();
+</script>

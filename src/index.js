@@ -7,6 +7,10 @@ import { handleFund } from './fund.js';
 import { handleDiscord, discordPublicKey, runSync } from './fund-discord.js';
 import { givebutterConfigured, givebutterLive } from './fund-givebutter.js';
 import { handleJoin, handleGivebutterWebhook, joinConfigured } from './join.js';
+import { handleTraining, handleTrainingLink, runTrainingSync } from './training.js';
+import { handleVoting, handleVotingLink } from './voting.js';
+import { handleClasses, handleClassLink } from './classes.js';
+import { handleBudget, handlePurchase } from './budget.js';
 import { syncDiscordEvents, discordEventsConfigured } from './discord-events.js';
 
 export default {
@@ -41,6 +45,33 @@ export default {
       return handleExport(request, env);
     }
     if (pathname.startsWith('/api/join/')) return handleJoin(request, env, pathname);
+    if (pathname.startsWith('/api/training/')) return handleTraining(request, env, ctx, pathname);
+    // The buttons in training emails (run_worker_first in wrangler.jsonc). The
+    // page's own shell is fetched from the assets by the handler.
+    if (pathname === '/training/link/' || pathname === '/training/link') {
+      if (new URL(request.url).search === '' && request.method === 'GET') return env.ASSETS.fetch(request);
+      return handleTrainingLink(request, env);
+    }
+    if (pathname.startsWith('/api/voting/')) return handleVoting(request, env, pathname);
+    // The buttons in member-vote emails, the same way.
+    if (pathname === '/voting/link/' || pathname === '/voting/link') {
+      if (new URL(request.url).search === '' && request.method === 'GET') return env.ASSETS.fetch(request);
+      return handleVotingLink(request, env);
+    }
+    if (pathname.startsWith('/api/classes')) return handleClasses(request, env, ctx, pathname);
+    // The "I can't come" button in free class emails, the same way.
+    if (pathname === '/classes/link/' || pathname === '/classes/link') {
+      if (new URL(request.url).search === '' && request.method === 'GET') return env.ASSETS.fetch(request);
+      return handleClassLink(request, env);
+    }
+    if (pathname === '/api/budget') {
+      if (request.method !== 'GET') return new Response('GET only', { status: 405 });
+      return handleBudget(request, env, ctx);
+    }
+    if (pathname === '/api/purchase') {
+      if (request.method !== 'POST') return new Response('POST only', { status: 405 });
+      return handlePurchase(request, env);
+    }
     if (pathname === '/api/givebutter-webhook') {
       if (request.method !== 'POST') return new Response('POST only', { status: 405 });
       return handleGivebutterWebhook(request, env);
@@ -76,12 +107,17 @@ export default {
   },
 
   // Cron triggers (wrangler.jsonc): every five minutes, count new Givebutter
-  // gifts toward the shop fund; hourly, copy upcoming calendar events to Discord.
+  // gifts toward the shop fund and keep the training catalog in step with
+  // Dolibarr; hourly, copy upcoming calendar events to Discord.
   async scheduled(event, env, ctx) {
     if (event.cron === '*/5 * * * *') {
       if (env.FUND_DB && givebutterConfigured(env) && givebutterLive(env)) {
         ctx.waitUntil(runSync(env).catch((e) => console.error('givebutter sync failed:', e.message)));
       }
+      ctx.waitUntil(runTrainingSync(env, new Date(event.scheduledTime)).then(
+        (r) => console.log('training sync:', r),
+        (e) => console.error('training sync failed:', e.message),
+      ));
       return;
     }
     ctx.waitUntil(

@@ -1,0 +1,27 @@
+{{- /* The page behind the buttons in training emails. The Worker
+       (src/training.js, handleTrainingLink) fills in the title and the body that
+       Dolibarr returns; opened without a link, it says so. */ -}}
+<div class="tl-page" id="tl-page">TRAINING_LINK_BODY</div>
+<script>
+(function () {
+  var el = document.getElementById('tl-page');
+  if (el && el.textContent.trim() === 'TRAINING_LINK_BODY') {
+    el.innerHTML = '<p>Open this page from the button in your training email. Need to book? <a href="/training/book/">Book a training</a>.</p>';
+    document.title = 'Training booking';
+    var h = document.querySelector('h1'); if (h) h.textContent = 'Training booking';
+  }
+})();
+</script>
+<style>
+.tl-page .facts{background:#fff;border:1px solid var(--line);border-radius:8px;padding:12px 16px;margin:0 0 1em}
+.tl-page .meta{color:var(--muted)}
+.tl-page form{margin:.6em 0 1.2em}
+.tl-page button{font:inherit;font-weight:700;padding:.65em 1.2em;border-radius:999px;border:2px solid var(--rust);background:var(--rust);color:#fff;cursor:pointer;margin:.2em 0}
+.tl-page button.alt{background:#fff;color:var(--rust)}
+.tl-page button.warn{background:#9b2c2c;border-color:#9b2c2c}
+.tl-page textarea{width:100%;min-height:5rem;font:inherit;padding:.5rem;box-sizing:border-box;border:1px solid var(--line);border-radius:6px}
+.tl-page label{display:block;margin:.4em 0}
+.tl-page .ok{color:var(--ok);font-weight:700}
+.tl-page .err{color:#9b2c2c;font-weight:700}
+.tl-page ul.slots{list-style:none;padding:0}
+</style>

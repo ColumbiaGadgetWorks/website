@@ -46,6 +46,8 @@ disableKinds = ["taxonomy", "term"]
   venmoDonate = "https://www.paypal.com/qrcodes/venmocs/da49c07b-2aeb-42b7-9cd4-731507b6012b?created=1791391114"  # Venmo QR link, shown on /kiosk/
   givebutterAccount = "T9BSo58XoxQgK1XH"   # from the Givebutter embed script (acct=...)
   givebutterWidgetId = "j9Mr6K"          # the id from the <givebutter-widget id="..."> tag; its form offers one-time, monthly and yearly gifts
+  givebutterTraining = "https://givebutter.com/cgw-training-fee-k3mcn7"   # training fees campaign link, e.g. https://givebutter.com/XXXXXX ; empty turns /training/book/ off. Give the campaign no checkout questions
+  givebutterTrainingWidgetId = ""         # its widget id (Campaign > Sharing > Widgets); empty sends people to the link instead
   discord = "https://discord.gg/yjpeBrAjuR"
   wiki = "https://wiki.comogadget.casa/"
   # Official bylaws and policies. /policies/ is built from this GitHub repository at build time
@@ -69,6 +71,8 @@ disableKinds = ["taxonomy", "term"]
                                    # subscribe visitors to the wrong one.
   contactEndpoint = "/api/contact" # handled by the Worker in src/index.js
   subscribeEndpoint = "/api/subscribe" # email updates signup, handled by the Worker in src/subscribe.js
+  googleAdsSignup = "AW-18542268392/jVQoCOaE66wdEOif0olF"  # Google Ads "Sign-up" conversion: fired when an email updates or membership signup succeeds. Empty turns it off.
+  googleAdsId = "AW-18542268392"  # Google Ads (Ad Grants) tag, loaded on every page by layouts/_partials/google-tag.html. Empty removes it.
   turnstileSiteKey = "0x4AAAAAAE_62c1QS97IgYEj"  # Cloudflare Turnstile site key (public): protects the contact form and the email signup. Must be live BEFORE TURNSTILE_SECRET is added.
 
 [menus]
@@ -77,7 +81,7 @@ disableKinds = ["taxonomy", "term"]
     pageRef = "/visit"
     weight = 10
   [[menus.main]]
-    name = "Tools"
+    name = "Tools & training"
     pageRef = "/tools"
     weight = 20
   [[menus.main]]
@@ -93,16 +97,33 @@ disableKinds = ["taxonomy", "term"]
     pageRef = "/about"
     weight = 60
   [[menus.main]]
+    name = "Membership"
+    pageRef = "/membership"
+    weight = 65
+    [menus.main.params]
+      button = true
+      large = true
+
+  [[menus.main]]
     name = "Donate"
     pageRef = "/donate"
     weight = 70
     [menus.main.params]
       button = true
+      large = true
 
   [[menus.footer]]
     name = "Membership"
     pageRef = "/membership"
     weight = 10
+  [[menus.footer]]
+    name = "Free classes"
+    pageRef = "/classes"
+    weight = 12
+  [[menus.footer]]
+    name = "Zone budgets"
+    pageRef = "/budget"
+    weight = 15
   [[menus.footer]]
     name = "Contact"
     pageRef = "/contact"

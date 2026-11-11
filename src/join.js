@@ -26,6 +26,7 @@ import { verifyTurnstile } from './turnstile.js';
 const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 const TOKEN_RE = /^[a-f0-9]{48}$/;
 const STARTS_PER_HOUR = 5;
+export const USER_AGENT = 'ColumbiaGadgetWorks-Website/1.0 (+https://columbiagadgetworks.org)';
 const MAX_ID_BYTES = 6 * 1024 * 1024;
 
 const json = (body, status = 200) => Response.json(body, { status, headers: { 'cache-control': 'no-store' } });
@@ -42,17 +43,22 @@ export async function dolibarr(env, action, body) {
   try {
     r = await fetch(url, {
       method: 'POST',
-      headers: { 'content-type': 'application/json', 'X-Onboarding-Key': env.DOLIBARR_API_KEY },
+      // Named, so firewalls in front of Dolibarr can tell it from an anonymous bot.
+      headers: { 'content-type': 'application/json', 'X-Onboarding-Key': env.DOLIBARR_API_KEY, 'user-agent': USER_AGENT },
       body: JSON.stringify(body || {}),
     });
   } catch {
     return { status: 502, data: { ok: false, error: 'unreachable' } };
   }
   let data;
+  const text = await r.text();
   try {
-    data = await r.json();
+    data = JSON.parse(text);
   } catch {
-    return { status: 502, data: { ok: false, error: 'bad-answer' } };
+    // Not the module's answer: a block page from a proxy or firewall in front of
+    // Dolibarr, or a PHP error page. Its status says which; the page goes to the log.
+    console.error(`dolibarr ${action}: HTTP ${r.status}, not JSON: ${text.slice(0, 300).replace(/\s+/g, ' ')}`);
+    return { status: 502, data: { ok: false, error: 'bad-answer', upstream: r.status } };
   }
   // A wrong key or a disabled module is our misconfiguration, not the visitor's.
   if (r.status === 401 || r.status === 503) return { status: 502, data: { ok: false, error: 'config' } };
@@ -132,6 +138,12 @@ export async function handleJoin(request, env, pathname) {
       name: str(data.name, 200),
       version: str(data.version, 64),
       signature: str(data.signature, 380000),
+      // Asked by the training pages: a date of birth, and for someone under 18
+      // the parent or guardian who signs for them.
+      birthdate: str(data.birthdate, 10),
+      guardian_name: str(data.guardian_name, 200),
+      guardian_relation: str(data.guardian_relation, 50),
+      guardian_email: str(data.guardian_email, 200),
       ip,
     });
     return json(r.data, r.status);

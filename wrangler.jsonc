@@ -14,7 +14,8 @@
     // Send /api/* to src/index.js even when a browser opens it directly. Without
     // this, a visit typed into the address bar counts as a page navigation and
     // gets the site's 404 page before the Worker runs (fetch() calls were fine).
-    "run_worker_first": ["/api/*"]
+    // /training/link* too: the buttons in training emails are shown through the Worker.
+    "run_worker_first": ["/api/*", "/training/link*", "/voting/link*", "/classes/link*"]
   },
   // Email updates list. No id on purpose: Wrangler creates the namespace on the
   // first deploy and keeps it linked afterwards (automatic provisioning, wrangler
@@ -47,7 +48,8 @@
     //   FUND_LOG_CHANNEL_ID  Discord channel the Givebutter sync reports to (optional)
   },
   // Hourly: copy upcoming calendar events to the Discord server (src/discord-events.js).
-  // Every five minutes: count new Givebutter gifts toward /fund goals (src/fund-givebutter.js).
+  // Every five minutes: count new Givebutter gifts toward /fund goals (src/fund-givebutter.js),
+  // and the training catalog sync with Dolibarr (src/training.js).
   // src/index.js tells them apart by the expression, so change both together.
   "triggers": { "crons": ["17 * * * *", "*/5 * * * *"] },
   "observability": { "enabled": true }

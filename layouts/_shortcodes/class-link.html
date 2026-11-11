@@ -1,0 +1,21 @@
+{{- /* The page behind the "I can't come" button in free class emails. The Worker
+       (src/classes.js) fills in the title and the body Dolibarr returns; opened
+       without a link, it says so. */ -}}
+<div class="vl-page" id="cl-page">CLASS_LINK_BODY</div>
+<script>
+(function () {
+  var el = document.getElementById('cl-page');
+  if (el && el.textContent.trim() === 'CLASS_LINK_BODY') {
+    el.innerHTML = '<p>Open this page from the link in your class email. Looking for a class? <a href="/classes/">See the free classes</a>.</p>';
+    document.title = 'Free class';
+    var h = document.querySelector('h1'); if (h) h.textContent = 'Free class';
+  }
+})();
+</script>
+<style>
+.vl-page .facts{background:#fff;border:1px solid var(--line);border-radius:8px;padding:12px 16px;margin:0 0 1em}
+.vl-page form{margin:.6em 0 1.2em}
+.vl-page button{font:inherit;font-weight:700;padding:.65em 1.2em;border-radius:999px;border:2px solid var(--rust);background:var(--rust);color:#fff;cursor:pointer;margin:.2em 0}
+.vl-page button.warn{background:#9b2c2c;border-color:#9b2c2c}
+.vl-page .ok{color:var(--ok);font-weight:700}
+</style>

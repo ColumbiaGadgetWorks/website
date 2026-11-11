@@ -1,0 +1,146 @@
+{{- /* Signing the waiver (and, for members, the membership agreement) before a
+       training: used by the booking page and the class sign-in page. Defines
+       window.cgwSignDocs(root, {token, needs, onDone}). The wording comes from
+       Dolibarr (/api/join/docs), which records the version each person signs.
+       The waiver asks for a date of birth; under 18, a parent or guardian signs.
+       Include once per page. */ -}}
+<script>
+window.cgwSignDocs = function (root, opts) {
+  var titles = { waiver: 'Liability waiver', agreement: 'Membership agreement' };
+  var why = {
+    invalid: 'Type the full legal name of whoever signs, and tick the box.',
+    signature: 'Draw the signature in the box.',
+    stale: 'The wording was updated while this page was open. Read it again and sign.',
+    birthdate: 'Type a valid date of birth.',
+    guardian: 'Under 18: a parent or guardian signs. Type their name and how they are related.',
+    too_young: 'Online training is not open to someone this young. Please contact us.',
+    token: 'This signing link has expired. Start again from the booking page.'
+  };
+  var docs = null, done = {};
+  root.textContent = '';
+  var err = document.createElement('div');
+  err.className = 'callout warn';
+  err.setAttribute('role', 'alert');
+  err.hidden = true;
+  function error(code) { err.textContent = why[code] || 'That did not go through. Try again in a minute.'; err.hidden = false; err.scrollIntoView({ block: 'nearest' }); }
+  function el(tag, attrs, text) {
+    var e = document.createElement(tag);
+    Object.keys(attrs || {}).forEach(function (k) { e.setAttribute(k, attrs[k]); });
+    if (text) e.textContent = text;
+    return e;
+  }
+  function pad(canvas, clear) {
+    var ctx = canvas.getContext('2d'), drawing = false, used = false;
+    function blank() { ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, canvas.width, canvas.height); used = false; }
+    function at(ev) { var r = canvas.getBoundingClientRect(); return [(ev.clientX - r.left) * canvas.width / r.width, (ev.clientY - r.top) * canvas.height / r.height]; }
+    blank();
+    ctx.lineWidth = 2.5; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.strokeStyle = '#111';
+    canvas.addEventListener('pointerdown', function (ev) {
+      ev.preventDefault(); drawing = true; used = true;
+      try { canvas.setPointerCapture(ev.pointerId); } catch (e) {}
+      var p = at(ev); ctx.beginPath(); ctx.moveTo(p[0], p[1]); ctx.lineTo(p[0] + 0.1, p[1] + 0.1); ctx.stroke();
+    });
+    canvas.addEventListener('pointermove', function (ev) { if (!drawing) return; ev.preventDefault(); var p = at(ev); ctx.lineTo(p[0], p[1]); ctx.stroke(); });
+    ['pointerup', 'pointercancel', 'pointerleave'].forEach(function (n) { canvas.addEventListener(n, function () { drawing = false; }); });
+    clear.addEventListener('click', blank);
+    return { used: function () { return used; }, png: function () { return canvas.toDataURL('image/png').split(',')[1]; } };
+  }
+  function age(iso) {
+    var b = new Date(iso + 'T12:00:00'), n = new Date();
+    if (isNaN(b)) return -1;
+    var a = n.getFullYear() - b.getFullYear();
+    if (n.getMonth() < b.getMonth() || (n.getMonth() === b.getMonth() && n.getDate() < b.getDate())) a--;
+    return a;
+  }
+  function section(doc, n) {
+    var s = el('section', { 'class': 'join-task' });
+    s.appendChild(el('h3', {}, n + '. ' + (docs[doc].title || titles[doc])));
+    var text = el('div', { 'class': 'join-doc', tabindex: '0' }, docs[doc].text);
+    s.appendChild(text);
+    var minor = null;
+    if (doc === 'waiver') {
+      var dob = el('div', { 'class': 'field' });
+      dob.appendChild(el('label', { 'for': 'sd-dob' }, 'Date of birth of the person being trained'));
+      var dobIn = el('input', { id: 'sd-dob', type: 'date', required: '' });
+      dob.appendChild(dobIn);
+      s.appendChild(dob);
+      minor = el('div', { 'class': 'callout' });
+      minor.hidden = true;
+      minor.appendChild(el('p', {}, 'Under 18: a parent or guardian signs this waiver for them, and should come to the training with them.'));
+      var g1 = el('div', { 'class': 'field' }); g1.appendChild(el('label', { 'for': 'sd-gname' }, 'Parent or guardian\'s full legal name')); g1.appendChild(el('input', { id: 'sd-gname', autocomplete: 'name', maxlength: '200' })); minor.appendChild(g1);
+      var g2 = el('div', { 'class': 'field' }); g2.appendChild(el('label', { 'for': 'sd-grel' }, 'Relationship')); var sel = el('select', { id: 'sd-grel' });
+      ['', 'Parent', 'Legal guardian'].forEach(function (o) { sel.appendChild(el('option', { value: o }, o || 'Choose…')); }); g2.appendChild(sel); minor.appendChild(g2);
+      var g3 = el('div', { 'class': 'field' }); g3.appendChild(el('label', { 'for': 'sd-gmail' }, 'Parent or guardian\'s email (optional)')); g3.appendChild(el('input', { id: 'sd-gmail', type: 'email', maxlength: '200' })); minor.appendChild(g3);
+      s.appendChild(minor);
+    }
+    var nameField = el('div', { 'class': 'field' });
+    var nameLabel = el('label', { 'for': 'sd-name-' + doc }, 'Your full legal name');
+    nameField.appendChild(nameLabel);
+    var name = el('input', { id: 'sd-name-' + doc, autocomplete: 'name', maxlength: '200' });
+    nameField.appendChild(name);
+    s.appendChild(nameField);
+    var sigField = el('div', { 'class': 'field' });
+    var sigLabel = el('label', {}, 'Sign here with your finger or mouse');
+    sigField.appendChild(sigLabel);
+    var canvas = el('canvas', { 'class': 'join-sig', width: '600', height: '180', role: 'img', 'aria-label': 'Signature box' });
+    var clear = el('button', { 'class': 'btn btn-light join-sig-clear', type: 'button' }, 'Clear');
+    sigField.appendChild(canvas); sigField.appendChild(clear);
+    s.appendChild(sigField);
+    var check = el('label', { 'class': 'join-check' });
+    var box = el('input', { type: 'checkbox' });
+    check.appendChild(box); check.appendChild(document.createTextNode(' I have read the ' + (doc === 'waiver' ? 'waiver' : 'agreement') + ' above and I agree to it'));
+    s.appendChild(check);
+    var btn = el('button', { 'class': 'btn btn-primary', type: 'button' }, doc === 'waiver' ? 'Sign the waiver' : 'Sign the agreement');
+    s.appendChild(btn);
+    var sig = pad(canvas, clear);
+    if (doc === 'waiver') {
+      s.querySelector('#sd-dob').addEventListener('change', function () {
+        var a = age(this.value), isMinor = a >= 0 && a < 18;
+        minor.hidden = !isMinor;
+        nameField.hidden = isMinor;
+        sigLabel.textContent = isMinor ? 'Parent or guardian signs here' : 'Sign here with your finger or mouse';
+      });
+    }
+    btn.addEventListener('click', function () {
+      err.hidden = true;
+      var body = { token: opts.token, doc: doc, version: docs[doc].version, name: name.value.trim() };
+      if (doc === 'waiver') {
+        body.birthdate = s.querySelector('#sd-dob').value;
+        if (!body.birthdate) return error('birthdate');
+        if (!minor.hidden) {
+          body.guardian_name = s.querySelector('#sd-gname').value.trim();
+          body.guardian_relation = s.querySelector('#sd-grel').value;
+          body.guardian_email = s.querySelector('#sd-gmail').value.trim();
+          body.name = body.guardian_name;
+          if (body.guardian_name.length < 3 || !body.guardian_relation) return error('guardian');
+        }
+      }
+      if (body.name.length < 3 || !box.checked) return error('invalid');
+      if (!sig.used()) return error('signature');
+      body.signature = sig.png();
+      btn.disabled = true;
+      fetch('/api/join/sign', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) })
+        .then(function (r) { return r.json(); }).catch(function () { return { ok: false }; })
+        .then(function (j) {
+          btn.disabled = false;
+          if (!j.ok) { if (j.error === 'stale') return start(); return error(j.error); }
+          done[doc] = true;
+          s.textContent = '';
+          s.appendChild(el('h3', {}, (docs[doc].title || titles[doc]) + ': signed'));
+          if (opts.needs.every(function (d) { return done[d]; })) opts.onDone(j);
+        });
+    });
+    return s;
+  }
+  function start() {
+    root.textContent = '';
+    root.appendChild(err);
+    fetch('/api/join/docs').then(function (r) { return r.json(); }).catch(function () { return { ok: false }; }).then(function (j) {
+      if (!j.ok) return error('');
+      docs = j.docs;
+      opts.needs.forEach(function (d, i) { if (!done[d]) root.appendChild(section(d, i + 1)); });
+    });
+  }
+  start();
+};
+</script>

@@ -1,0 +1,24 @@
+{{- /* Google tag for Google Ads (Ad Grants). Google asks for it immediately
+       after <head> on every page, once. The kiosk has its own layout and no
+       tag: it is the shop's touchscreen, not a page visitors arrive at. */ -}}
+{{- with site.Params.googleAdsId }}
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id={{ . }}"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', '{{ . }}');
+</script>
+{{- end }}
+{{- /* Google Ads "Sign-up" conversion. Not tied to a page: the email updates
+       signup and the membership signup call cgwSignupConversion() at the
+       moment a signup actually succeeds. Without an ID it does nothing. */}}
+<script>
+  window.cgwSignupConversion = function () {
+    {{- with site.Params.googleAdsSignup }}
+    if (window.gtag) gtag('event', 'conversion', { 'send_to': '{{ . }}', 'value': 1.0, 'currency': 'USD' });
+    {{- end }}
+  };
+</script>

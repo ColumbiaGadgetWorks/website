@@ -35,6 +35,9 @@
   if (q === 'ok') {
     form.hidden = true;
     document.getElementById('updates-ok').hidden = false;
+    if (window.cgwSignupConversion) window.cgwSignupConversion();
+    // Drop ?updates=ok so a reload or a shared link does not count again.
+    history.replaceState(null, '', location.pathname + location.hash);
   } else if (q) {
     var why = {
       invalid: "That email address doesn't look right. Please check it and try again.",

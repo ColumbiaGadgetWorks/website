@@ -1,0 +1,4 @@
+{{- /* The training catalog as the site was built: data/training.json, a copy of
+       Dolibarr's that the nightly workflow refreshes. The Worker falls back to it
+       when it has no copy of its own (src/training.js). */ -}}
+{{- hugo.Data.training | default dict | jsonify (dict "indent" "  ") -}}

@@ -1,0 +1,81 @@
+{{- /* Sign in to a group class with its code (in the link or typed). New people
+       become non-members; anyone without a waiver on file signs it here, on the
+       spot. The code only works around the class time (Dolibarr checks). */ -}}
+{{- $p := site.Params -}}
+<div id="tc">
+  <noscript><div class="callout warn"><p>Signing in needs JavaScript. Ask your trainer to add you.</p></div></noscript>
+  <div class="callout warn" id="tc-error" role="alert" hidden></div>
+
+  <form class="contact-form tc-panel" id="tc-code">
+    <div class="field"><label for="tc-code-in">Class code</label><input id="tc-code-in" required maxlength="20" autocapitalize="characters" placeholder="e.g. PRINT-7K2Q"></div>
+    <button class="btn btn-primary" type="submit">Continue</button>
+  </form>
+
+  <form class="contact-form tc-panel" id="tc-who" hidden>
+    <p class="tc-class" id="tc-class"></p>
+    <div class="field"><label for="tc-mail">Email</label><input id="tc-mail" type="email" required autocomplete="email" maxlength="200"></div>
+    <div class="field"><label for="tc-first">First name</label><input id="tc-first" autocomplete="given-name" maxlength="50"></div>
+    <div class="field"><label for="tc-last">Last name</label><input id="tc-last" autocomplete="family-name" maxlength="50"></div>
+    <p class="muted small">Name only needed the first time. Your training is recorded under this email.</p>
+    {{ with $p.turnstileSiteKey }}<div class="cf-turnstile" data-sitekey="{{ . }}" data-action="training-class"></div><script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>{{ end }}
+    <button class="btn btn-primary" type="submit">Sign in</button>
+  </form>
+
+  <div class="tc-panel" id="tc-sign" hidden>
+    <h2>Sign the waiver</h2>
+    <p>Everyone using the shop needs a signed waiver on file. Under 18? A parent or guardian signs for you.</p>
+    <div id="tc-sign-docs"></div>
+  </div>
+
+  <div class="callout ok tc-panel" id="tc-done" hidden>
+    <p><strong>You are signed in.</strong> <span id="tc-done-text"></span> You will get an email once your trainer records your training.</p>
+  </div>
+</div>
+{{ partial "sign-docs.html" . }}
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var code = '', session = '', info = null;
+  var why = {
+    closed: 'That code is not open. Check it with your trainer; it works from shortly before the class until a few hours after.',
+    full: 'The class is full. Ask your trainer.',
+    invalid: 'Check the email address. Someone new also needs a first and last name.',
+    captcha: 'The spam check did not pass. Tick it again.',
+    slow: 'Too many tries from here. Ask your trainer to add you.',
+    unavailable: 'Sign-in is not working right now. Ask your trainer to add you by hand.'
+  };
+  function error(c) { var e = $('tc-error'); e.textContent = why[c] || 'That did not go through. Try again.'; e.hidden = false; }
+  function show(id) { Array.prototype.forEach.call(document.querySelectorAll('#tc .tc-panel'), function (el) { el.hidden = el.id !== id; }); $('tc-error').hidden = true; }
+  function lookup(c) {
+    fetch('/api/training/class?c=' + encodeURIComponent(c)).then(function (r) { return r.json(); }).catch(function () { return { ok: false, error: 'unavailable' }; }).then(function (j) {
+      if (!j.ok) { show('tc-code'); return error(j.error); }
+      code = j.code; info = j;
+      $('tc-class').textContent = j.tool + ' class with ' + j.trainer + ', ' + j.when + '.';
+      show('tc-who');
+    });
+  }
+  function join(body) {
+    return fetch('/api/training/class', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) })
+      .then(function (r) { return r.json(); }).catch(function () { return { ok: false, error: 'unavailable' }; });
+  }
+  function result(j) {
+    if (window.turnstile) { try { window.turnstile.reset(); } catch (e) {} }
+    if (!j.ok) return error(j.error);
+    session = j.session || session;
+    if (j.done) {
+      $('tc-done-text').textContent = info ? info.tool + ', ' + info.when + '.' : '';
+      return show('tc-done');
+    }
+    show('tc-sign');
+    window.cgwSignDocs($('tc-sign-docs'), { token: j.token, needs: j.needs, onDone: function () { join({ code: code, session: session }).then(result); } });
+  }
+  $('tc-code').addEventListener('submit', function (ev) { ev.preventDefault(); lookup($('tc-code-in').value.trim()); });
+  $('tc-who').addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    var t = document.querySelector('#tc-who [name="cf-turnstile-response"]');
+    join({ code: code, email: $('tc-mail').value.trim(), firstname: $('tc-first').value.trim(), lastname: $('tc-last').value.trim(), 'cf-turnstile-response': t ? t.value : '' }).then(result);
+  });
+  var c = new URLSearchParams(location.search).get('c');
+  if (c) { $('tc-code-in').value = c; lookup(c); }
+})();
+</script>
