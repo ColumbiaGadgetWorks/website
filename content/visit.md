@@ -42,4 +42,4 @@ Most day-to-day chatter (who's coming Thursday, class announcements, "does anyon
 
 <p class="cta-row"><a class="btn btn-primary" href="/contact/">Ask a question</a> <a class="btn btn-outline" rel="noopener" href="https://discord.gg/yjpeBrAjuR">Join the Discord</a></p>
 
-Ready for more than Thursdays? [Membership](/membership/) gets you 24/7 access, and our [member wiki](https://wiki.comogadget.casa/) has the tool guides and policies once you join.
+Ready for more than Thursdays? [Membership](/membership/) gets you 24/7 access, and our [member wiki](https://wiki.comogadget.casa/) has the tool guides once you join. Our [bylaws and policies](/policies/) are public.

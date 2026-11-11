@@ -14,3 +14,5 @@
 /wp-admin/*                                    /                                         301
 /wp-content/*                                  /                                         301
 /events/                                       /calendar/                                301
+/code-of-conduct/                              /policies/conduct-and-safety/             301
+/code-of-conduct                               /policies/conduct-and-safety/             301
