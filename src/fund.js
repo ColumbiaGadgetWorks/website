@@ -28,6 +28,31 @@ export async function totals(db, guildId, name) {
   return { raised: row.raised, count: row.count };
 }
 
+// Biggest givers first: one row per named donor (their gifts added up), while each
+// anonymous gift stays its own row since nothing says they are the same person.
+export async function topDonors(db, guildId, name, limit) {
+  const { results } = await db
+    .prepare(
+      "SELECT donor, SUM(amount) AS amount, COUNT(*) AS gifts, MAX(id) AS last FROM donation " +
+        "WHERE guild_id = ? AND name = ? " +
+        "GROUP BY CASE WHEN donor IS NULL OR donor = '' OR donor = 'Anonymous' THEN '#' || id ELSE donor END " +
+        "ORDER BY amount DESC, last DESC LIMIT ?",
+    )
+    .bind(guildId, name, limit)
+    .all();
+  return results;
+}
+
+// Gifts counted so far this calendar year (Central time), across every fund.
+export async function yearTotals(db, now = new Date()) {
+  const year = Number(new Intl.DateTimeFormat('en-US', { timeZone: 'America/Chicago', year: 'numeric' }).format(now));
+  const row = await db
+    .prepare("SELECT COALESCE(SUM(amount), 0) AS raised, COUNT(*) AS count FROM donation WHERE ts >= ?")
+    .bind(`${year}-01-01T06:00:00`)
+    .first();
+  return { year, raised: row.raised, count: row.count };
+}
+
 export async function recentDonations(db, guildId, name, limit) {
   const { results } = await db
     .prepare('SELECT donor, amount FROM donation WHERE guild_id = ? AND name = ? ORDER BY id DESC LIMIT ?')
@@ -39,7 +64,7 @@ export async function recentDonations(db, guildId, name, limit) {
 // ---------- GET /api/fund/campaigns ----------
 
 export async function handleFund(request, env, ctx) {
-  const cacheKey = new Request('https://fund.internal/v2/campaigns', { method: 'GET' });
+  const cacheKey = new Request('https://fund.internal/v3/campaigns', { method: 'GET' });
   const cache = caches.default;
   const hit = await cache.match(cacheKey);
   if (hit) return hit;
