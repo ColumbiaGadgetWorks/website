@@ -217,7 +217,7 @@ async function buildEmbed(db, guildId, row) {
 
 async function listMessage(db, guildId, env) {
   const { results: rows } = await db
-    .prepare('SELECT name, goal, currency, link FROM campaign WHERE guild_id = ? ORDER BY (name = 'General') DESC, name')
+    .prepare('SELECT name, goal, currency, link FROM campaign WHERE guild_id = ? ORDER BY (name = \'General\') DESC, name')
     .bind(guildId)
     .all();
   if (!rows.length) return message('No funds yet. They appear here once they exist on Givebutter and the sync has run.', true);
