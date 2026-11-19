@@ -18,8 +18,8 @@ test('announceable applies threshold and freshness', () => {
   const now = new Date().toISOString();
   const old = new Date(Date.now() - 3 * 3600e3).toISOString();
   const got = announceable({}, [
-    { id: 'a', amount: 19.99, ts: now },
-    { id: 'b', amount: 20, ts: now },
+    { id: 'a', amount: 4.99, ts: now },
+    { id: 'b', amount: 5, ts: now },
     { id: 'c', amount: 500, ts: old },
   ]);
   assert.deepEqual(got.map((t) => t.id), ['b']);

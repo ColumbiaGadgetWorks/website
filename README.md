@@ -136,7 +136,7 @@ Setup, once:
    the history. From then on the cron keeps it current.
 
 **Big-gift thank-yous.** When the sync counts a new Givebutter gift of at least
-`FUND_ANNOUNCE_MIN` (default 20) that is under an hour old, the kiosk shows a
+`FUND_ANNOUNCE_MIN` (default 5) that is under an hour old, the kiosk shows a
 thank-you banner for 5 minutes ("Jane just gave $25.00 toward ...") and the bot
 posts the same line in `FUND_ANNOUNCE_CHANNEL_ID` (falls back to
 `FUND_LOG_CHANNEL_ID`). Only the first name is used, and nobody is named when

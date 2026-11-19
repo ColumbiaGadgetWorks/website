@@ -195,7 +195,7 @@ const FRESH_MS = 60 * 60 * 1000; // never announce a gift older than this (late 
 
 // Of the gifts a sync just counted, the ones worth announcing (newest last).
 export function announceable(env, added) {
-  const min = Number(env.FUND_ANNOUNCE_MIN ?? 20);
+  const min = Number(env.FUND_ANNOUNCE_MIN ?? 5);
   return added
     .filter((t) => t.amount >= min && Date.now() - Date.parse(t.ts) < FRESH_MS)
     .sort((a, b) => Date.parse(a.ts) - Date.parse(b.ts));

@@ -47,7 +47,7 @@
     //   GIVEBUTTER_SYNC      "on" to record Givebutter gifts; anything else is a dry run
     //   FUND_LOG_CHANNEL_ID  Discord channel the Givebutter sync reports to (optional)
     //   FUND_ANNOUNCE_CHANNEL_ID  channel for big-gift thank-yous (optional, defaults to the log channel)
-    //   FUND_ANNOUNCE_MIN    smallest gift announced, default 20
+    //   FUND_ANNOUNCE_MIN    smallest gift announced, default 5
   },
   // Hourly: copy upcoming calendar events to the Discord server (src/discord-events.js).
   // Every five minutes: count new Givebutter gifts toward /fund goals (src/fund-givebutter.js),
