@@ -390,6 +390,7 @@ function summarize(r) {
   const lines = [r.apply ? '**Givebutter sync**' : '**Givebutter sync preview** (dry run: nothing was saved)'];
   lines.push(`Read ${r.scanned} transaction${r.scanned !== 1 ? 's' : ''}${r.full ? ', full history' : ''}.`);
   if (r.created?.length) lines.push(`${r.apply ? 'New' : 'Would add'} from Givebutter: ${r.created.map((n) => `**${n}**`).join(', ')}`);
+  if (r.fundsNote) lines.push(`⚠️ ${r.fundsNote}`);
   const gift = (t) => `${money(t.amount)} from ${t.donor || 'Anonymous'} (\`${t.id}\`, ${day(t.ts)})`;
   const section = (title, items, fmt) => {
     if (!items.length) return;

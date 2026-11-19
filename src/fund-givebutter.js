@@ -237,9 +237,13 @@ async function listFunds(env) {
       out.push(...list);
       if (Array.isArray(res) || page >= (Number(res.meta?.last_page) || 1)) break;
     }
-  } catch {
+  } catch (err) {
+    console.error('givebutter funds:', err.message);
+    listFunds.error = err.message;
     return [];
   }
+  listFunds.error = null;
+  listFunds.count = out.length;
   return out.filter((f) => f && (f.code || f.id) && String(f.name || '').trim());
 }
 
@@ -249,7 +253,11 @@ async function listFunds(env) {
 // With apply=false nothing is written but the mappings are still added.
 async function ensureFunds(env, db, mappings, apply) {
   const guild = String(env.DISCORD_GUILD_ID || '').trim();
-  if (!guild) return [];
+  ensureFunds.note = null;
+  if (!guild) {
+    ensureFunds.note = 'DISCORD_GUILD_ID is not set on the Worker, so no funds were created.';
+    return [];
+  }
   const created = [];
   const add = async (name, fund, campaign) => {
     created.push(name);
@@ -270,6 +278,8 @@ async function ensureFunds(env, db, mappings, apply) {
     if (mappings.some((m) => m.fund && keys.includes(m.fund))) continue;
     await add(String(f.name).trim().slice(0, 80), f.code || f.id, null);
   }
+  if (listFunds.error) ensureFunds.note = `Could not read the fund list from Givebutter (${listFunds.error}).`;
+  else if (!listFunds.count) ensureFunds.note = 'Givebutter returned no funds.';
   const code = campaignCodeOf(env);
   if (code && !mappings.some((m) => !m.fund && m.campaign === lower(code))) await add('General', null, code);
   return created;
@@ -300,6 +310,7 @@ export async function syncGivebutter(env, { apply, full = false } = {}) {
 
   const mappings = await loadMappings(db);
   result.created = await ensureFunds(env, db, mappings, apply);
+  result.fundsNote = ensureFunds.note;
   if (!mappings.length) return { ...result, empty: true };
 
   const counted = new Map(
