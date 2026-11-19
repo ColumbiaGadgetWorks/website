@@ -595,7 +595,39 @@
   }
   .thanks.show { transform: translate(-50%, 0); opacity: 1; }
   .thanks b { font-family: "IBM Plex Mono", monospace; }
+  .thanks.show { will-change: transform, opacity; }
   @media (prefers-reduced-motion: reduce) { .thanks { transition: none; } }
+
+  /* Confetti for a big gift. Plain coloured rectangles moved with transform
+     only, so a weak GPU can run it on the compositor: no blur, no shadows, no
+     canvas, no per-frame script. The pieces are made once and reused. */
+  .confetti { position: fixed; inset: 0; z-index: 49; pointer-events: none; overflow: hidden; contain: strict; }
+  .confetti i {
+    position: absolute; top: -20px; left: var(--x);
+    width: 10px; height: 16px; background: var(--c);
+    opacity: 0; backface-visibility: hidden;
+  }
+  .confetti.go i {
+    will-change: transform;
+    animation: confetti-fall var(--t) cubic-bezier(.3, .55, .45, 1) var(--d) 1 both;
+  }
+  @keyframes confetti-fall {
+    from { opacity: 1; transform: translate3d(0, 0, 0) rotate(0); }
+    to   { opacity: 1; transform: translate3d(var(--dx), 108vh, 0) rotate(var(--r)); }
+  }
+
+  /* ---------- shop touchscreen: cheap on a weak GPU ----------
+     Switching panels is a quick fade of the incoming panel only: no sliding,
+     no scaling, no cross-fading page background, no blurred shadows. */
+  :root[data-kiosk] .panel { transition: none; }
+  :root[data-kiosk] .panel.parked-left,
+  :root[data-kiosk] .panel.parked-right { transform: none; }
+  :root[data-kiosk] body::before { transition: none; }
+  :root[data-kiosk] .panel:not(.parked-left):not(.parked-right) { animation: panel-in .18s ease-out; }
+  @keyframes panel-in { from { opacity: 0; } to { opacity: 1; } }
+  :root[data-kiosk] .sheet { box-shadow: none; }
+  :root[data-kiosk] .panel-info { box-shadow: 6px 6px 0 var(--cgw-orange); }
+  :root[data-kiosk] .thanks { box-shadow: none; }
 
   /* ---------- states ---------- */
 
@@ -987,7 +1019,8 @@ const panels = {
   fund: document.getElementById("panel-fund"),
   info: document.getElementById("panel-info"),
 };
-const SWAP_MS = 520;
+const KIOSK = document.documentElement.hasAttribute("data-kiosk");
+const SWAP_MS = KIOSK ? 30 : 520;
 let current = "fund";
 let swapTimer = 0;
 
@@ -1006,7 +1039,7 @@ function showPanel(name) {
   outgoing.classList.add(away);
   outgoing.inert = true;
   document.documentElement.setAttribute("data-panel", name);
-  window.scrollTo({ top: 0, behavior: "smooth" });
+  window.scrollTo({ top: 0, behavior: KIOSK ? "auto" : "smooth" });
   current = name;
   updateSwitch();
 
@@ -1296,6 +1329,35 @@ function esc(s) {
   sync();
 })();
 
+let confettiEl = null, confettiTimer = 0;
+function confetti() {
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  if (!confettiEl) {
+    const colors = ["#E8590C", "#C8102E", "#157F5B", "#F2B705", "#1F6FB2"];
+    confettiEl = document.createElement("div");
+    confettiEl.className = "confetti";
+    confettiEl.setAttribute("aria-hidden", "true");
+    for (let i = 0; i < 28; i++) confettiEl.appendChild(document.createElement("i"));
+    document.body.appendChild(confettiEl);
+    confettiEl.dataset.colors = colors.join();
+  }
+  const colors = confettiEl.dataset.colors.split(",");
+  for (const p of confettiEl.children) {
+    const s = p.style;
+    s.setProperty("--x", (Math.random() * 100).toFixed(1) + "%");
+    s.setProperty("--dx", Math.round(Math.random() * 160 - 80) + "px");
+    s.setProperty("--r", Math.round(180 + Math.random() * 540) + "deg");
+    s.setProperty("--d", (Math.random() * 0.6).toFixed(2) + "s");
+    s.setProperty("--t", (1.8 + Math.random() * 1.0).toFixed(2) + "s");
+    s.setProperty("--c", colors[(Math.random() * colors.length) | 0]);
+  }
+  confettiEl.classList.remove("go");
+  void confettiEl.offsetWidth;               // restart the animation
+  confettiEl.classList.add("go");
+  clearTimeout(confettiTimer);
+  confettiTimer = setTimeout(() => confettiEl.classList.remove("go"), 4000);
+}
+
 let thanksTimer = null, thanksShown = null;
 function showThanks(a) {
   const el = document.getElementById("thanks");
@@ -1305,6 +1367,7 @@ function showThanks(a) {
   const who = a.who ? esc(a.who) : "Someone";
   el.innerHTML = `${who} just gave <b>${esc(money(a.currency, a.amount))}</b> ${a.campaign === "General" ? "to CGW" : "toward " + esc(a.campaign)}. Thank you!`;
   el.classList.add("show");
+  confetti();
   clearTimeout(thanksTimer);
   thanksTimer = setTimeout(() => el.classList.remove("show"), a.seconds_left * 1000);
 }
