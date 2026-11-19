@@ -93,11 +93,15 @@ async function fromD1(env) {
     .prepare('SELECT guild_id, name, goal, currency, link FROM campaign ORDER BY name')
     .all();
 
+  const yr = await yearTotals(db);
   const campaigns = [];
   for (const r of rows) {
     const { raised, count } = await totals(db, r.guild_id, r.name);
     const recent = showDonors
       ? (await recentDonations(db, r.guild_id, r.name, 6)).map((d) => ({ donor: d.donor || 'Anonymous', amount: d.amount }))
+      : [];
+    const top = showDonors
+      ? (await topDonors(db, r.guild_id, r.name, 25)).map((d) => ({ donor: d.donor || 'Anonymous', amount: d.amount, gifts: d.gifts }))
       : [];
     campaigns.push({
       name: r.name,
@@ -108,12 +112,16 @@ async function fromD1(env) {
       pct: r.goal ? raised / r.goal : 0,
       link: r.link || donateUrl,
       recent,
+      top,
     });
   }
   return {
     generated: new Date().toISOString().replace(/\.\d{3}Z$/, '+00:00'),
     donate_url: donateUrl,
     announcement: await currentAnnouncement(db),
+    year: yr.year,
+    year_raised: yr.raised,
+    year_count: yr.count,
     campaigns,
   };
 }

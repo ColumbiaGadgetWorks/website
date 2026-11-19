@@ -1426,8 +1426,13 @@ async function load() {
     return;
   }
 
-  const totalRaised = cs.reduce((s, c) => s + c.raised, 0);
-  const totalGifts = cs.reduce((s, c) => s + c.count, 0);
+  // Total for the current year (the API sends it); all-time if an old API does not.
+  const yearly = typeof data.year_raised === "number";
+  const totalRaised = yearly ? data.year_raised : cs.reduce((s, c) => s + c.raised, 0);
+  const totalGifts = yearly ? data.year_count : cs.reduce((s, c) => s + c.count, 0);
+  const totalLabel = yearly ? "Total raised in " + data.year : "Total raised";
+  // Re-drawing every 30s would close any drop-down someone opened, so remember them.
+  const openFunds = new Set([...body.querySelectorAll("details.history[open]")].map(d => d.dataset.fund));
   const cur0 = cs[0].currency;
   body.innerHTML = `
     <div class="totalbar">
@@ -1436,11 +1441,12 @@ async function load() {
       <span class="tot-sub">${totalGifts} gift${totalGifts === 1 ? "" : "s"}</span>
     </div>` + cs.map(campaignHTML).join("");
 
+  body.querySelectorAll("details.history").forEach(d => { if (openFunds.has(d.dataset.fund)) d.open = true; });
+
   document.getElementById("tb-count").textContent = cs.length;
-  document.getElementById("tb-raised").textContent =
-    money(cs[0].currency, cs.reduce((s, c) => s + c.raised, 0));
-  document.getElementById("tb-gifts").textContent =
-    cs.reduce((s, c) => s + c.count, 0);
+  document.getElementById("tb-raised-label").textContent = totalLabel;
+  document.getElementById("tb-raised").textContent = money(cs[0].currency, totalRaised);
+  document.getElementById("tb-gifts").textContent = totalGifts;
   document.getElementById("tb-updated").textContent =
     new Date(data.generated).toLocaleString(undefined,
       { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
