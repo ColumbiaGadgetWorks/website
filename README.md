@@ -139,7 +139,7 @@ Setup, once:
 thank-you banner for 5 minutes ("Jane just gave $25.00 toward ...", or "to CGW"
 for General) and the bot posts the same line in `FUND_ANNOUNCE_CHANNEL_ID`
 (falls back to `FUND_LOG_CHANNEL_ID`). Only the first name is used, and nobody
-is named when the donor gave anonymously. History imports and manual syncs
+is named when the donor gave anonymously. Full-history imports
 never announce.
 
 The database gets its new columns and tables on the first `/fund` command or
