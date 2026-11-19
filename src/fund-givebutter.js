@@ -123,6 +123,9 @@ export function readTransaction(t) {
     amount: num(t.donated) ?? num(t.amount) ?? 0,
     // The name Givebutter shows publicly, which already honours "give anonymously".
     donor: String(t.giving_space?.name || '').trim().slice(0, 100) || null,
+    anonymous: [t.is_anonymous, t.anonymous, t.giving_space?.is_anonymous, t.giving_space?.anonymous].some(
+      (v) => v === true || v === 1 || v === '1' || v === 'true',
+    ) || /^anonymous\b/i.test(String(t.giving_space?.name || '').trim()) || !String(t.giving_space?.name || '').trim(),
     ts: t.transacted_at || t.created_at || new Date().toISOString(),
     funds: [t.fund_code, t.fund_id, t.fund?.code, t.fund?.id].map(lower).filter(Boolean),
     campaigns: [t.campaign_code, t.campaign_id].map(lower).filter(Boolean),
@@ -136,13 +139,14 @@ export function readTransaction(t) {
 export async function loadMappings(db) {
   const { results } = await db
     .prepare(
-      'SELECT guild_id, name, gb_fund, gb_campaign, gb_keywords FROM campaign ' +
+      'SELECT guild_id, name, currency, gb_fund, gb_campaign, gb_keywords FROM campaign ' +
         'WHERE gb_fund IS NOT NULL OR gb_campaign IS NOT NULL OR gb_keywords IS NOT NULL',
     )
     .all();
   return results.map((r) => ({
     guild_id: r.guild_id,
     name: r.name,
+    currency: r.currency || '$',
     fund: lower(r.gb_fund),
     campaign: lower(r.gb_campaign),
     keywords: String(r.gb_keywords || '')
@@ -174,6 +178,48 @@ export function keywordGuess(tx, mappings) {
   const text = tx.note.toLowerCase();
   if (!text) return null;
   return mappings.find((m) => m.keywords.some((k) => text.includes(k))) || null;
+}
+
+// ---------- big-gift announcements ----------
+
+// What the kiosk and Discord call the donor: first name only, or nobody when
+// the donor chose to give anonymously.
+export function announceName(tx) {
+  if (tx.anonymous || !tx.donor) return null;
+  const first = tx.donor.split(/\s+/)[0].replace(/[^\p{L}\p{M}'.-]/gu, '');
+  return first || null;
+}
+
+export const ANNOUNCE_SECONDS = 300;
+const FRESH_MS = 60 * 60 * 1000; // never announce a gift older than this (late sync, history import)
+
+// Of the gifts a sync just counted, the ones worth announcing (newest last).
+export function announceable(env, added) {
+  const min = Number(env.FUND_ANNOUNCE_MIN ?? 20);
+  return added
+    .filter((t) => t.amount >= min && Date.now() - Date.parse(t.ts) < FRESH_MS)
+    .sort((a, b) => Date.parse(a.ts) - Date.parse(b.ts));
+}
+
+// The newest announcement still inside its window, for /api/fund/campaigns.
+export async function currentAnnouncement(db) {
+  try {
+    const raw = await getState(db, 'announce');
+    if (!raw) return null;
+    const a = JSON.parse(raw);
+    const left = ANNOUNCE_SECONDS - Math.floor((Date.now() - a.at) / 1000);
+    return left > 0 ? { id: a.id, who: a.who, amount: a.amount, campaign: a.campaign, currency: a.currency, seconds_left: left } : null;
+  } catch {
+    return null;
+  }
+}
+
+export async function saveAnnouncement(db, tx) {
+  await setState(
+    db,
+    'announce',
+    JSON.stringify({ id: tx.id, who: announceName(tx), amount: tx.amount, campaign: tx.name, currency: tx.currency || '$', at: Date.now() }),
+  );
 }
 
 // ---------- the sync ----------
@@ -237,7 +283,7 @@ export async function syncGivebutter(env, { apply, full = false } = {}) {
       const m = matchMapping(tx, mappings);
       if (m) {
         if (!existing) {
-          result.added.push({ ...tx, name: m.name });
+          result.added.push({ ...tx, name: m.name, currency: m.currency });
           touch(m.guild_id, m.name);
           if (apply) {
             await db

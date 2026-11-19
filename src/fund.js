@@ -7,6 +7,8 @@
 // /api/campaigns (FUNDBOT_API_URL) instead, so the kiosk keeps working during
 // the move. Neither source URL ever comes from the request.
 
+import { currentAnnouncement } from './fund-givebutter.js';
+
 const CACHE_SECONDS = 15;
 
 // ---------- queries shared with the Discord commands ----------
@@ -86,6 +88,7 @@ async function fromD1(env) {
   return {
     generated: new Date().toISOString().replace(/\.\d{3}Z$/, '+00:00'),
     donate_url: donateUrl,
+    announcement: await currentAnnouncement(db),
     campaigns,
   };
 }

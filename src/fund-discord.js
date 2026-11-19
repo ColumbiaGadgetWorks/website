@@ -24,6 +24,9 @@ import {
   assignTransaction,
   setReview,
   GivebutterError,
+  announceable,
+  announceName,
+  saveAnnouncement,
 } from './fund-givebutter.js';
 
 const API = 'https://discord.com/api/v10';
@@ -496,6 +499,7 @@ export async function runSync(env, { full = false, fromCommand = false } = {}) {
   const text = summarize(r);
   if (apply) {
     for (const t of r.touched) await refreshBoard(env, t.guild_id, t.name);
+    if (!full && !fromCommand) await announceGifts(env, r.added);
     const changed = r.added.length || r.moved.length || r.removed.length || r.review.length;
     if (changed && env.FUND_LOG_CHANNEL_ID && env.DISCORD_BOT_TOKEN && !fromCommand) {
       const res = await discordApi(env, 'POST', `/channels/${env.FUND_LOG_CHANNEL_ID}/messages`, {
@@ -510,6 +514,30 @@ export async function runSync(env, { full = false, fromCommand = false } = {}) {
       `${r.moved.length} moved, ${r.removed.length} removed, ${r.review.length} to review`,
   );
   return { text, result: r };
+}
+
+// Big new gifts: the kiosk banner (newest one, via /api/fund/campaigns) and a
+// thank-you in FUND_ANNOUNCE_CHANNEL_ID (falls back to FUND_LOG_CHANNEL_ID).
+async function announceGifts(env, added) {
+  const gifts = announceable(env, added);
+  if (!gifts.length) return;
+  try {
+    await saveAnnouncement(env.FUND_DB, gifts[gifts.length - 1]);
+  } catch (err) {
+    console.error('announce: could not save', err);
+  }
+  const channel = env.FUND_ANNOUNCE_CHANNEL_ID || env.FUND_LOG_CHANNEL_ID;
+  if (!channel || !env.DISCORD_BOT_TOKEN) return;
+  for (const g of gifts.slice(0, 5)) {
+    const who = announceName(g);
+    const text =
+      `🎉 ${who ? `**${who}**` : 'Someone'} just gave **${g.currency}${money(g.amount)}** toward **${g.name}**. Thank you!`;
+    const res = await discordApi(env, 'POST', `/channels/${channel}/messages`, {
+      content: text,
+      allowed_mentions: { parse: [] },
+    });
+    if (!res.ok) console.error('announce: post failed', res.status);
+  }
 }
 
 function summarize(r) {

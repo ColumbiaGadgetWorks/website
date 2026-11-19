@@ -543,6 +543,22 @@
     font-variant-numeric: tabular-nums;
   }
 
+  /* ---------- big-gift thank-you banner ---------- */
+  .thanks {
+    position: fixed; left: 50%; top: 14px; z-index: 50;
+    transform: translate(-50%, -140%); opacity: 0;
+    max-width: min(92vw, 640px); padding: 14px 22px;
+    background: var(--ink, #101A22); color: var(--paper, #FBFAF6);
+    border-left: 6px solid var(--met, #157F5B);
+    font: 600 1.15rem/1.3 "IBM Plex Sans", system-ui, sans-serif;
+    box-shadow: 0 6px 24px rgba(16, 26, 34, .35);
+    transition: transform .5s ease, opacity .5s ease;
+    pointer-events: none;
+  }
+  .thanks.show { transform: translate(-50%, 0); opacity: 1; }
+  .thanks b { font-family: "IBM Plex Mono", monospace; }
+  @media (prefers-reduced-motion: reduce) { .thanks { transition: none; } }
+
   /* ---------- states ---------- */
 
   .notice {
@@ -761,6 +777,8 @@
   <span class="panel-switch-label">View information</span>
   <span class="swap-arrow" aria-hidden="true">&rarr;</span>
 </button>
+
+<div class="thanks" id="thanks" role="status" aria-live="polite"></div>
 
 <div class="stage">
 
@@ -1207,6 +1225,19 @@ function esc(s) {
     ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]));
 }
 
+let thanksTimer = null, thanksShown = null;
+function showThanks(a) {
+  const el = document.getElementById("thanks");
+  if (!a) return;
+  if (thanksShown === a.id) return;
+  thanksShown = a.id;
+  const who = a.who ? esc(a.who) : "Someone";
+  el.innerHTML = `${who} just gave <b>${esc(money(a.currency, a.amount))}</b> toward ${esc(a.campaign)}. Thank you!`;
+  el.classList.add("show");
+  clearTimeout(thanksTimer);
+  thanksTimer = setTimeout(() => el.classList.remove("show"), a.seconds_left * 1000);
+}
+
 async function load() {
   let data;
   try {
@@ -1220,6 +1251,8 @@ async function load() {
     return;
   }
 
+
+  showThanks(data.announcement);
 
   // Active campaigns first, finished ones sink to the bottom; alphabetical
   // order within each group is preserved since Array#sort is stable and the
