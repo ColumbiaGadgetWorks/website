@@ -344,7 +344,9 @@ export async function runSync(env, { full = false, fromCommand = false } = {}) {
   const text = summarize(r);
   if (apply) {
     for (const t of r.touched) await refreshBoard(env, t.guild_id, t.name);
-    if (!full && !fromCommand) await announceGifts(env, r.added);
+    // A gift is only ever in r.added the one time it is first counted, so whether the
+    // cron or /fund sync counts it, it is announced once. Full syncs (history) never announce.
+    if (!full) await announceGifts(env, r.added);
     const changed = r.added.length || r.moved.length || r.removed.length || r.created?.length;
     if (changed && env.FUND_LOG_CHANNEL_ID && env.DISCORD_BOT_TOKEN && !fromCommand) {
       const res = await discordApi(env, 'POST', `/channels/${env.FUND_LOG_CHANNEL_ID}/messages`, {
