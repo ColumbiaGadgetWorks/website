@@ -112,6 +112,8 @@ function relay(r) {
 
 // ---------------------------------------------------------------- routes
 
+const TRAINING_PAUSED = true;
+
 export async function handleTraining(request, env, ctx, pathname) {
   const route = pathname.replace(/^\/api\/training\//, '');
   if (route === 'sync') return handleSync(request, env);

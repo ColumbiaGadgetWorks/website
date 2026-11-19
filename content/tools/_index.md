@@ -7,4 +7,4 @@ description: "Equipment at Columbia Gadget Works makerspace in Columbia, MO: 80W
 
 The shop is organized into zones, each looked after by a volunteer lead. Members can use any tool they've been trained on, 24/7. Visitors can try the basic tools on Thursday nights and get a demo of anything else. Detailed operating guides, settings, and maintenance logs live on the [member wiki](https://wiki.comogadget.casa/).
 
-**Training:** tools marked *training required* need a short training before you use them alone. It is half price for members and usually takes an hour or less. [Book a training](/training/book/), or [check what you are trained on](/training/).
+**Training:** tools marked *training required* need a short training before you use them alone. It is half price for members and usually takes an hour or less. Online booking is paused while we set up a new system; [ask us](/contact/) about a training, or [check what you are trained on](/training/).

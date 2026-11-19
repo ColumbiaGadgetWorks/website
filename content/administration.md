@@ -34,9 +34,9 @@ Nobody approves their own request. You get an email when it is approved, or turn
 ## Trainings
 
 - **[What am I trained on?](/training/)**: type your email to see the tools you are signed off on.
-- **[Book a training](/training/book/)**: pick the tool, a trainer and a time, and pay to hold your seat. Members pay half.
-- **Trainers: train someone now.** On [Book a training](/training/book/), press **I'm a trainer: train someone now** and type your own email. You get a link (good for 2 hours) where you pick the tool and type the trainee's email. They confirm, sign the waiver and pay; then you record the training from your email. An unpaid request expires after 4 hours.
-- **[Class sign-in](/training/class/)**: at a group class, scan the trainer's QR code or type the class code.
+- **Book a training**: online booking and payment are paused while a new system is set up.
+- **Trainers: train someone now.** Paused with booking. When it returns: on the booking page, press **I'm a trainer: train someone now** and type your own email. You get a link (good for 2 hours) where you pick the tool and type the trainee's email. They confirm, sign the waiver and pay; then you record the training from your email. An unpaid request expires after 4 hours.
+- **Class sign-in** (paused): at a group class, scan the trainer's QR code or type the class code.
 
 ## Voting
 

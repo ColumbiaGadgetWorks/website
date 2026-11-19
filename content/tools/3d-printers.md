@@ -41,6 +41,6 @@ You need a short training before using the printers on your own. It is one sessi
 
 **Read the [3D printer guide on the wiki](https://wiki.comogadget.casa/index.php/3D_printers) before you come.**
 
-Trainings are on **Thursdays at 5:00 PM**, just before Open Hack Night. The fee is **$10, or $5 for members**; half goes to the Digital Fab zone for filament and parts, half to your trainer. [Book a training](/training/book/?tool=3d-printers) to pick a date and pay online. Once you are trained you can [check it here](/training/).
+Trainings are on **Thursdays at 5:00 PM**, just before Open Hack Night. The fee is **$10, or $5 for members**; half goes to the Digital Fab zone for filament and parts, half to your trainer. Online booking and payment are paused while we set up a new system; [contact us](/contact/) to arrange one. Once you are trained you can [check it here](/training/).
 
 After training, report jams or failed prints on Discord so the next person doesn't inherit them.

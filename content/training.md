@@ -13,4 +13,4 @@ Type your email. You will see a masked copy of your email and name, so you know 
 
 A training is recorded when your trainer marks it done, usually the same day; you get an email when it is. If you used another email when you booked, try that one. If a training is missing, [contact us](/contact/) with the date and the name of your trainer.
 
-Need a training? [Book one](/training/book/).
+Need a training? Online booking is paused while we set up a new system; [contact us](/contact/).

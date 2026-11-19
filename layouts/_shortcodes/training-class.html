@@ -1,6 +1,9 @@
 {{- /* Sign in to a group class with its code (in the link or typed). New people
        become non-members; anyone without a waiver on file signs it here, on the
        spot. The code only works around the class time (Dolibarr checks). */ -}}
+{{- if site.Params.trainingPaused }}
+<div class="callout"><p><strong>Training booking and payment are paused</strong> while we set up a new system. Ask on <a href="{{ site.Params.discord }}">Discord</a> or <a href="/contact/">contact us</a> and a trainer will sort it out.</p></div>
+{{- else }}
 {{- $p := site.Params -}}
 <div id="tc">
   <noscript><div class="callout warn"><p>Signing in needs JavaScript. Ask your trainer to add you.</p></div></noscript>
@@ -79,3 +82,4 @@
   if (c) { $('tc-code-in').value = c; lookup(c); }
 })();
 </script>
+{{- end }}

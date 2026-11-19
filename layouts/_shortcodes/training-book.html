@@ -6,6 +6,9 @@
        On the spot: a trainer asks for their link here ("I'm a trainer"); the trainee
        they send a request to says yes in an email and comes back here with
        #spot=<ref>.<key> to give a name if new, sign, and pay. */ -}}
+{{- if site.Params.trainingPaused }}
+<div class="callout"><p><strong>Training booking and payment are paused</strong> while we set up a new system. Ask on <a href="{{ site.Params.discord }}">Discord</a> or <a href="/contact/">contact us</a> and a trainer will sort it out.</p></div>
+{{- else }}
 {{- $p := site.Params -}}
 {{- $cat := hugo.Data.training | default dict -}}
 <div id="tb" class="tb">
@@ -372,3 +375,4 @@
   }
 })();
 </script>
+{{- end }}

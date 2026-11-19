@@ -22,7 +22,7 @@
         <h2>Training</h2>
         <p><strong>${{ $t.fee }}</strong>, or <strong>${{ $t.member_fee }}</strong> for <a href="/membership/">members</a>. About {{ $t.minutes }} minutes{{ with $t.covers }}, covers {{ . }}{{ end }}.</p>
         {{ with $t.slots }}<p class="muted small">{{ range $i, $s := . }}{{ if $i }}; {{ end }}{{ $s.label }} with {{ $s.trainer }}{{ end }}.</p>{{ end }}
-        {{ if $t.bookable }}<p><a class="btn btn-primary" href="/training/book/?tool={{ $t.id }}">Book training</a></p>{{ else }}<p class="muted small">Booking opens once a trainer is set. <a href="/contact/">Ask us</a>.</p>{{ end }}
+        {{ if site.Params.trainingPaused }}<p class="muted small">Online booking is paused while we set up a new system. <a href="/contact/">Ask us</a> about a training.</p>{{ else if $t.bookable }}<p><a class="btn btn-primary" href="/training/book/?tool={{ $t.id }}">Book training</a></p>{{ else }}<p class="muted small">Booking opens once a trainer is set. <a href="/contact/">Ask us</a>.</p>{{ end }}
       </div>
       {{- end }}
       {{ with .Params.wiki }}<p><a class="btn btn-outline" href="{{ . }}" rel="noopener">{{ if $t }}Training guide on the wiki{{ else }}Operating guide on the wiki{{ end }}</a></p>{{ end }}
