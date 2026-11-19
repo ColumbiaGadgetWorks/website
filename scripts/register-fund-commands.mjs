@@ -1,8 +1,8 @@
 // Registers the /fund slash commands for one Discord server.
 //
-// Run this after any change to the commands below (for example the Givebutter
-// subcommands: map, sync, review, assign, dismiss, history, remove), or if the
-// commands go missing:
+// Funds and gifts come from Givebutter, so the commands only look at them
+// (list, show, board), set a goal, or run the sync. Run this after any change
+// to the commands below, or if the commands go missing:
 //
 //   DISCORD_BOT_TOKEN=... node scripts/register-fund-commands.mjs <application id> <server id>
 
@@ -14,53 +14,23 @@ if (!appId || !guildId || !token) {
 }
 
 const STRING = 3;
-const INTEGER = 4;
 const BOOLEAN = 5;
 const NUMBER = 10;
 const SUB = 1;
-const name = (autocomplete = true) => ({ type: STRING, name: 'name', description: 'Campaign name', required: true, autocomplete });
+const name = () => ({ type: STRING, name: 'name', description: 'Fund name', required: true, autocomplete: true });
 
 const fund = {
   name: 'fund',
   description: 'Fundraising tracker',
   options: [
-    { type: SUB, name: 'create', description: 'Create or update a campaign goal', options: [
-      name(false),
-      { type: NUMBER, name: 'goal', description: 'Goal amount', required: true },
-      { type: STRING, name: 'currency', description: 'Currency symbol (default $)' },
-      { type: STRING, name: 'link', description: 'Donate link (https://)' },
-    ] },
-    { type: SUB, name: 'link', description: "Set or clear a campaign's donate link", options: [
-      name(), { type: STRING, name: 'url', description: 'Donate link (https://); leave empty to clear' },
-    ] },
-    { type: SUB, name: 'add', description: 'Log a donation', options: [
-      name(), { type: NUMBER, name: 'amount', description: 'Amount', required: true },
-      { type: STRING, name: 'donor', description: 'Donor name (leave empty for Anonymous)' },
-    ] },
     { type: SUB, name: 'show', description: 'Show current progress', options: [name()] },
-    { type: SUB, name: 'list', description: 'List every active fundraiser' },
+    { type: SUB, name: 'list', description: 'List every fund' },
     { type: SUB, name: 'board', description: 'Post a live-updating tracker in this channel', options: [name()] },
-    { type: SUB, name: 'undo', description: 'Remove the most recent hand-entered donation', options: [name()] },
-    { type: SUB, name: 'map', description: 'Count Givebutter gifts toward a campaign', options: [
-      name(),
-      { type: STRING, name: 'fund', description: 'Givebutter Fund code (the "designate to" choice)' },
-      { type: STRING, name: 'campaign', description: 'Givebutter campaign code, e.g. v7RxV6' },
-      { type: STRING, name: 'keywords', description: 'Comma list; untagged gifts mentioning one go to review' },
+    { type: SUB, name: 'goal', description: 'Set or clear a fund goal', options: [
+      name(), { type: NUMBER, name: 'amount', description: 'Goal amount; leave empty for no goal' },
     ] },
-    { type: SUB, name: 'sync', description: 'Check Givebutter for new gifts now', options: [
+    { type: SUB, name: 'sync', description: 'Check Givebutter for new funds and gifts now', options: [
       { type: BOOLEAN, name: 'full', description: 'Re-read all history, to bring in earlier gifts' },
-    ] },
-    { type: SUB, name: 'review', description: 'List Givebutter gifts waiting for a decision' },
-    { type: SUB, name: 'assign', description: 'Count a Givebutter gift toward a campaign', options: [
-      { type: STRING, name: 'transaction', description: 'Givebutter transaction id', required: true },
-      name(),
-    ] },
-    { type: SUB, name: 'dismiss', description: 'Skip a Givebutter gift in the review list', options: [
-      { type: STRING, name: 'transaction', description: 'Givebutter transaction id', required: true },
-    ] },
-    { type: SUB, name: 'history', description: 'List recent donations with their entry numbers', options: [name()] },
-    { type: SUB, name: 'remove', description: 'Remove one donation by entry number', options: [
-      name(), { type: INTEGER, name: 'entry', description: 'Entry number from /fund history', required: true },
     ] },
   ],
 };

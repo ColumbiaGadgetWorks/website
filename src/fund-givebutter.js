@@ -1,19 +1,17 @@
 // Givebutter donations counted toward shop fund goals.
 //
-// A /fund campaign is tied to Givebutter with /fund map: a Fund code (the
-// "designate to" dropdown on the donation form), a Givebutter campaign code, or
-// both. Every five minutes the cron trigger reads recent transactions from the
-// Givebutter API and records each successful gift that matches a mapping as a
+// Funds follow Givebutter: every Givebutter Fund gets a goal row (no goal until
+// /fund goal sets one), and gifts to the donation campaign with no fund count
+// toward "General". Every five minutes the cron trigger reads recent
+// transactions from the Givebutter API and records each successful gift as a
 // donation row, keyed by the Givebutter transaction id so a gift is never
 // counted twice. Refunded or failed gifts are taken back out.
-//
-// Gifts that match no mapping but whose message mentions one of a campaign's
-// keywords are not counted. They wait in a review list (/fund review) until
-// someone assigns or dismisses them.
 //
 // Bindings:
 //   FUND_DB             D1 database (db/fund-schema.sql)
 //   GIVEBUTTER_API_KEY  secret, Givebutter dashboard > Settings > Integrations > API
+//   DISCORD_GUILD_ID    server the funds belong to
+//   DONATE_URL          givebutter.com/<code> names the General campaign
 //   GIVEBUTTER_SYNC     "on" records gifts. Anything else (the default) is a dry
 //                       run: the cron does nothing and /fund sync only previews.
 
@@ -157,7 +155,7 @@ export async function loadMappings(db) {
 }
 
 // The /fund campaign a gift counts toward. A mapping matches when every code it
-// sets matches; the one with more codes set wins.
+// sets matches; a fund beats a campaign-only catch-all (General).
 export function matchMapping(tx, mappings) {
   let best = null;
   let bestScore = 0;
@@ -165,7 +163,7 @@ export function matchMapping(tx, mappings) {
     if (!m.fund && !m.campaign) continue;
     if (m.fund && !tx.funds.includes(m.fund)) continue;
     if (m.campaign && !tx.campaigns.includes(m.campaign)) continue;
-    const score = (m.fund ? 1 : 0) + (m.campaign ? 1 : 0);
+    const score = (m.fund ? 2 : 0) + (m.campaign ? 1 : 0);
     if (score > bestScore) {
       best = m;
       bestScore = score;
@@ -222,6 +220,61 @@ export async function saveAnnouncement(db, tx) {
   );
 }
 
+// ---------- funds follow Givebutter ----------
+
+const campaignCodeOf = (env) => {
+  const m = String(env.DONATE_URL || '').match(/givebutter\.com\/([A-Za-z0-9_-]+)\/?(?:[?#].*)?$/);
+  return m ? m[1] : null;
+};
+
+// Every fund on Givebutter, or [] when the API says otherwise (fails safe).
+async function listFunds(env) {
+  const out = [];
+  try {
+    for (let page = 1; page <= 5; page++) {
+      const res = await gb(env, `/funds?page=${page}`);
+      const list = Array.isArray(res) ? res : Array.isArray(res.data) ? res.data : [];
+      out.push(...list);
+      if (Array.isArray(res) || page >= (Number(res.meta?.last_page) || 1)) break;
+    }
+  } catch {
+    return [];
+  }
+  return out.filter((f) => f && (f.code || f.id) && String(f.name || '').trim());
+}
+
+// Makes sure every Givebutter fund has a goal row (no goal, "raised so far")
+// and that gifts to the donation campaign with no fund land in "General".
+// New rows are also pushed onto `mappings` so the same run counts their gifts.
+// With apply=false nothing is written but the mappings are still added.
+async function ensureFunds(env, db, mappings, apply) {
+  const guild = String(env.DISCORD_GUILD_ID || '').trim();
+  if (!guild) return [];
+  const created = [];
+  const add = async (name, fund, campaign) => {
+    created.push(name);
+    mappings.push({ guild_id: guild, name, currency: '$', fund: lower(fund), campaign: lower(campaign), keywords: [] });
+    if (!apply) return;
+    await db
+      .prepare('INSERT OR IGNORE INTO campaign (guild_id, name, goal, gb_fund, gb_campaign) VALUES (?, ?, 0, ?, ?)')
+      .bind(guild, name, fund || null, campaign || null)
+      .run();
+    // A goal someone already made by hand under that name just gets linked.
+    await db
+      .prepare('UPDATE campaign SET gb_fund = COALESCE(gb_fund, ?), gb_campaign = COALESCE(gb_campaign, ?) WHERE guild_id = ? AND name = ?')
+      .bind(fund || null, campaign || null, guild, name)
+      .run();
+  };
+  for (const f of await listFunds(env)) {
+    const keys = [f.code, f.id].map(lower).filter(Boolean);
+    if (mappings.some((m) => m.fund && keys.includes(m.fund))) continue;
+    await add(String(f.name).trim().slice(0, 80), f.code || f.id, null);
+  }
+  const code = campaignCodeOf(env);
+  if (code && !mappings.some((m) => !m.fund && m.campaign === lower(code))) await add('General', null, code);
+  return created;
+}
+
 // ---------- the sync ----------
 
 async function getState(db, key) {
@@ -246,6 +299,7 @@ export async function syncGivebutter(env, { apply, full = false } = {}) {
   const result = { apply, full, added: [], moved: [], removed: [], review: [], scanned: 0, touched: [] };
 
   const mappings = await loadMappings(db);
+  result.created = await ensureFunds(env, db, mappings, apply);
   if (!mappings.length) return { ...result, empty: true };
 
   const counted = new Map(

@@ -21,8 +21,6 @@ import {
   givebutterConfigured,
   givebutterLive,
   syncGivebutter,
-  assignTransaction,
-  setReview,
   GivebutterError,
   announceable,
   announceName,
@@ -104,7 +102,7 @@ async function runCommand(interaction, env, ctx) {
 
   const db = env.FUND_DB;
   const isAdmin = canManage(interaction);
-  const privileged = ['create', 'link', 'add', 'board', 'undo', 'map', 'sync', 'review', 'assign', 'dismiss', 'history', 'remove'];
+  const privileged = ['board', 'goal', 'sync'];
   if (privileged.includes(sub?.name) && !isAdmin) {
     return message("You don't have permission to use that.", true);
   }
@@ -113,47 +111,6 @@ async function runCommand(interaction, env, ctx) {
   const noCampaign = (name) => message(`No campaign named **${name}**.`, true);
 
   switch (sub?.name) {
-    case 'create': {
-      const { name, goal } = opts;
-      const currency = opts.currency ?? '$';
-      if (!(goal > 0)) return message('Goal must be greater than zero.', true);
-      const link = (opts.link || env.DONATE_URL || '').trim() || null;
-      if (link && !validLink(link)) return message('Donate link must start with https://', true);
-      await db
-        .prepare(
-          'INSERT INTO campaign (guild_id, name, goal, currency, link) VALUES (?, ?, ?, ?, ?) ' +
-            'ON CONFLICT(guild_id, name) DO UPDATE SET goal = excluded.goal, currency = excluded.currency, link = excluded.link',
-        )
-        .bind(guildId, name, goal, currency, link)
-        .run();
-      ctx.waitUntil(refreshBoard(env, guildId, name));
-      return message(
-        `Campaign **${name}** set to ${currency}${money(goal)}.` + (link ? `\nDonate link: ${link}` : '\nNo donate link set.'),
-        true,
-      );
-    }
-
-    case 'link': {
-      const { name } = opts;
-      if (await missing(name)) return noCampaign(name);
-      const url = (opts.url || '').trim() || null;
-      if (url && !validLink(url)) return message('Donate link must start with https://', true);
-      await db.prepare('UPDATE campaign SET link = ? WHERE guild_id = ? AND name = ?').bind(url, guildId, name).run();
-      ctx.waitUntil(refreshBoard(env, guildId, name));
-      return message(`Donate link for **${name}** ${url ? 'set to ' + url : 'cleared'}.`, true);
-    }
-
-    case 'add': {
-      const { name, amount } = opts;
-      if (await missing(name)) return noCampaign(name);
-      await db
-        .prepare('INSERT INTO donation (guild_id, name, amount, donor, ts) VALUES (?, ?, ?, ?, ?)')
-        .bind(guildId, name, amount, opts.donor ?? null, new Date().toISOString())
-        .run();
-      ctx.waitUntil(refreshBoard(env, guildId, name));
-      return campaignMessage(db, guildId, name);
-    }
-
     case 'show': {
       const { name } = opts;
       if (await missing(name)) return noCampaign(name);
@@ -171,46 +128,15 @@ async function runCommand(interaction, env, ctx) {
       return campaignMessage(db, guildId, name);
     }
 
-    case 'undo': {
-      // Only hand-entered gifts: a Givebutter gift would come back on the next
-      // sync. /fund remove takes those out for good.
-      const { name } = opts;
-      const last = await db
-        .prepare('SELECT id, amount FROM donation WHERE guild_id = ? AND name = ? AND external_id IS NULL ORDER BY id DESC LIMIT 1')
-        .bind(guildId, name)
-        .first();
-      if (!last) return message('No hand-entered donation to undo. See `/fund history` for Givebutter gifts.', true);
-      await db.prepare('DELETE FROM donation WHERE id = ?').bind(last.id).run();
-      ctx.waitUntil(refreshBoard(env, guildId, name));
-      return message(`Removed last donation of ${money(last.amount)}.`, true);
-    }
-
-    case 'map': {
+    case 'goal': {
+      // Funds come from Givebutter; this only sets or clears the target.
       const { name } = opts;
       if (await missing(name)) return noCampaign(name);
-      const clean = (v) => String(v ?? '').trim() || null;
-      const fund = clean(opts.fund);
-      const campaign = clean(opts.campaign);
-      const keywords = clean(opts.keywords);
-      await db
-        .prepare('UPDATE campaign SET gb_fund = ?, gb_campaign = ?, gb_keywords = ? WHERE guild_id = ? AND name = ?')
-        .bind(fund, campaign, keywords, guildId, name)
-        .run();
-      if (!fund && !campaign && !keywords) {
-        return message(`**${name}** is no longer linked to Givebutter. Gifts already counted stay.`, true);
-      }
-      const parts = [];
-      if (fund) parts.push(`Fund \`${fund}\``);
-      if (campaign) parts.push(`campaign \`${campaign}\``);
-      const lines = [
-        parts.length
-          ? `Givebutter gifts to ${parts.join(' and ')} now count toward **${name}**.`
-          : `No Fund or campaign code set, so nothing is counted toward **${name}** automatically.`,
-      ];
-      if (keywords) lines.push(`Other gifts whose message mentions ${keywords.split(',').map((k) => `"${k.trim()}"`).join(', ')} go to \`/fund review\`.`);
-      lines.push('Run `/fund sync full:True` to bring in earlier gifts.');
-      if (!givebutterConfigured(env)) lines.push('The Givebutter API key is not set yet, so nothing will sync until it is.');
-      return message(lines.join('\n'), true);
+      const goal = opts.amount === undefined || opts.amount === null ? 0 : Number(opts.amount);
+      if (!(goal >= 0)) return message('Goal must be zero or more.', true);
+      await db.prepare('UPDATE campaign SET goal = ? WHERE guild_id = ? AND name = ?').bind(goal, guildId, name).run();
+      ctx.waitUntil(refreshBoard(env, guildId, name));
+      return message(goal > 0 ? `Goal for **${name}** set to ${money(goal)}.` : `**${name}** now has no goal (shows what it has raised).`, true);
     }
 
     case 'sync': {
@@ -223,90 +149,6 @@ async function runCommand(interaction, env, ctx) {
         }),
       );
       return { type: 5, data: { flags: EPHEMERAL } };
-    }
-
-    case 'review': {
-      const { results } = await db
-        .prepare("SELECT external_id, guess, amount, donor, note, ts FROM gb_review WHERE guild_id = ? AND status = 'open' ORDER BY ts DESC LIMIT 15")
-        .bind(guildId)
-        .all();
-      if (!results.length) return message('Nothing waiting for review.', true);
-      const lines = results.map(
-        (r) =>
-          `\`${r.external_id}\` ${day(r.ts)} · ${money(r.amount)} · ${r.donor || 'Anonymous'}` +
-          (r.note ? ` · "${r.note.slice(0, 80)}"` : '') +
-          (r.guess ? ` → **${r.guess}**?` : ''),
-      );
-      lines.push('', 'Count one with `/fund assign`, or skip it with `/fund dismiss`.');
-      return message(lines.join('\n').slice(0, 1990), true);
-    }
-
-    case 'assign': {
-      const { name } = opts;
-      const tx = String(opts.transaction ?? '').trim();
-      if (await missing(name)) return noCampaign(name);
-      if (!/^[A-Za-z0-9_-]{1,40}$/.test(tx)) return message('Give the Givebutter transaction id, as shown in `/fund review`.', true);
-      ctx.waitUntil(
-        followUp(interaction, async () => {
-          let r;
-          try {
-            r = await assignTransaction(env, guildId, tx, name);
-          } catch (err) {
-            return givebutterProblem(err);
-          }
-          if (r.error === 'no-key') return 'Set the GIVEBUTTER_API_KEY secret on the website Worker first.';
-          if (r.error === 'not-found') return `Givebutter has no transaction \`${tx}\`.`;
-          if (r.error === 'not-paid') return `Transaction \`${tx}\` is ${r.tx.status || 'not paid'}, so it was not counted.`;
-          await refreshBoard(env, guildId, name);
-          if (r.before && r.before.name !== name) await refreshBoard(env, r.before.guild_id, r.before.name);
-          return `Counted ${money(r.tx.amount)} from ${r.tx.donor || 'Anonymous'} toward **${name}**.` +
-            (r.before && r.before.name !== name ? ` Moved from **${r.before.name}**.` : '');
-        }),
-      );
-      return { type: 5, data: { flags: EPHEMERAL } };
-    }
-
-    case 'dismiss': {
-      const tx = String(opts.transaction ?? '').trim();
-      const row = await db.prepare('SELECT guild_id, amount, donor, ts FROM gb_review WHERE external_id = ?').bind(tx).first();
-      if (!row || row.guild_id !== guildId) return message(`No Givebutter gift \`${tx}\` in the review list.`, true);
-      await setReview(db, guildId, tx, 'dismissed', row);
-      return message(`Skipped \`${tx}\`. It won't be counted or listed again.`, true);
-    }
-
-    case 'history': {
-      const { name } = opts;
-      if (await missing(name)) return noCampaign(name);
-      const { results } = await db
-        .prepare('SELECT id, amount, donor, ts, external_id FROM donation WHERE guild_id = ? AND name = ? ORDER BY id DESC LIMIT 20')
-        .bind(guildId, name)
-        .all();
-      if (!results.length) return message(`No donations recorded for **${name}** yet.`, true);
-      const lines = results.map(
-        (r) =>
-          `#${r.id} · ${day(r.ts)} · ${money(r.amount)} · ${r.donor || 'Anonymous'} · ` +
-          (r.external_id ? `Givebutter \`${r.external_id}\`` : 'entered by hand'),
-      );
-      lines.push('', 'Take one out with `/fund remove`.');
-      return message(`**${name}**, latest 20\n` + lines.join('\n').slice(0, 1900), true);
-    }
-
-    case 'remove': {
-      const { name, entry } = opts;
-      const row = await db
-        .prepare('SELECT id, amount, donor, ts, external_id FROM donation WHERE id = ? AND guild_id = ? AND name = ?')
-        .bind(entry, guildId, name)
-        .first();
-      if (!row) return message(`No entry #${entry} in **${name}**. See \`/fund history\`.`, true);
-      await db.prepare('DELETE FROM donation WHERE id = ?').bind(row.id).run();
-      // Otherwise the next sync would count the Givebutter gift again.
-      if (row.external_id) await setReview(db, guildId, row.external_id, 'dismissed', row);
-      ctx.waitUntil(refreshBoard(env, guildId, name));
-      return message(
-        `Removed #${row.id}, ${money(row.amount)} from ${row.donor || 'Anonymous'}.` +
-          (row.external_id ? ' The sync will leave that Givebutter gift out from now on.' : ''),
-        true,
-      );
     }
 
     default:
@@ -345,11 +187,13 @@ async function buildEmbed(db, guildId, row) {
   const { name, goal, currency: cur, link } = row;
   const { raised, count } = await totals(db, guildId, name);
   const pct = goal ? raised / goal : 0;
-  const fields = [
-    { name: 'Raised', value: `${cur}${money(raised)}`, inline: true },
-    { name: 'Goal', value: `${cur}${money(goal)}`, inline: true },
-    { name: 'Remaining', value: `${cur}${money(Math.max(0, goal - raised))}`, inline: true },
-  ];
+  const fields = goal > 0
+    ? [
+        { name: 'Raised', value: `${cur}${money(raised)}`, inline: true },
+        { name: 'Goal', value: `${cur}${money(goal)}`, inline: true },
+        { name: 'Remaining', value: `${cur}${money(Math.max(0, goal - raised))}`, inline: true },
+      ]
+    : [{ name: 'Raised so far', value: `${cur}${money(raised)}`, inline: true }];
   const recent = await recentDonations(db, guildId, name, 5);
   if (recent.length) {
     fields.push({
@@ -363,7 +207,7 @@ async function buildEmbed(db, guildId, row) {
   return {
     title: `\u{1F3AF} ${name}`,
     url: validLink(link) ? link : undefined,
-    description: `\`${bar(pct)}\`  **${(pct * 100).toFixed(1)}%**`,
+    description: goal > 0 ? `\`${bar(pct)}\`  **${(pct * 100).toFixed(1)}%**` : `**${cur}${money(raised)}** raised so far`,
     color: pct >= 1 ? GREEN : BLURPLE,
     timestamp: new Date().toISOString(),
     fields,
@@ -373,10 +217,10 @@ async function buildEmbed(db, guildId, row) {
 
 async function listMessage(db, guildId, env) {
   const { results: rows } = await db
-    .prepare('SELECT name, goal, currency, link FROM campaign WHERE guild_id = ? ORDER BY name')
+    .prepare('SELECT name, goal, currency, link FROM campaign WHERE guild_id = ? ORDER BY (name = 'General') DESC, name')
     .bind(guildId)
     .all();
-  if (!rows.length) return message('No campaigns yet. Start one with `/fund create`.', true);
+  if (!rows.length) return message('No funds yet. They appear here once they exist on Givebutter and the sync has run.', true);
 
   let grandRaised = 0;
   let grandGoal = 0;
@@ -386,9 +230,10 @@ async function listMessage(db, guildId, env) {
     grandRaised += raised;
     grandGoal += r.goal;
     const pct = r.goal ? raised / r.goal : 0;
-    let value =
-      `\`${bar(pct, 16)}\` **${Math.round(pct * 100)}%**\n` +
-      `${r.currency}${money(raised)} of ${r.currency}${money(r.goal)} · ${count} gift${count !== 1 ? 's' : ''}`;
+    let value = r.goal > 0
+      ? `\`${bar(pct, 16)}\` **${Math.round(pct * 100)}%**\n` +
+        `${r.currency}${money(raised)} of ${r.currency}${money(r.goal)} · ${count} gift${count !== 1 ? 's' : ''}`
+      : `${r.currency}${money(raised)} raised so far · ${count} gift${count !== 1 ? 's' : ''}`;
     if (validLink(r.link)) value += ` · [Donate](${r.link})`;
     fields.push({ name: (pct >= 1 ? '✅ ' : '') + r.name, value, inline: false });
   }
@@ -500,7 +345,7 @@ export async function runSync(env, { full = false, fromCommand = false } = {}) {
   if (apply) {
     for (const t of r.touched) await refreshBoard(env, t.guild_id, t.name);
     if (!full && !fromCommand) await announceGifts(env, r.added);
-    const changed = r.added.length || r.moved.length || r.removed.length || r.review.length;
+    const changed = r.added.length || r.moved.length || r.removed.length || r.created?.length;
     if (changed && env.FUND_LOG_CHANNEL_ID && env.DISCORD_BOT_TOKEN && !fromCommand) {
       const res = await discordApi(env, 'POST', `/channels/${env.FUND_LOG_CHANNEL_ID}/messages`, {
         content: text.slice(0, 1990),
@@ -531,7 +376,7 @@ async function announceGifts(env, added) {
   for (const g of gifts.slice(0, 5)) {
     const who = announceName(g);
     const text =
-      `🎉 ${who ? `**${who}**` : 'Someone'} just gave **${g.currency}${money(g.amount)}** toward **${g.name}**. Thank you!`;
+      `🎉 ${who ? `**${who}**` : 'Someone'} just gave **${g.currency}${money(g.amount)}** ${g.name === 'General' ? 'to **CGW**' : `toward **${g.name}**`}. Thank you!`;
     const res = await discordApi(env, 'POST', `/channels/${channel}/messages`, {
       content: text,
       allowed_mentions: { parse: [] },
@@ -541,9 +386,10 @@ async function announceGifts(env, added) {
 }
 
 function summarize(r) {
-  if (r.empty) return 'No campaign is linked to Givebutter yet. Link one with `/fund map`.';
+  if (r.empty) return 'Nothing to sync yet: set DISCORD_GUILD_ID and DONATE_URL, or create a fund on Givebutter.';
   const lines = [r.apply ? '**Givebutter sync**' : '**Givebutter sync preview** (dry run: nothing was saved)'];
   lines.push(`Read ${r.scanned} transaction${r.scanned !== 1 ? 's' : ''}${r.full ? ', full history' : ''}.`);
+  if (r.created?.length) lines.push(`${r.apply ? 'New' : 'Would add'} from Givebutter: ${r.created.map((n) => `**${n}**`).join(', ')}`);
   const gift = (t) => `${money(t.amount)} from ${t.donor || 'Anonymous'} (\`${t.id}\`, ${day(t.ts)})`;
   const section = (title, items, fmt) => {
     if (!items.length) return;
@@ -554,9 +400,7 @@ function summarize(r) {
   section(r.apply ? 'Counted' : 'Would count', r.added, (t) => `${gift(t)} → **${t.name}**`);
   section(r.apply ? 'Moved' : 'Would move', r.moved, (t) => `${gift(t)}: **${t.from}** → **${t.name}**`);
   section(r.apply ? 'Taken out (refunded or failed)' : 'Would take out (refunded or failed)', r.removed, (t) => `${gift(t)} out of **${t.name}**`);
-  section('Needs review', r.review, (t) => `${gift(t)}${t.note ? ` "${t.note.slice(0, 60)}"` : ''} → **${t.name}**?`);
-  if (!r.added.length && !r.moved.length && !r.removed.length && !r.review.length) lines.push('Nothing new.');
-  if (r.review.length && r.apply) lines.push('', 'See `/fund review`.');
+  if (!r.added.length && !r.moved.length && !r.removed.length && !r.created?.length) lines.push('Nothing new.');
   if (!r.apply) lines.push('', 'Set GIVEBUTTER_SYNC to `on` on the website Worker to start counting.');
   return lines.join('\n');
 }

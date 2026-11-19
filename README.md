@@ -59,7 +59,7 @@ sitemap and search results. It is one standalone template,
 and a month calendar.
 
 * **Fund figures** come from the `fundraiser` D1 database through
-  `/api/fund/campaigns` (`src/fund.js`): gifts entered with `/fund add` plus
+  `/api/fund/campaigns` (`src/fund.js`): gifts the Givebutter sync recorded plus
   Givebutter gifts counted by the sync below.
 * **Calendar** is the same `/api/calendar` the calendar page uses.
 * **QR codes** are drawn by Hugo at build time from `hugo.toml`:
@@ -102,68 +102,59 @@ After changing the commands, or if they ever go missing, run
 commands and the kiosk page are built the way they are, the known caveats, and
 how this replaced the old fundbot bot.
 
-### Givebutter gifts counted automatically
+### Givebutter is the source of truth
 
-`src/fund-givebutter.js` reads the Givebutter API every five minutes (second
-cron in `wrangler.jsonc`) and counts each successful gift toward the `/fund`
-campaign it is tied to. Each counted gift stores its Givebutter transaction id,
-so a gift is never counted twice; a gift later refunded or failed is taken back
-out. Gifts entered with `/fund add` (Venmo, cash) are left alone.
+`src/fund-givebutter.js` runs every five minutes (second cron in
+`wrangler.jsonc`). Each run:
 
-Donors pick a goal with Givebutter **Funds** (Settings > Account > Funds): one
-fund per goal, each with a short code, shown as a "designate to" dropdown on
-the donation form. No separate donation link per goal is needed. Funds are
-account-wide, so hide them on the membership dues campaign (Campaign > Settings
-> Funds) or tie each goal to both the fund and the donation campaign.
+1. Reads the Givebutter **Funds** (Settings > Account > Funds, the "designate
+   to" dropdown) and makes a goal row for any fund that has none. A new fund
+   shows on the kiosk with "raised so far" and no goal until someone sets one
+   with `/fund goal`.
+2. Makes a **General** row for gifts to the donation campaign (the code at the
+   end of `DONATE_URL`) that carry no fund. It is pinned first on the kiosk.
+3. Counts each successful gift toward its fund (or General). A gift stores its
+   Givebutter transaction id, so it is never counted twice; one later refunded
+   or failed is taken back out. A gift that moves to another fund moves with it.
+
+Nothing is created or counted while `GIVEBUTTER_SYNC` is unset: it is a dry run
+and `/fund sync` only previews. Funds Givebutter no longer lists keep their
+row and history; a finished fund simply stays on the kiosk, greyed out once it
+has met its goal.
 
 Setup, once:
 
-1. Givebutter: create a fund per goal and give it a code (`LASER`, `ROOF`).
-   Then Settings > Integrations > API > create a key.
-2. Worker secret `GIVEBUTTER_API_KEY` = that key. Optional variable
-   `FUND_LOG_CHANNEL_ID` = a Discord channel id where the sync reports what it
-   counted (the bot needs Send Messages there).
-3. Register the new subcommands: `DISCORD_BOT_TOKEN=... node
+1. Givebutter: Settings > Integrations > API > create a key, then set the
+   Worker secret `GIVEBUTTER_API_KEY`. Also set `DISCORD_GUILD_ID` and
+   `DONATE_URL` (https://givebutter.com/<code>). Optional `FUND_LOG_CHANNEL_ID`
+   = a Discord channel where the sync reports what it counted.
+2. Register the commands: `DISCORD_BOT_TOKEN=... node
    scripts/register-fund-commands.mjs <application id> <server id>`.
-4. In Discord, tie each goal: `/fund map name:Laser cutter fund:LASER
-   campaign:v7RxV6 keywords:laser, glowforge`. `campaign` is optional (the code
-   at the end of the givebutter.com link). `keywords` sends untagged gifts that
-   mention one to the review list instead of counting them.
-5. `/fund sync full:True` previews what would be counted, including gifts made
-   before the mapping. Nothing is saved while `GIVEBUTTER_SYNC` is unset.
-6. When the preview matches the Givebutter dashboard, set the variable
-   `GIVEBUTTER_SYNC` = `on` and run `/fund sync full:True` once more to import
-   the history. From then on the cron keeps it current.
+3. `/fund sync full:True` previews the funds and gifts it would pick up.
+4. When the preview matches the Givebutter dashboard, set `GIVEBUTTER_SYNC` =
+   `on` and run `/fund sync full:True` once more to import the history.
 
 **Big-gift thank-yous.** When the sync counts a new Givebutter gift of at least
 `FUND_ANNOUNCE_MIN` (default 5) that is under an hour old, the kiosk shows a
-thank-you banner for 5 minutes ("Jane just gave $25.00 toward ...") and the bot
-posts the same line in `FUND_ANNOUNCE_CHANNEL_ID` (falls back to
-`FUND_LOG_CHANNEL_ID`). Only the first name is used, and nobody is named when
-the donor gave anonymously. History imports (`/fund sync full:True`) and manual
-syncs never announce.
+thank-you banner for 5 minutes ("Jane just gave $25.00 toward ...", or "to CGW"
+for General) and the bot posts the same line in `FUND_ANNOUNCE_CHANNEL_ID`
+(falls back to `FUND_LOG_CHANNEL_ID`). Only the first name is used, and nobody
+is named when the donor gave anonymously. History imports and manual syncs
+never announce.
 
 The database gets its new columns and tables on the first `/fund` command or
 sync after deploy; nothing has to be run by hand.
 
-| Command | Does |
-|---|---|
-| `/fund map <name> [fund] [campaign] [keywords]` | tie a goal to Givebutter; no options unties it |
-| `/fund sync [full]` | check Givebutter now (a preview until `GIVEBUTTER_SYNC=on`) |
-| `/fund review` | Givebutter gifts that mention a goal but carry no fund |
-| `/fund assign <transaction> <name>` | count one Givebutter gift, from the review list or any transaction id |
-| `/fund dismiss <transaction>` | skip a gift in the review list for good |
-| `/fund history <name>` | latest 20 entries with numbers and where each came from |
-| `/fund remove <name> <entry>` | take one entry out; a Givebutter gift stays out |
+| Command | Who | Does |
+|---|---|---|
+| `/fund list` | anyone | every fund with progress |
+| `/fund show <name>` | anyone | one fund in detail |
+| `/fund board <name>` | Manage Server | pin a live-updating tracker |
+| `/fund goal <name> [amount]` | Manage Server | set a goal, or clear it by leaving the amount empty |
+| `/fund sync [full]` | Manage Server | run the sync now (a preview until `GIVEBUTTER_SYNC=on`) |
 
-All of these need Manage Server. `/fund undo` now only removes hand-entered
-gifts, since a Givebutter gift would come back on the next sync.
-
-If gifts entered by hand earlier were also paid through Givebutter, they will
-be counted twice once the history is imported: find them with `/fund history`
-and take the hand-entered copy out with `/fund remove`. From now on, record
-cash and checks in Givebutter as offline donations with the fund set, and keep
-`/fund add` for gifts that never touch Givebutter.
+There is no command to create a fund or log a gift: do both in Givebutter
+(record cash and checks there as offline donations with the fund set).
 
 Query the data: `npx wrangler d1 execute fundraiser --remote --command "SELECT * FROM donation ORDER BY id DESC LIMIT 10"`.
 

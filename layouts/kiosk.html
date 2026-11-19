@@ -338,7 +338,7 @@
   /* ---------- campaign ---------- */
 
   .campaign {
-    padding: clamp(1.5rem, 4vw, 2.75rem);
+    padding: clamp(.875rem, 2vw, 1.375rem) clamp(1rem, 3vw, 2rem);
     border-bottom: 1px solid var(--rule);
   }
   .campaign:last-of-type { border-bottom: 0; }
@@ -352,14 +352,14 @@
     flex-wrap: wrap;
     align-items: baseline;
     justify-content: space-between;
-    gap: .5rem 1.5rem;
-    margin-bottom: 2.25rem;
+    gap: .25rem 1.5rem;
+    margin-bottom: .875rem;
   }
 
   .campaign-name {
     font-family: "IBM Plex Sans Condensed", sans-serif;
     font-weight: 600;
-    font-size: clamp(1.375rem, 3.5vw, 1.875rem);
+    font-size: clamp(1.125rem, 2.6vw, 1.5rem);
     text-transform: uppercase;
     letter-spacing: .015em;
     margin: 0;
@@ -397,7 +397,7 @@
 
   .track {
     position: relative;
-    height: 26px;
+    height: 18px;
     border: 1px solid var(--ink);
     border-top: 0;
     background:
@@ -432,7 +432,7 @@
     width: calc(var(--pct) * 100%);
     max-width: 100%;
     min-width: 8.5rem;
-    margin-top: .5rem;
+    margin-top: .375rem;
     display: flex;
     align-items: center;
     gap: .5rem;
@@ -484,14 +484,14 @@
     font-size: .75rem;
     letter-spacing: .04em;
     color: var(--graphite);
-    margin-top: .75rem;
+    margin-top: .5rem;
   }
   /* ---------- donors ---------- */
 
   .ledger {
-    margin: 1.75rem 0 0;
+    margin: .875rem 0 0;
     border-top: 1px dashed var(--rule);
-    padding-top: 1rem;
+    padding-top: .625rem;
     font-family: "IBM Plex Mono", monospace;
     font-size: .8125rem;
   }
@@ -500,14 +500,14 @@
     letter-spacing: .18em;
     text-transform: uppercase;
     color: var(--graphite);
-    margin-bottom: .625rem;
+    margin-bottom: .375rem;
   }
   .ledger ol { list-style: none; margin: 0; padding: 0; }
   .ledger li {
     display: flex;
     align-items: baseline;
     gap: .5rem;
-    padding: .1875rem 0;
+    padding: .0625rem 0;
   }
   .ledger .lead {
     flex: 1 1 auto;
@@ -515,6 +515,23 @@
     transform: translateY(-.2em);
   }
   .ledger .amt { font-variant-numeric: tabular-nums; }
+
+  /* total raised, above the trackers */
+  .totalbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: .25rem 1.5rem;
+    padding: .875rem clamp(1rem, 3vw, 2rem);
+    border-bottom: 1.5px solid var(--ink);
+    font-family: "IBM Plex Sans Condensed", sans-serif;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+  }
+  .totalbar .tot-label { font-size: .875rem; color: var(--graphite); font-weight: 600; }
+  .totalbar .tot-amt { font-size: clamp(1.75rem, 5vw, 2.5rem); font-weight: 700; line-height: 1; }
+  .totalbar .tot-sub { font-family: "IBM Plex Mono", monospace; font-size: .75rem; color: var(--graphite); text-transform: none; }
 
   /* ---------- title block ---------- */
 
@@ -1205,18 +1222,30 @@ function ticks() {
 }
 
 function campaignHTML(c) {
-  const met = c.raised >= c.goal;
+  const hasGoal = c.goal > 0;
+  const met = hasGoal && c.raised >= c.goal;
   const pct = Math.min(c.pct, 1);
   const short = Math.max(0, c.goal - c.raised);
+  const gifts = `${c.count} gift${c.count === 1 ? "" : "s"}`;
 
   const ledger = c.recent.length ? `
     <div class="ledger">
       <p class="ledger-label">Most recent</p>
-      <ol>${c.recent.map(d => `
+      <ol>${c.recent.slice(0, 3).map(d => `
         <li><span>${esc(d.donor)}</span><span class="lead"></span>
             <span class="amt">${money(c.currency, d.amount)}</span></li>`).join("")}
       </ol>
     </div>` : "";
+
+  if (!hasGoal) return `
+    <section class="campaign">
+      <div class="campaign-head">
+        <h2 class="campaign-name">${esc(c.name === "General" ? "General donations" : c.name)}</h2>
+        <p class="tally"><b>${money(c.currency, c.raised)}</b> raised so far</p>
+      </div>
+      <p class="remaining">${gifts} so far</p>
+      ${ledger}
+    </section>`;
 
   return `
     <section class="campaign ${met ? "finished" : ""}">
@@ -1239,8 +1268,8 @@ function campaignHTML(c) {
       </div>
 
       <p class="remaining">${met
-        ? `Finished! ${money(c.currency, c.raised)} raised across ${c.count} gift${c.count === 1 ? "" : "s"}.`
-        : `${money(c.currency, short)} to go · ${c.count} gift${c.count === 1 ? "" : "s"} so far`}</p>
+        ? `Finished! ${money(c.currency, c.raised)} raised across ${gifts}.`
+        : `${money(c.currency, short)} to go · ${gifts} so far`}</p>
 
       ${ledger}
     </section>`;
@@ -1274,7 +1303,7 @@ function showThanks(a) {
   if (thanksShown === a.id) return;
   thanksShown = a.id;
   const who = a.who ? esc(a.who) : "Someone";
-  el.innerHTML = `${who} just gave <b>${esc(money(a.currency, a.amount))}</b> toward ${esc(a.campaign)}. Thank you!`;
+  el.innerHTML = `${who} just gave <b>${esc(money(a.currency, a.amount))}</b> ${a.campaign === "General" ? "to CGW" : "toward " + esc(a.campaign)}. Thank you!`;
   el.classList.add("show");
   clearTimeout(thanksTimer);
   thanksTimer = setTimeout(() => el.classList.remove("show"), a.seconds_left * 1000);
@@ -1299,19 +1328,26 @@ async function load() {
   // Active campaigns first, finished ones sink to the bottom; alphabetical
   // order within each group is preserved since Array#sort is stable and the
   // API already returns rows ordered by name.
-  const cs = [...data.campaigns].sort((a, b) => {
-    const aMet = a.raised >= a.goal, bMet = b.raised >= b.goal;
-    return aMet === bMet ? 0 : aMet ? 1 : -1;
-  });
+  // General (the donation page with no fund) is pinned first.
+  const rank = (c) => c.name === "General" ? 0 : (c.goal > 0 && c.raised >= c.goal) ? 2 : 1;
+  const cs = [...data.campaigns].sort((a, b) => rank(a) - rank(b));
 
   if (!cs.length) {
     body.innerHTML = `<div class="notice"><b>Nothing running yet</b>
-      Start one in Discord with /fund create, then it shows up here.</div>`;
+      Create a fund on Givebutter and it shows up here within the hour.</div>`;
     tb.hidden = true;
     return;
   }
 
-  body.innerHTML = cs.map(campaignHTML).join("");
+  const totalRaised = cs.reduce((s, c) => s + c.raised, 0);
+  const totalGifts = cs.reduce((s, c) => s + c.count, 0);
+  const cur0 = cs[0].currency;
+  body.innerHTML = `
+    <div class="totalbar">
+      <span class="tot-label">Total raised</span>
+      <span class="tot-amt">${money(cur0, totalRaised)}</span>
+      <span class="tot-sub">${totalGifts} gift${totalGifts === 1 ? "" : "s"}</span>
+    </div>` + cs.map(campaignHTML).join("");
 
   document.getElementById("tb-count").textContent = cs.length;
   document.getElementById("tb-raised").textContent =

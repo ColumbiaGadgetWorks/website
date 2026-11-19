@@ -20,7 +20,7 @@ In October 2026 everything moved into this site:
 | SQLite file in the container | `fundraiser` D1 database, same tables (`db/fund-schema.sql`), Discord ids stored as text |
 | `/api/campaigns` | `/api/fund/campaigns` (`src/fund.js`), same JSON |
 | `web/index.html` | `layouts/kiosk.html`, served at `/kiosk/` |
-| `/fund add` only | `/fund add` plus the Givebutter sync (`src/fund-givebutter.js`) |
+| `/fund add` only | the Givebutter sync (`src/fund-givebutter.js`) |
 
 The command names, options and reply wording were kept so nothing changed for
 the people using them.
@@ -32,18 +32,19 @@ SQLite.
 
 ## Commands
 
-The original commands. The Givebutter ones (`map`, `sync`, `review`, `assign`,
-`dismiss`, `history`, `remove`) are in the README.
+Funds and gifts come from Givebutter (see the README), so the commands only
+read them, set a goal or run the sync.
 
 | Command | Who | Does |
 |---|---|---|
-| `/fund list` | anyone | every campaign, with progress and donate links |
-| `/fund show <name>` | anyone | one campaign in detail |
-| `/fund create <name> <goal> [currency] [link]` | Manage Server | create or update a campaign |
-| `/fund link <name> [url]` | Manage Server | set or clear the donate link |
-| `/fund add <name> <amount> [donor]` | Manage Server | log a donation |
+| `/fund list` | anyone | every fund, with progress |
+| `/fund show <name>` | anyone | one fund in detail |
 | `/fund board <name>` | Manage Server | pin a live-updating tracker |
-| `/fund undo <name>` | Manage Server | remove the most recent hand-entered donation |
+| `/fund goal <name> [amount]` | Manage Server | set or clear a goal |
+| `/fund sync [full]` | Manage Server | run the sync now |
+
+Removed in November 2026 because Givebutter replaced them: `create`, `link`,
+`map`, `add`, `undo`, `assign`, `dismiss`, `history`, `remove`, `review`.
 
 "Manage Server" also lets Administrators through. `list` and `show` are public
 on purpose.
@@ -108,10 +109,8 @@ Condensed for display, Sans for body, Mono for data and labels.
 
 ## Caveats
 
-- **`/fund add` is an honor-system ledger.** Anyone with Manage Server can enter
-  any figure, and the totals are published on `/kiosk/` and `/api/fund/campaigns`.
-  Givebutter is the source of truth for anything paid through it; the sync
-  exists so those gifts no longer have to be typed in.
+- **Givebutter is the ledger.** Nothing is typed in by hand any more; totals on
+  `/kiosk/` and `/api/fund/campaigns` are whatever Givebutter reports.
 - **Donor names are public.** The page shows the six most recent donor names per
   campaign. Someone who gave their name in Discord did not necessarily agree to
   the open internet. `SHOW_DONORS` (in `wrangler.jsonc`, now `true`) set to
