@@ -574,20 +574,41 @@
 
   /* ---------- kiosk scroll buttons ---------- */
   .scroll-btns { display: none; }
+  /* One floating pill in the bottom-right corner, like map and reader controls:
+     frosted page colour, chevrons in ink, a slim position track between them.
+     It fades away when the page doesn't scroll, and each arrow fades at its end. */
   :root[data-kiosk] .scroll-btns {
-    position: fixed; right: .75rem; top: 50%; z-index: 20;
-    transform: translateY(-50%);
-    display: flex; flex-direction: column; gap: 1rem;
+    position: fixed; z-index: 20;
+    right: max(1rem, env(safe-area-inset-right)); bottom: max(1.25rem, env(safe-area-inset-bottom));
+    display: flex; flex-direction: column; align-items: center; gap: .25rem;
+    padding: .375rem;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--paper) 72%, transparent);
+    -webkit-backdrop-filter: blur(10px) saturate(1.2); backdrop-filter: blur(10px) saturate(1.2);
+    border: 1px solid color-mix(in srgb, var(--rule) 80%, transparent);
+    box-shadow: 0 6px 20px rgba(0,0,0,.18), 0 1px 3px rgba(0,0,0,.12);
+    transition: opacity .25s ease, transform .25s ease;
   }
+  :root[data-kiosk] .scroll-btns.is-idle { opacity: 0; transform: translateY(.5rem); pointer-events: none; }
   .scroll-btn {
-    width: 4.5rem; height: 4.5rem; padding: 0;
-    border: 1.5px solid var(--ink);
-    background: var(--ink); color: var(--paper-fixed);
-    font-size: 2rem; line-height: 1; cursor: pointer;
-    touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+    display: grid; place-items: center;
+    width: 3.5rem; height: 3.5rem; padding: 0;
+    border: 0; border-radius: 50%;
+    background: transparent; color: var(--ink);
+    cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+    transition: opacity .2s ease, background-color .15s ease, transform .1s ease;
   }
-  .scroll-btn:active { transform: scale(.94); }
-  .scroll-btn[disabled] { opacity: .25; cursor: default; }
+  .scroll-btn svg { width: 1.75rem; height: 1.75rem; }
+  .scroll-btn:active, .scroll-btn.is-held { background: color-mix(in srgb, var(--ink) 12%, transparent); transform: scale(.92); }
+  .scroll-btn[disabled] { opacity: .2; cursor: default; }
+  .scroll-track {
+    position: relative; width: 4px; height: 3rem; border-radius: 2px;
+    background: color-mix(in srgb, var(--ink) 15%, transparent); overflow: hidden;
+  }
+  .scroll-thumb {
+    position: absolute; left: 0; right: 0; top: 0; min-height: .5rem;
+    border-radius: 2px; background: var(--cut);
+  }
   /* A scrollbar that stays visible, for pages where the toolkit hides it. */
   :root[data-kiosk] { scrollbar-width: auto; scrollbar-color: var(--graphite) transparent; }
   :root[data-kiosk]::-webkit-scrollbar { width: 1.25rem; }
@@ -861,8 +882,9 @@
 </button>
 
 <div class="scroll-btns" id="scroll-btns">
-  <button type="button" class="scroll-btn" id="scroll-up" aria-label="Scroll up">&#9650;</button>
-  <button type="button" class="scroll-btn" id="scroll-down" aria-label="Scroll down">&#9660;</button>
+  <button type="button" class="scroll-btn" id="scroll-up" aria-label="Scroll up"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 15l6-6 6 6"/></svg></button>
+  <div class="scroll-track" aria-hidden="true"><div class="scroll-thumb" id="scroll-thumb"></div></div>
+  <button type="button" class="scroll-btn" id="scroll-down" aria-label="Scroll down"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
 </div>
 
 <div class="thanks" id="thanks" role="status" aria-live="polite"></div>
@@ -1342,11 +1364,44 @@ function esc(s) {
   const up = document.getElementById("scroll-up");
   const down = document.getElementById("scroll-down");
   if (!up || !down) return;
-  const step = () => Math.round(window.innerHeight * 0.7);
-  const room = () => document.documentElement.scrollHeight - window.innerHeight - window.scrollY;
-  const sync = () => { up.disabled = window.scrollY < 4; down.disabled = room() < 4; };
-  up.addEventListener("click", () => window.scrollBy({ top: -step(), behavior: "smooth" }));
-  down.addEventListener("click", () => window.scrollBy({ top: step(), behavior: "smooth" }));
+  const box = document.getElementById("scroll-btns");
+  const thumb = document.getElementById("scroll-thumb");
+  const step = () => Math.round(window.innerHeight * 0.6);
+  const max = () => document.documentElement.scrollHeight - window.innerHeight;
+  const sync = () => {
+    const m = max();
+    up.disabled = window.scrollY < 4;
+    down.disabled = m - window.scrollY < 4;
+    box.classList.toggle("is-idle", m < 8);
+    if (thumb && m > 0) {
+      const frac = window.innerHeight / document.documentElement.scrollHeight;
+      thumb.style.height = (frac * 100) + "%";
+      thumb.style.top = ((window.scrollY / m) * (1 - frac) * 100) + "%";
+    }
+  };
+  // Tap: page by 60% of the screen. Press and hold: keep gliding until released.
+  const bind = (btn, dir) => {
+    let holdTimer = 0, raf = 0, held = false;
+    const glide = () => { window.scrollBy(0, dir * 14); raf = requestAnimationFrame(glide); };
+    const stop = () => {
+      clearTimeout(holdTimer); cancelAnimationFrame(raf);
+      btn.classList.remove("is-held");
+    };
+    btn.addEventListener("pointerdown", (e) => {
+      if (btn.disabled) return;
+      held = false;
+      try { btn.setPointerCapture(e.pointerId); } catch (_) {}
+      holdTimer = setTimeout(() => { held = true; btn.classList.add("is-held"); glide(); }, 350);
+    });
+    ["pointerup", "pointercancel", "lostpointercapture"].forEach((t) => btn.addEventListener(t, stop));
+    btn.addEventListener("click", () => {
+      if (held) { held = false; return; }
+      window.scrollBy({ top: dir * step(), behavior: "smooth" });
+    });
+    btn.addEventListener("contextmenu", (e) => e.preventDefault()); // long-press menu on touch
+  };
+  bind(up, -1);
+  bind(down, 1);
   window.addEventListener("scroll", sync, { passive: true });
   window.addEventListener("resize", sync);
   setInterval(sync, 1000); // content height changes as panels and data load
