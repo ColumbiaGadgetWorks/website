@@ -14,7 +14,9 @@
   <div class="field"><label for="cl-email">Email</label><input id="cl-email" name="email" type="email" required autocomplete="email" maxlength="200"></div>
   <div class="field"><label class="cl-check"><input type="checkbox" name="updates"><span>Email me about Columbia Gadget Works classes and events</span></label></div>
   <div class="cl-trap" aria-hidden="true"><label>Leave this empty<input name="website" tabindex="-1" autocomplete="off"></label></div>
-  {{ with $p.turnstileSiteKey }}<div class="cf-turnstile" data-sitekey="{{ . }}" data-action="class-signup"></div><script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>{{ end }}
+  {{- /* Rendered by the script when the form opens: the form is moved under the
+         picked class, and moving an already-rendered Turnstile iframe leaves it blank. */}}
+  {{ with $p.turnstileSiteKey }}<div class="cl-ts" data-sitekey="{{ . }}"></div><script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>{{ end }}
   <button class="btn btn-primary" type="submit">Save my seat</button>
   <div class="callout warn" id="cl-error" role="alert" hidden></div>
 </form>
@@ -50,9 +52,19 @@
   var fields = { name: 'Type your name.', email: 'Type a valid email address.' };
   function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text !== undefined) e.textContent = text; return e; }
 
+  // Turnstile is drawn after the form is in place (see the note on .cl-ts).
+  var tsBox = f.querySelector('.cl-ts'), tsId = null;
+  function renderTs(tries) {
+    if (!tsBox) return;
+    if (!window.turnstile) { if (tries < 100) setTimeout(function () { renderTs(tries + 1); }, 150); return; }
+    if (tsId !== null) { try { window.turnstile.remove(tsId); } catch (e) {} }
+    tsId = window.turnstile.render(tsBox, { sitekey: tsBox.dataset.sitekey, action: 'class-signup', theme: 'light' });
+  }
+
   function open(card, c) {
     card.appendChild(f);
     f.hidden = false;
+    renderTs(0);
     f.cls.value = c.id;
     $('cl-error').hidden = true;
     f.querySelector('button[type=submit]').disabled = false;
@@ -101,7 +113,7 @@
       id: Number(f.cls.value), name: f.fullname.value, email: f.email.value, updates: f.updates.checked, website: f.website.value, 'cf-turnstile-response': ts ? ts.value : ''
     }) }).then(function (r) { return r.json(); }).catch(function () { return { ok: false, error: 'unavailable' }; }).then(function (j) {
       btn.disabled = false;
-      if (window.turnstile) { try { window.turnstile.reset(); } catch (e) {} }
+      if (window.turnstile && tsId !== null) { try { window.turnstile.reset(tsId); } catch (e) {} }
       if (!j.ok) return fail(j.error === 'invalid' ? (fields[j.field] || fields.name) : (why[j.error] || why.unavailable));
       var card = f.parentNode;
       f.hidden = true;
