@@ -1,6 +1,6 @@
 {
   "version": 5,
-  "generated": "2026-11-26T15:45:45Z",
+  "generated": "2026-11-27T18:15:45Z",
   "timezone": "America/Chicago",
   "zones": [
     "Digital Fab"
@@ -33,10 +33,6 @@
     }
   ],
   "closed": [
-    {
-      "day": "2026-11-26",
-      "reason": "Cancelled: Open Hack Night (Thanksgiving)"
-    },
     {
       "day": "2026-12-24",
       "reason": "Cancelled: Open Hack Night (Christmas Eve)"
